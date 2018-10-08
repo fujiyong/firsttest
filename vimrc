@@ -101,6 +101,14 @@ augroup filetype
     autocmd! BufRead,BufNewFile BUILD set filetype=blade
 augroup end
 
+
+
+
+
+
+
+
+
 " //////>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 " //////>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 "vim官网     http://www.vim.org/scripts/index.php
@@ -109,16 +117,16 @@ augroup end
 "1下载 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 "2
 
-set nocompatible              " be iMproved, required 
+set nocompatible              " be iMproved, required
 filetype off                  " required
 
 " set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim 
+set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-" alternatively, pass a path where Vundle should install plugins 
+" alternatively, pass a path where Vundle should install plugins
 "call vundle#begin('~/some/path/here')
 
-" let Vundle manage Vundle, required 
+" let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 "Plugin 'c.vim'
 "Plugin 'vim-scripts/rstatusline'
@@ -127,13 +135,13 @@ Plugin 'kien/ctrlp.vim'
 
 " 使用非插件官网的其他网上地址 
 "Plugin 'git@gitlab.alibaba-inc.com:ziying.liuziying/studyvim.git'
-" 使用非插件官网的本地插件
+" 使用本地插件
 "Plugin 'file:///home/gmarik/path/to/plugin'
 
-" All of your Plugins must be added before the following line 
-call vundle#end()               " required 
-filetype plugin indent on       " required 
-" To ignore plugin indent changes, instead use: 
+" All of your Plugins must be added before the following line
+call vundle#end()               " required
+filetype plugin indent on       " required
+" To ignore plugin indent changes, instead use:
 "filetype plugin on
 
 "3 重启vim 安装:PluginInstall 删除:PluginClean 更新:PluginUpdate 列举:PluginList
@@ -142,74 +150,102 @@ filetype plugin indent on       " required
 "  //////<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
+
+
+
+
+
+
+
+"xmodmap -e 'clear Lock' -e 'keycode 0x42 = Escape' //将CapLock映射为Esc
 "alias 查看所有的alias :!alias | grep vi
-"!vimtutor
-":help user-manual    :!locate vimrc_example.vim  :help 'wrap'//最好加上'
-"查看配置文件 :scriptnames
-":version 查看vim有哪些功能插件
-":options 
-"   打开选项，回车可跳到主题，对选项进行更改后  然后Ctrl-O返回到菜单
-"   :set ${item}? 用于查看已经设置的值
-"   :set 选项名&  用于恢复默认值
-"   :set list nolist list!(toggle) 用于toggle 
-":set //查看用户所有不同于默认值的选项
-":help option-list 可以查看所有选项的缩写
-"命令补全  :{x}-Ctrl-d 输入任意字母x，然后按Ctrl-d，就会出现以该字母为首的命令
-"          :e Ctrl-d 按tab选择edit，然后输入文件名的前几个字母，再按tab补全
-"set fileformat=unix //将wndows的^M去掉
-"set fileencodings=  文件支持类型
-"set fileencoding=   文件类型
-"set termencoding=   终端类型
-":e<CR> 刷新窗口 :e .打开当前目录列表，然后可以使用jk选择
-"百度 vim 系统缓冲区
-"  vim剪切板 与 系统剪切板
-"  set clipboard unnamedplus
-"gd跳到变量定义处 gf 在include处跳到文件 K调用man命令查看当前C函数或shell脚本的帮助
-"
 "查看所有终端字符 stty -a
 "进退之间
 "   挂起 Ctrl-Z(等价与:suspend,windows一般为撤销命令)  恢复 fg
 ":lcd 只影响当前窗口的工作目录 :cd 影响全局 :pwd
 "
 "
-"gf 首先在当前工作目录:pwd中查找,然后在path下查找光标下关键字的定义
-":set path += /a/b/c,/d/e 添加path :set path? 查看path
-"gf     == :fin[d] stdio.h 在path中查找 
-"[f  ]f == :sf[ind]       则会新建立窗口
-"^Wf    == :tabf[ind]
+"!vimtutor
+":help user-manual    :!locate vimrc_example.vim  :help 'wrap'//最好加上'
+":scrip[tnames] 查看配置文件
+":ve[rsion]     查看vim有哪些功能插件
+":set runtimepath? 查看所有插件位置
+"选项
+"   打开选项，回车可跳到主题，对选项进行更改后  然后Ctrl-O返回到菜单
+"   :set ${option}? 用于查看已经设置的值
+"   :set ${option}& 用于恢复默认值
+"   :set list nolist list!(toggle) 用于toggle
+"
+"   :set 查看用户所有不同于默认值的选项
+"   :help option-list 可以查看所有选项的缩写
+"
+"   set fileformat=unix 将wndows的^M去掉
+"   set fileencodings=  文件支持类型
+"   set fileencoding=   文件类型
+"   set termencoding=   终端类型
+"命令补全  :{x}-Ctrl-d 输入任意字母x，然后按Ctrl-d，就会出现以该字母为首的命令
+"          :e Ctrl-d 按tab选择edit，然后输入文件名的前几个字母，再按tab补全
+":e<CR> 刷新窗口 :e .打开当前目录列表，然后可以使用jk选择
+"百度 vim 系统缓冲区
+"  vim剪切板 与 系统剪切板
+"  set clipboard unnamedplus
+"
+"[i 若在变量上按[i,则在最底下显示变量的定义 若按下[I则在tags窗口显示所有包含该变量的行
+"[D 在宏上按，只查找宏定义
+"gd 在当前函数内跳到变量定义处
+"gD 在当前文件内跳到变量定义处
+"gf 在include处跳到文件 
+"K调用man命令查看当前C函数或shell脚本的帮助
+"
+"*与当前单词相同的下一个单词上
+"#与当前单词相同的上一个单词上
+"%可以在宏定义之间循环调转查看是否匹配 #ifdef #else #endif
 "
 "
+"
+"
+"
+"
+"
+"Insert模式下
+"   删除
+"       词    "Ctr-w"
+"       行 首 "Ctr-u"
+"
+"w 简单word头，包括末尾空白 this is-a line, with special/separated/words (and som more);
+"W 复杂word头，包括末尾空白 W的标准不是正则表达式\w,而是依据\S即非空白字符
+"e 简单word尾end,不包括末尾空白
+"E 复杂word尾end,不包括末尾空白
 "
 "光标移动
-"   向左{n}  字符    h backspace 
+"   向左{n}  字符    h backspace
 "            单词    首b 尾ge   "B gE" 对于有non-word的特殊字符时(.-)/等时，使用大写
 "   向右{n}  字符    l spacebar
-"            单词    首w 尾e    "W E" //this is-a line, with special/separated/words (and som more);
-"   下行{n}          +  j enter
-"   上行{n}          -  k
-"   行      0第一个字符 ^第一个非空白字符   {n}$ 
+"            单词    首w 尾e    "W E" 
+"   下行{n}          +  j enter  gj 在不断行wrap的情况下从视觉上移动一行
+"   上行{n}          -  k        gk 
+"   行      0第一个字符 ^第一个非空白字符  "m"窗口中间 {n}$
 "   句    首(   尾)
-"   段    首{   尾}
+"   段    首{   尾}  is 
 "   屏幕    Home Middle Last
-"   文件    {n}% 50%  文件行数的50%处 
+"           Ctrl-U[p]向上半屏 Ctrl-D[own]向下半屏 Ctrl-F[orward]向前一屏 Ctrl-B[ack]向后一屏
+"   文件    {n}% 50%  文件行数的50%处
 "           :goto {n} 文件字节偏移处 :goto 3 去第3个字节
-"
-"屏幕移动定位C-Up向上半屏 C-Down向下半屏 C-Forward向前一屏 C-Back向后一屏
 "
 "插入
 "   字符 前i  后a
 "   行   前I  尾A
 "        下一行o   上一行O
-"删除 d operation + w/e w包括空白，e不包括空白
+"删除 d operation  
 "   字符 {n}x == {n}dl X == dh
-"   词   "{n}dW {n}dw {n}dE {n}de"
+"   词   "{n}dW {n}dw {n}dE {n}de" diw daw di' di" di( di[ di{ di< // delete inner|a word|(|{
 "   行   {n}dd
 "        行首 d0 
 "        行尾 d$ d$等价于D
 "   文件 dgg dG
 "删除并进入插入模式 change operation + w/e w包括空白，e不包括空白
-"   字符  {n}s == {n}cl              至少是词，不能是单个字母
-"   词    "{n}cW {n}cw {n}cE {n}ce"    
+"   字符  {n}s == {n}cl 至少是词，不能是单个字母 
+"   词    "{n}cW {n}cw {n}cE {n}ce" ci' ci" ci( ci[ ci{ ci<
 "   行    {n}cc 等价与S
 "         行首 c0 
 "         行尾 c$等价于C
@@ -218,7 +254,7 @@ filetype plugin indent on       " required
 "   R 进入Replace模式，替换当前光标位置及其后面的字符，直至按ESC
 "   ～ 改变当前光标下的大小写 gu将下一行都改成小写 gU将下一行都改成大写
 "   g～大小写反写
-"简单的重复执行修改命令 复杂的使用Recording
+"简单的重复执行上一次修改命令 复杂的使用Recording
 "   .除了u C-R 和以冒号开始的命令
 "   .需要在normal模式下执行，先定好位，然后.  重复的是上一次修改命令而不是被修改的内容
 "   例如上一次执行cwxyz<Esc>(删除当前单词，然后插入xyz),那么定好位后，执行.也就是执行cwxyz<Esc>
@@ -227,27 +263,34 @@ filetype plugin indent on       " required
 "   as a sentence      == is + 句子后的空白
 "   eg: v模式 + as/is   das dis cas cis
 "
+"选中
+"   vi' vi" vi( vi[ vi{ vi<
 "复制 yank operation + w/e w包括空白，e不包括空白 非Copy，因为c被change占用
-"   词 "{n}yW {n}yw  {n}yE {n}ye" //特殊历史情况，cw==ce
+"   词 "{n}yW {n}yw  {n}yE {n}ye" yi' yi" yi( yi[ yi{ yi<  //特殊历史情况，cw==ce 
 "   行 {n}yy {n}Y
 "   y 复制选中内容 
 "粘贴putting 非paste
-"   {n}p/P 粘贴 若是一个字母，则粘贴到当前光标后的第一个位置;
-"          若是一行,则粘贴到下一行
+"   {n}p/P 粘贴 若是一个字母，则粘贴到当前光标后/前的第一个位置;
+"          若是一行,则粘贴到下/上一行
 "          n 表示重复执行n次
 "系统剪切板    "*yy "*p
 
-"撤销与重做 u U(撤销一行中所作的修改) c-R(撤销最后一次的撤销)
-"查找
+"撤销与重做 "u" "U" (撤销一行中所作的修改) "Ctrl-R"(撤销最后一次的撤销)
+"查找 :h pattern
+"   "为什么?+*和[]是只匹配前面一个尽可能小的，而|尽可能大呢?"
 "   同一行
 "       {n}f{x} 向右查找, {n}F{x}向左查找, 
 "       {n}t{x} 向右停止till于x的前一个字符 {n}T{x}
 "       ";"与原方向相同地重复执行上述命令  ","与原方向相反重复执行
-"   当前单词 {n}*  {n}#反向
+"   当前一个单词 {n}*  {n}#反向
 "   当前几个单词 visual select, yank, :let @/=@", n
-"   /\<{string}\>\c <>单词起止c表示忽略大小写 {2}n同向搜索第2处 {2}N逆向搜索第2处; 
+"   /\<{string}\>\c <>单词起止 "c"表示临时忽略大小写 "C"表示临时大小写敏感
+"                   {2}n同向搜索第2处 {2}N逆向搜索第2处; 
 "   ?{stringi}\c向后搜索;  .*[]^%/?~$转义 .匹配换行符以外的任意字符
 "   :set ic hls is ws //ignore case highlight-search increment-search wrapscan
+"   预定义字符集
+"       \d数字 \D非数字 \s空白tab或space \S非空白 \l小写字母 \L非小写 \u大写 \U非大写
+"       可以在\加_表示加上断行  \_. 断行在内的任意字符 \_s表示断行或空白
 "Visual模式
 "   v 进入Visual模式       o(other end)切换到选中区域的另一头 
 "   Shift-V进入行选择模式  o(other end)切换到选中区域的另一头 
@@ -262,17 +305,6 @@ filetype plugin indent on       " required
 "                    //str表示插入的字符串 
 "                    //在输入str的同时，只会在第一行显示 按下2下Esc后其他行也插入了str
 "
-"标签
-"   m{a} 只对当前文件有效 将当前光标的位置标记为{a}， `{a}跳转到a处 '{a}跳转到a处行首
-"   mA 为全局标记，对全部文件有效
-"   :marks查看所有标签 
-"       '为此处跳转前的起跳点 
-"       "上次编辑该文件时的光标的最后位置
-"       [最后一次修改的起始位置, 
-"       ]最后一次修改的结束位置
-"   :marks aB //list marks a and B
-"   :delm a b 1 //del marks a b 1
-"   :delm!  //del all marks
 "
 "多个窗口
 "   vi -o/O a.txt b.txt c.txt
@@ -290,6 +322,7 @@ filetype plugin indent on       " required
 "   :fir[st] :[]wp[revious] :next :[3]wn[ext] :la[st]  w表示write
 "   :args 列举，正在编辑的文件用[]括起
 "   :args b.txt a.txt c.txt重新编排
+"   :argdo %s/\<aa\>/bb/ge | update   //global ignoreerror 
 "   C-^ 在当前和下一个文件中切换
 "   :saveas e.txt 另存为
 "   当回到某个文件时， '.回到最后修改处 '"回到最后光标处
@@ -302,9 +335,12 @@ filetype plugin indent on       " required
 "   :diffu[pdate] 重新比较2个文件
 "   :set scrollbind 同步滚动
 "   
-"wf 创建折叠行 zo打开 zc关闭 zR/mr打开所有折行 zM/zm关闭所有折行
-"zd删除当前行折行 zD删除所有折叠
-"J命令
+"折叠folder
+"   zf {ap|n|visual模式} 创建折叠行a paragraph n rows 
+"   zd 删除当前行的折行 zD删除当前行的所有折叠 只是删除创建的折叠未删除内容
+"   zo 打开 zR/zr打开所有折行 reduce
+"   zc 关闭 zM/zm关闭所有折行 more
+"合并行Join命令
 "   换行符 行前的空白 行尾的空白都替换为单个的空格，最后的行尾放2个空格
 "   若要保持行前空白和行尾空白，使用gJ
 "
@@ -408,8 +444,7 @@ filetype plugin indent on       " required
 "   "*为当前选择区 选择的内容
 "
 "
-"map
-"   查看所有映射 :map
+"
 
 " 
 "
@@ -471,32 +506,35 @@ augroup numbertoggle   "插入模式下的显示相对，命令模式下的显�
 augroup END
 
 source $VIMRUNTIME/ftplugin/man.vim " K是在同一个窗口中打开帮助，添加上该句后，
-                                    " 就可以上下窗口运行:Man [n]{str}打开彩色帮助
+                                    " 就可以上下窗口运行:Man [n] {str}打开彩色帮助
                                     " 比如 :Man 2 open 注意是 "Man" 而不是man
                                     " 之后就可以在其中Ctrl-]和Ctrl-o
                                     " 为什么 "\K"无效
 syn on
-set sw=4            "shiftwidth 指定一个shift单位等于多少空格 向右>  向左<
+autocmd Filetype c,cpp set sw=4     "当文件类型是c cpp时，就自动执行后面的命令
+set sw=4            "shiftwidth 指定一个shift单位等于多少空格 增加缩进>>  减少缩进<<
+set sts=4           "softtabstop 
 set ts=4            "tabstop 设置一个tab等于多少空格
+"retab 4
 set ai              "autoindent 在insert模式下回车或normal模式下按o时,新行与上一行有同样的缩进方式
-set si              "smartindent
+set si              "smartindent 使用开花括号缩进，闭花括号撤去这一级的缩进 
+                    "遇到cinwords选项中列出的词也会缩进 宏定义#不使用缩进
+set cindent         "c语言indent 只适合C语言
 set expandtab       "将tab转化为空格
-"set nowrap         "一行显示不下时，不折叠到下一行显示
 "set iskeyword+=-   "iskeyword=@,48-57,_,192-255 @表示所有字母 48-57即是0-9 192-255可打印拉丁字母
 "set iskeyword-=-   "+=表示添加 -=表示减少排除
 set scrolloff=0     "光标离窗口上下边界的最小行距离
 set history=50		"keep 50 lines of command line history
 
 set is              "incsearch increment search
-set ic              "help ic ignoreCase when search
-set showmatch       "sm 当在输入([{时显示匹配的括号
+set ic              "help ic ignoreCase when search 默认大小写敏感
+set smartcase       "当搜索pattern中含有大写字母时是大小写敏感，否则大小写不敏感
+set showmatch       "sm 当在输入([{时显示匹配的括号并跳到匹配的括号，没有则蜂鸣 时长set matchtime=15 单位0.1秒
 set hlsearch        "hls
+"set nowrapscan     "循环搜索
 
 set fileencodings=utf-8,gb18030,utf-16,big5
-"自动识别文件类型 不同文件类型使用plugin脚本和缩进定义文件
-filetype plugin indent on
-"当文件类型是c cpp时，就自动执行后面的命令
-autocmd Filetype c,cpp set sw=4 
+filetype plugin indent on "自动识别文件类型 不同文件类型使用plugin脚本和缩进定义文件
 
 "colorscheme evening
 "cd /usr/share/vim/vim80/colors
@@ -508,7 +546,8 @@ autocmd Filetype c,cpp set sw=4
 
 "set mouse=a
 "set cc=80         "80列高亮
-"set textwidth=78 "设置行宽 默认78
+"set nowrap        "不加换行符 一行显示不下时，不折叠到下一行显示
+"set textwidth=78  "加换行符 设置自动断行行宽 默认78 
 "autocmd InsertLeave * se nocul  " 用浅色高亮当前行
 "autocmd InsertEnter * se cul    " 用浅色高亮当前行
 set cursorline
@@ -521,7 +560,69 @@ set showcmd
 set ruler		" show the cursor position all the time 右下角显示光标位置
 set statusline=[%F]%y%r%m%*%=[Line:%l/%L,Column:%c][%p%%]
 
-let mapleader = ";"    " 查看:options可知默认是\
+"缩写
+"   insert模式下的缩写 输入#b + 空格即可
+"   command模式下的缩写 !同时适用insert cmd
+iabbrev #b /*****************************************      
+iabbrev #e   ****************************************/     
+"   unabbreviate #b  iunabbeviate cunabb
+"   abclear          iabclear   cabclear    == all insert command mode
+"
+"缩写与map区别
+"   触发时机  缩写是结束时即空格触发 map是输入映射键时就触发
+"
+"自定义冒号命令 h user-commands
+"   : "com"[mand]    列出所有的冒号命令,这对于查看第三方插件的命令很有效
+"   :command!        重新定义cmd 在command后加!即可
+"   :delcommand $cmd 清除命令cmd
+"   :comclear        清除所有命令
+"
+"   :command 
+"       Cmd    //Cmd首字母必须大写，但不能使用:X :Next :Print 下划线  可以使用数字但不鼓励
+"       [-nargs=[0|1|?|+|*]] //nargs参数个数  ?表示0/1 +表示1或多 *表示任意 默认是command0
+"       [-range=[|%|{count}] //行号范围 %表示所有 默认是当前行
+"       Op <q-args> 或<f-args>
+"
+"       eg  :command -nargs=* -range=% DoIt :<line1>,<line2>call AFunction(<f-args>)
+"           :DoIt a b c  //:call Afunction(a,b,c)
+"自动命令  autocmd
+"   :autocmd [group] {event} {file_pattern} [nested] {command}   
+"       //group 可选 为了方便管理这些命令
+"       //event 查看帮助 :h autocmd-events
+"       //file-pattern 带有通配符的文件名
+"           . 匹配一个.号     ？匹配任意一个字符   *匹配任意个数的任何字符
+"           [abc] 匹配a或b或c  a{b,c} 匹配ab和ac
+"       //nested 可选 允许对自动命令的第归触发
+"       //command  
+"           normal {cmd} //使用normal模式下的命令
+"
+"   忽略事件
+"       :set eventignore=WinEnter,WinLeave //逗号分隔
+"       :set eventignore=all
+"       :set eventignore=    //恢复
+"
+"   :autogroup {group_name}
+"       :autocmd 
+"       :autocmd 
+"   :autogroup END
+"
+"   :autocmd  [{event} {file_pattern}]  列出所有的自动命令列表
+"   :autocmd! {event} {file_pattern}    删除
+"   :autocmd! {group-name}              删除命令组
+"
+"
+"map
+"   :map      查看所有映射 第一列的n代表normal, i代表insert, 空白代表:map即normal和visual
+"   :mapclear 删除所有映射
+"   工作模式    不允许重映射 取消映射
+"       :map   :noremap  :unmap  normal, visual and operatiing-pending(如删除命令在输入d后，粘贴在输入y之后) 
+"       :nmap  :nnoremap :nunmap normal
+"       :imap  :inoremap :iunmap insert
+"       :cmap  :cnoremap :cunmap cmd
+"       :vmap  :vnoremap :vunmap visual
+"       :map!  :noremap! :unmap! insert and cmd
+"       :omap  :onoremap :ounmap operating-pending
+"let mapleader = ";"    " 查看:options可知默认是\, :map可以查看mapleader
 "let mapleader = ","
 
 "当前行位于屏幕
@@ -543,18 +644,66 @@ nmap <leader>hh <Plug>MarkClear
 nmap <leader>hr <Plug>MarkRegex
 nmap <leader>t :set tags=tags<cr>
 
-"查看所有标签
+"标签
+"   m{a} 只对当前文件有效 将当前光标的位置标记为{a}， `{a}跳转到a处 '{a}跳转到a处行首
+"   mA 为全局标记，对全部文件有效
+"   :marks查看所有标签 
+"       '为此处跳转前的起跳点 
+"       "上次编辑该文件时的光标的最后位置
+"       [最后一次修改的起始位置, 
+"       ]最后一次修改的结束位置
+"   :marks aB   //list marks a and B
+"   :delm a b 1 //del marks a b 1
+"   :delm!      //del all marks
 nmap <leader>sm :marks<cr>       
+
+"查找文件gf操作
+"   首先在当前工作目录:pwd中查找,然后在path下查找光标下关键字的定义
+"   :set path? 查看path
+"   :set path += /a/ "*"/c,/d/ "**"/e 添加path a的所有儿子目录中含有孙子目录c d的所有后代中含有e目录的
+"   :set path += ./proto        表示在使用fg的那个文件(或正在编辑的文件)所在的目录查找
+"   :set path += proto          表示一开始进入vi的当前工作目录下查找proto子目录
+"   gf     == :fin[d] stdio.h   "在当前窗口打开"
+"   [f  ]f == :sf[ind]          "在新建窗口打开"
+"   ^Wf    == :tabf[ind]        "在新建tab打开"
+"
+"查找函数tags操作
+"   :set tags=~/proj/ "**"/tags   
+"   :tags 打印tags栈  >表示current 
+"
+"   当出现选择列表时选择第一列的序号 :tfirst :[n]tpreviois :[n]tnext  :tlast
+"
+"   :{n}tag           == Ctrl-T        //往回跳n步
+"   :tag write_<Tab>                   //按tab进行选择
+"   :tag /write<Tab>                   // /表示按搜索模式进行选择
+"   :sta[g]   {reg_tag} == Ctrl-W ]    // "在split窗口查看 焦点在split窗口"
+"   :stj[ump] {reg_tag}                //支持re正则表达式
+"
+"   预览窗口preview
+"   :ptag func_name  == Ctrl-w }       //在看或写代码时在 "预览窗口"中查看函数原型,焦点还是在原来窗口
+"   :pc[lose]                          //在当前窗口中关闭预览窗口
+
 "buffers操作 一个缓冲区就是一个被编辑文件的副本
-" :ls 查看所有缓冲区  *a表示actiive
+" :ls 查看Active Inactive Hidden缓冲区  *a表示actiive
+"         % buffer in the current window
+"         # alternate buffer
+"         a active buffer
+"         h hidden buffer   :hide edit 2.cpp //可以在不保存当前修改下直接edit 2.cpp
+"         u an unlisted buffer 当使用:bd [n]时进入unbuflist, 
+"                              :ls不显示 :ls!显示
+"         = readonly buffer
+"         + modified buffer
+"         x a buffer with read errors
+"   
 " :on[ly] 只保留当前窗口,其他都关闭 :q关闭当前窗口
 "
 " :bad[d] {fname} 添加文件
 " :bd[elete] [n] 从bufferlist中删除[n]
-" :b[uf] {n} 切换到n编号缓冲区    :sb  {n}  以split方式打开
+" :bwipe [n]     从buflist完全删除
+" :b[uf] {n} 切换到n编号缓冲区    :sb  {n}  "以split窗口方式打开"
 " :bf[irst] :bl[ast]              :sbf sbl
 " :bp[re]   :bn[nex]              :sbp sbn
-" :b#        之前所在的buffer
+" :b#        之前所在的buffer     :sb#
 "
 " :bufdo {cmd} 在所有的缓冲区中执行cmd  :bufdo /e
 " :windo {cmd} 在所有的窗口中执行cmd    :windo /e
@@ -571,15 +720,20 @@ nmap <leader>bp :bp<cr>
 " :tabo[nly]
 "
 " :tabfir[st] tabl[ast]
-" 
 " :tabp[re]   {n}     == :tabN[ext]{n}   == {n}gT 
 " :tabn[ext] {seq_n}                     == {seq_n}gt
 "
-"tags操作
-" 产生
-" :tags 列举所有tag >表示current 
-" :ta[g] ${re_tag}    //支持re正则表达式
-" :tj[ump] ${re_ag} :stj[ump] ${re_tag} //支持re正则表达式
+"
+"Compiler
+"   :make
+"       :set makeprg=make -f mymakefile
+"       :set makeprg=nmake -f project.mak
+"       :set makeprg=make %
+"   遍历错误
+"       :clist简单 :clist!详细
+"       :cfirst :cprevious :cnext :clast
+"       :cc [n]  //第几条错误
+"   
 
 "Find/replace issue
 nmap <F6> :cn<cr>
@@ -619,12 +773,47 @@ nmap <silent><F12> :Gtags<CR>
 
 "nerdcomment插件
 nmap <leader>tree :NERDTree<cr>
-map <C-r> <C-W>r  " 顺时针转换窗口
-map <C-R> <C-W>R  " 逆时针转换窗口
-map <C-x> <C-W>x  " 左右上下对换窗口
+" 顺时针转换窗口
+map <C-r> <C-W>r 
+" 逆时针转换窗口
+map <C-R> <C-W>R  
+" 左右上下对换窗口
+map <C-x> <C-W>x  
 "let loaded_nerd_comments=1
 let NERDMenuMode=0
 let NERDShutUp=1
 let NERDSpaceDelims=1           " 让注释符与语句之间留一个空格
 let NERDCompactSexyComs=1       " 多行注释时样子更好看
 let g:NERDDefaultAlign = 'left'  "将行注释符左对齐
+
+
+
+"ftplugin filetype-plugin 定制一个文件类型plugin
+
+"以脚本形式执行vi的命令
+"shell
+"   for file in *.txt; do
+"       vim -e -s $file < change.vim //以extend模式(即命令模式)silent方式不要再给出:和其他不必要的提示
+"       vim -s change.vim $file //s表示script
+"       lpr -r tempfile   //打印之后然后删除
+"   done
+"cat change.vim
+"   %s/\<aa\>/bb/ge
+"   write tempfile
+"   quit
+"
+"脚本
+"   b:name   局部于一个缓冲区的变量buffer
+"   w:name   局部于一个窗口的变量window
+"   g:name   全局变量global
+"   v:name   vim的预定义的变量
+"   a:name   函数参数argument
+"   s:name   脚本变量script
+"
+"函数
+"   :function 显示用户自定义的函数
+"   :function $fun_name  查看函数的定义
+"   :delfunction $fun_name 删除函数
+"
+"   <SID>                    scriptID 使vi为当前脚本生成唯一标示ID
+"   <Plug>{脚本名}{映射名}
