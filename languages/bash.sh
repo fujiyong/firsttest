@@ -1018,6 +1018,9 @@ https://yq.aliyun.com/articles/68541
         echo "${B[1]}"            # a  b c
         echo "${C[@]}"            # bar a  b c 42
         echo "${C[@]: -2:2}"      # a  b c 42  减号前的空格是必须的
+Map
+
+
 逻辑运算
     test {expression}         # 判断条件为真的话 test 程序返回0 否则非零
     [ expression ]            # 判断条件为真的话返回0 否则非零
@@ -1115,8 +1118,12 @@ https://yq.aliyun.com/articles/68541
     n<&-                               # 关闭作为输入的文件描述符 n
     diff <(cmd1) <(cmd2)               # 比较两个命令的输出
 
-
+printf
+date
 find
+    find / -type f -size +5M           # 查找大于 5M 的文件
+    find ~ -mmin 60 -type f            # 查找 $HOME 目录中，60 分钟内修改过的文件
+    find . -type f -newermt "2010-01-01" ! -newermt "2010-06-01"
 
 grep 
     grep -A 5 "foo"   file            # 前5行         
@@ -1175,10 +1182,7 @@ awk
     netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
 
 
-uname -a
-    查看内核版本
-lsb_release -a     #yum search lsb而不是yum search lsb_release
-    查看版本CentOS Redhat Ubuntu
+
 
 netstat -tlpn
     -l  tcp udp raw unixsocket
@@ -1217,12 +1221,22 @@ iostat [delay [count]]
 
 
 
+命令处理
+    command ls                         # 忽略 alias 直接执行程序或者内建命令 ls
+    builtin cd                         # 忽略 alias 直接运行内建的 cd 命令
+    enable                             # 列出所有 bash 内置命令，或禁止某命令
+    help {builtin_command}             # 查看内置命令的帮助（仅限 bash 内置命令）
 
+    eval $script                       # 对 script 变量中的字符串求值（执行）
 
+showkey -a                # 查看终端发送的按键编码
+man ascii                          # 显示 ascii 表
 
-
-
-
+uname -a
+    查看内核版本
+lsb_release -a     #yum search lsb而不是yum search lsb_release
+    查看版本CentOS Redhat Ubuntu
+hostname
 
 登录
     last {user}
@@ -1257,6 +1271,21 @@ iostat [delay [count]]
     pkill {proName}
     killall {progname}
 
+    ps                        # 查看当前会话进程
+    ps ax                     # 查看所有进程，类似 ps -e
+    ps aux                    # 查看所有进程详细信息，类似 ps -ef
+    ps auxww                  # 查看所有进程，并且显示进程的完整启动命令
+    ps -u {user}              # 查看某用户进程
+    ps axjf                   # 列出进程树
+    ps xjf -u {user}          # 列出某用户的进程树
+    ps -eo pid,user,command   # 按用户指定的格式查看进程
+    ps aux | grep httpd       # 查看名为 httpd 的所有进程
+    ps --ppid {pid}           # 查看父进程为 pid 的所有进程
+    pstree                    # 树形列出所有进程，pstree 默认一般不带，需安装
+    pstree {user}             # 进程树列出某用户的进程
+    pstree -u                 # 树形列出所有进程以及所属用户
+    pgrep {procname}          # 搜索名字匹配的进程的 pid，比如 pgrep apache2
+
     后台进程 使用&启动的程序  不能接受输入,但可以有输出
     CTRL-Z 
     jobs              查看后台进程
@@ -1264,8 +1293,83 @@ iostat [delay [count]]
     fg {n}            将后台进程切换到前台  如在vi某文件时,CTRL-Z,再fg
     disown {pid|jid}  将进程从后台任务列表（jobs）移除
     wait              等待所有后台进程任务结束
+信号
+    trap cmd sig1 sig2        # 在脚本中设置信号处理命令
+    trap "" sig1 sig2         # 在脚本中屏蔽某信号
+    trap - sig1 sig2          # 恢复默认信号处理行为
+网络
+    ping -c N {host}
+    traceroute {host}         # 侦测路由连通情况
+    mtr {host}                # 高级版本 traceroute
+    host {domain}             # DNS 查询，{domain} 前面可加 -a 查看详细信息
+    whois {domain}            # 取得域名 whois 信息
+    dig {domain}              # 取得域名 dns 信息
+    route -n                  # 查看路由表
 
-ping -c N {host}
+    ip a                               # 显示所有网络地址，同 ip address
+    ip a show eth1                     # 显示网卡 IP 地址
+    ip a add 172.16.1.23/24 dev eth1   # 添加网卡 IP 地址
+    ip a del 172.16.1.23/24 dev eth1   # 删除网卡 IP 地址
+    ip link show dev eth0              # 显示网卡设备属性
+    ip link set eth1 up                # 激活网卡
+    ip link set eth1 down              # 关闭网卡
+    ip link set eth1 address {mac}     # 修改 MAC 地址
+    ip neighbour                       # 查看 ARP 缓存
+    ip route                           # 查看路由表
+    ip route add 10.1.0.0/24 via 10.0.0.253 dev eth0    # 添加静态路由
+    ip route del 10.1.0.0/24           # 删除静态路由
+
+    ifconfig                           # 显示所有网卡和接口信息
+    ifconfig -a                        # 显示所有网卡（包括开机没启动的）信息
+    ifconfig eth0                      # 指定设备显示信息
+    ifconfig eth0 up                   # 激活网卡
+    ifconfig eth0 down                 # 关闭网卡
+    ifconfig eth0 192.168.120.56       # 给网卡配置 IP 地址
+    ifconfig eth0 10.0.0.8 netmask 255.255.255.0 up     # 配置 IP 并启动
+    ifconfig eth0 hw ether 00:aa:bb:cc:dd:ee            # 修改 MAC 地址
+
+    nmap 10.0.0.12                     # 扫描主机 1-1000 端口
+    nmap -p 1024-65535 10.0.0.12       # 扫描给定端口
+    nmap 10.0.0.0/24                   # 给定网段扫描局域网内所有主机
+    nmap -O -sV 10.0.0.12              # 探测主机服务和操作系统版本
+
+man hier                           # 查看文件系统的结构和含义
+man test                           # 查看 posix sh 的条件判断帮助
+getconf LONG_BIT                   # 查看系统是 32 位还是 64 位
+bind -P                            # 列出所有 bash 的快捷键
+
+
+lsof -i [$proto_name]:80
+curl wttr.in/~beijing              # 查看北京的天气预报
+echo $[RANDOM%X+1]                 # 取得 1 到 X 之间的随机数
+bind -x '"\C-l":ls -l'             # 设置 CTRL+l 为执行 ls -l 命令
+netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
+# 性能测试：测试处理器性能
+python -c "import test.pystone;print(test.pystone.pystones())"
+
+# 性能测试：测试内存带宽
+dd if=/dev/zero of=/dev/null bs=1M count=32768
+
+# 通过主机 A 直接 ssh 到主机 B
+ssh -t hostA ssh hostB
+
+# 下载一个网站的所有图片
+wget -r -l1 --no-parent -nH -nd -P/tmp -A".gif,.jpg" http://example.com/images
+
+# 快速创建项目目录
+mkdir -p work/{project1,project2}/{src,bin,bak}
+
+# 显示当前正在使用网络的进程
+lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2
+
+# 反向代理：将外网主机（202.115.8.1）端口（8443）转发到内网主机 192.168.1.2:443
+ssh -CqTnN -R 0.0.0.0:8443:192.168.1.2:443  user@202.115.8.1
+
+# 正向代理：将本地主机的 8443 端口，通过 192.168.1.3 转发到 192.168.1.2:443 
+ssh -CqTnN -L 0.0.0.0:8443:192.168.1.2:443  user@192.168.1.3
+
+# socks5 代理：把本地 1080 端口的 socks5 的代理请求通过远程主机转发出去
+ssh -CqTnN -D localhost:1080  user@202.115.8.1
 
 
 ls无色 alias ls='ls --color=auto '
