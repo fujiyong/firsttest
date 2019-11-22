@@ -884,21 +884,109 @@ https://yq.aliyun.com/articles/68541
 # 
 # 
 # 
-# source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
-# 定义变量 
-#   local var=                      #在等号前不能有空格 左边不需要$,右边引用变量需要$
-# 拼接变量{}
-#   local var="visitor"; 
-#   ${var}or        #visitor 拼接字符串,为了明确变量的边界,需要添加{}
-#   ${var}${var2}   
-# 数值计算操作
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+安装zsh http://www.skywind.me/blog/archives/2060
+# 
+命令
+    source a.sh   #source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
+    env
+    set
+    unset
+        unset
+        unset f
+    declare
+        declare -a                # 查看所有数组
+        declare -f                # 查看所有函数
+        declare -F                # 查看所有函数，仅显示函数名
+        declare -i                # 查看所有整数
+        declare -r                # 查看所有只读变量
+        declare -x                # 查看所有被导出成环境变量的东西
+        declare -p varname        # 输出变量是怎么定义的（类型+值）
+预定义变量
+    echo $$                   # 查看当前 shell 的进程号
+    echo $!                   # 查看最近调用的后台任务进程号
+    echo $?                   # 查看最近一条命令的返回码
+定义用户变量 
+   local var=                      #在等号前不能有空格 左边不需要$,右边引用变量需要$
+拼接变量{}
+   local var="visitor"; 
+   ${var}or        #visitor 拼接字符串,为了明确变量的边界,需要添加{}
+   ${var}${var2}
+执行命令并赋值
+    varname=$(id -u user)    # 运行命令，并将标准输出内容捕获并将返回值赋值
+    varname=`id -u user`
+查看变量
+    echo $var
+数值
     if (( ))
-    $(( $number_var + 1))
-    $[ $number_var + 1 ]
-    let number_var = $number_var + 1 
-    number_var = `expr $number + 1`
-# 数组
-    for ((i=1; i<=j; i++))
+    计算
+        number=$(( $number_var + 1))  #双括号内的 $ 可以省略
+        $[ $number_var + 1 ]
+        let number_var = $number_var + 1 
+        number_var = `expr $number + 1`   # 兼容 posix sh 的计算，使用 expr 命令计算结果
+    比较
+        num1 -eq num2             # 数字判断：num1 == num2
+        num1 -ne num2             # 数字判断：num1 != num2
+        num1 -lt num2             # 数字判断：num1 < num2
+        num1 -le num2             # 数字判断：num1 <= num2
+        num1 -gt num2             # 数字判断：num1 > num2
+        num1 -ge num2             # 数字判断：num1 >= num2
+字符串
+    长度  #获取之后就可以有边界的切割了 sed cut awk
+        ${#varname}               # 返回字符串长度
+    切割
+        ${varname:offset:len}     # 取得字符串的子字符串
+    拼接
+        ${var}er
+        ${var1}${var2}
+    替换
+        ${variable/pattern/str}   # 将变量中第一个匹配 pattern 的替换成 str，并返回
+        ${variable//pattern/str}  # 将变量中所有匹配 pattern 的地方替换成 str 并返回
+    比较
+        str1 = str2               # 判断字符串相等，如 [ "$x" = "$y" ] && echo yes
+        str1 != str2              # 判断字符串不等，如 [ "$x" != "$y" ] && echo yes
+        str1 < str2               # 字符串小于，如 [ "$x" \< "$y" ] && echo yes
+        str2 > str2               # 字符串大于，注意 < 或 > 是字面量，输入时要加反斜杆
+        -n str1                   # 判断字符串不为空（长度大于零）
+        -z str1                   # 判断字符串为空（长度等于零）
+
+        ${varname:-word}          # 如果变量不为空则返回变量，否则返回 word
+        ${varname:=word}          # 如果变量不为空则返回变量，否则赋值成 word 并返回
+        ${varname:?message}       # 如果变量不为空则返回变量，否则打印错误信息并退出
+        ${varname:+word}          # 如果变量不为空则返回 word，否则返回 null
+        ${varname:offset:len}     # 取得字符串的子字符串
+
+        ${variable#pattern}       # 如果变量头部匹配 pattern，则删除最小匹配部分返回剩下的
+        ${variable##pattern}      # 如果变量头部匹配 pattern，则删除最大匹配部分返回剩下的
+        ${variable%pattern}       # 如果变量尾部匹配 pattern，则删除最小匹配部分返回剩下的
+        ${variable%%pattern}      # 如果变量尾部匹配 pattern，则删除最大匹配部分返回剩下的
+        ${variable/pattern/str}   # 将变量中第一个匹配 pattern 的替换成 str，并返回
+        ${variable//pattern/str}  # 将变量中所有匹配 pattern 的地方替换成 str 并返回
+
+        *(patternlist)            # 零次或者多次匹配
+        +(patternlist)            # 一次或者多次匹配
+        ?(patternlist)            # 零次或者一次匹配
+        @(patternlist)            # 单词匹配
+        !(patternlist)            # 不匹配
+数组
+    for ((i=1; i<=j; i++)); do  done
+    for i in "a" "b"
     for i in {1..10}
     for i in 192.168.1.{1..254}
     for i in “file1” “file2” “file3”
@@ -909,14 +997,278 @@ https://yq.aliyun.com/articles/68541
     for I in $(<file)
     for i in "$@"          #$#变量个数 $@ $*变量内容 $0文件名 $9 ${10} ${11}当变量个数大约9时,需要{},也就是要明确边界
 
-    #数组长度
-字符串
-    切割
-    替换
+    定义数组
+        array=([0]=valA [1]=valB [2]=valC)   
+        array=(valA valB valC)
+    旋转门
+        转入数组
+            array=($text)             # 按空格分隔 text 成数组，并赋值给变量
+            IFS="/" array=($text)     # 按斜杆分隔字符串 text 成数组，并赋值给变量 
+        转出数组
+            text="${array[*]}"        # 用空格链接数组并赋值给变量
+            text=$(IFS=/; echo "${array[*]}")  # 用斜杠链接数组并赋值给变量             
+    获取数组元素            ${array[i]}
+    获取数组长度            ${#array[@]}
+    获取数组中某变量长度     ${#array[i]}
+    数组切片
+        A=( foo bar "a  b c" 42 ) # 数组定义
+        B=("${A[@]:1:2}")         # 数组切片：B=( bar "a  b c" )
+        C=("${A[@]:1}")           # 数组切片：C=( bar "a  b c" 42 )
+        echo "${B[@]}"            # bar a  b c
+        echo "${B[1]}"            # a  b c
+        echo "${C[@]}"            # bar a  b c 42
+        echo "${C[@]: -2:2}"      # a  b c 42  减号前的空格是必须的
+逻辑运算
+    test {expression}         # 判断条件为真的话 test 程序返回0 否则非零
+    [ expression ]            # 判断条件为真的话返回0 否则非零
+    [ \( $x -gt 10 \) ]
 
-    #拼接
-        ${var}er
-        ${var1}${var2}
-#输入
+    statement1 && statement2  # and 操作符
+    statement1 || statement2  # or 操作符
+    ! expression              # 如果 expression 为假那返回真
+
+    exp1 -a exp2              # exp1 和 exp2 同时为真时返回真（POSIX XSI扩展）
+    exp1 -o exp2              # exp1 和 exp2 有一个为真就返回真（POSIX XSI扩展）
+
+    -a file                   # 判断文件存在，如 [ -a /tmp/abc ] && echo "exists"
+    -d file                   # 判断文件存在，且该文件是一个目录
+    -e file                   # 判断文件存在，和 -a 等价
+    -f file                   # 判断文件存在，且该文件是一个普通文件（非目录等）
+    -r file                   # 判断文件存在，且可读
+    -s file                   # 判断文件存在，且尺寸大于0
+    -w file                   # 判断文件存在，且可写
+    -x file                   # 判断文件存在，且执行
+    -N file                   # 文件上次修改过后还没有读取过
+    -O file                   # 文件存在且属于当前用户
+    -G file                   # 文件存在且匹配你的用户组
+    file1 -nt file2           # 文件1 比 文件2 新
+    file1 -ot file2           # 文件1 比 文件2 旧
+流程控制
+    if [condition]; then
+    elif [condition]; then
+    else
+    fi
+
+    for ;do 
+    done
+
+    while [condition]; do
+    done
+
+    until condition; do
+        statements
+    done
+
+    case expression in 
+        pattern1 )
+            statements ;;
+        pattern2 )
+            statements ;;
+        * )
+            otherwise ;;
+    esac
+
+    select name [in list]; do
+        statements that can use $name
+    done
+
+函数
+    function myfunc() {
+        # $1 代表第一个参数，$N 代表第 N 个参数
+        # $# 代表参数个数
+        # $0 代表被调用者自身的名字
+        # $@ 代表所有参数，类型是个数组，想传递所有参数给其他命令用 cmd "$@" 
+        # $* 空格链接起来的所有参数，类型是字符串
+        {shell commands ...}
+    }
+
+    myfunc                    # 调用函数 myfunc 
+    myfunc arg1 arg2 arg3     # 带参数的函数调用
+    myfunc "$@"               # 将所有参数传递给函数
+    myfunc "${array[@]}"      # 将一个数组当作多个参数传递给函数
+    shift                     # 参数左移
+
+    unset -f myfunc           # 删除函数
+    declare -f                # 列出函数定义
+输入 输出 重定向
     read $line # 读取一行
     read $v1 $v2 $n #将一行按照IFS分割赋值给各变量 若变量数小于切片数,则最后一个变量再获取其余值; 若变量数大于切片数,则多余变量值为空
+
+    cmd1 | cmd2                        # 管道，cmd1 的标准输出接到 cmd2 的标准输入
+    < file                             # 将文件内容重定向为命令的标准输入
+    > file                             # 将命令的标准输出重定向到文件，会覆盖文件
+    >> file                            # 将命令的标准输出重定向到文件，追加不覆盖
+    >| file                            # 强制输出到文件，即便设置过：set -o noclobber
+    n>| file                           # 强制将文件描述符 n的输出重定向到文件
+    <> file                            # 同时使用该文件作为标准输入和标准输出
+    n<> file                           # 同时使用文件作为文件描述符 n 的输出和输入
+    n> file                            # 重定向文件描述符 n 的输出到文件
+    n< file                            # 重定向文件描述符 n 的输入为文件内容
+    n>&                                # 将标准输出 dup/合并 到文件描述符 n
+    n<&                                # 将标准输入 dump/合并 定向为描述符 n
+    n>&m                               # 文件描述符 n 被作为描述符 m 的副本，输出用
+    n<&m                               # 文件描述符 n 被作为描述符 m 的副本，输入用
+    &>file                             # 将标准输出和标准错误重定向到文件
+    <&-                                # 关闭标准输入
+    >&-                                # 关闭标准输出
+    n>&-                               # 关闭作为输出的文件描述符 n
+    n<&-                               # 关闭作为输入的文件描述符 n
+    diff <(cmd1) <(cmd2)               # 比较两个命令的输出
+
+
+find
+
+grep 
+    grep -A 5 "foo"   file            # 前5行         
+    grep -B 5 "foo"   file            # 后5行
+    grep -C 5 "foo"   file            # 前后5行
+
+    -i   #忽略大小写
+    -v   #忽略
+    -n   #行号
+
+    -r   #递归  相对于文件夹来说
+egrep == grep -E
+fgrep == grep -F  #fixed 即pattern不转义,为字面字符
+
+sort
+    sort file                          # 排序文件
+    sort -u file                       # 去重排序
+    sort -r file                       # 反向排序（降序）
+    sort -n file                       # 使用数字而不是字符串进行比较
+    sort -t: -k 3n /etc/passwd         # 按 passwd 文件的第三列进行排序
+
+文本切割cut
+    按byte
+        cut -c 1-16                        # 截取每行头16个字符
+        cut -c 1-16 file                   # 截取指定文件中每行头 16个字符
+        cut -c3-                           # 截取每行从第三个字符开始到行末的内容
+    按分隔符
+        cut -d':' -f5                      # 截取用冒号分隔的第五列内容
+        cut -d';' -f2,10,12                # 截取用分号分隔的第二和第十列 第十二列内容
+        cut -d' ' -f3-7                    # 截取空格分隔的三到七列
+        cut -d' ' -f3
+
+sed
+    sed 's/find/replace/' file         # 替换文件中首次出现的字符串并输出结果 
+    sed '10s/find/replace/' file       # 替换文件第 10 行内容
+    sed '10,20s/find/replace/' file    # 替换文件中 10-20 行内容
+    sed -r 's/regex/replace/g' file    # 替换文件中所有出现的字符串
+    sed -i 's/find/replace/g' file     # 替换文件中所有出现的字符并且覆盖文件
+    sed -i '/find/i\newline' file      # 在文件的匹配文本前插入行
+    sed -i '/find/a\newline' file      # 在文件的匹配文本后插入行
+    sed '/line/s/find/replace/' file   # 先搜索行特征再执行替换
+    sed -e 's/f/r/' -e 's/f/r' file    # 执行多次替换
+    sed 's#find#replace#' file         # 使用 # 替换 / 来避免 pattern 中有斜杆
+    sed -i -r 's/^\s+//g' file         # 删除文件每行头部空格
+    sed '/^$/d' file                   # 删除文件空行并打印
+    sed -i 's/\s\+$//' file            # 删除文件每行末尾多余空格
+    sed -n '2p' file                   # 打印文件第二行
+    sed -n '2,5p' file                 # 打印文件第二到第五行
+awk
+    awk -F ',' '{s+=$1; print $5, $NF;} END {print s}' file       # 打印文件中以逗号分隔的第五列 最后一列
+    awk '/str/ {print $2}' file                                   # 打印文件中包含 str 的所有行的第二列
+    awk '{s+=$1} END {print s}' file                              # 计算所有第一列的合
+    awk 'NR%3==1' file                                            # 从第一行开始，每隔三行打印一行
+
+    history | awk '{a[$2]++}END{for(i in a){print a[i] " " i}}' | sort -rn | head
+    netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
+
+
+uname -a
+    查看内核版本
+lsb_release -a     #yum search lsb而不是yum search lsb_release
+    查看版本CentOS Redhat Ubuntu
+
+netstat -tlpn
+    -l  tcp udp raw unixsocket
+
+    -t  tcp
+    -u  udp
+
+    -p  pid/progname
+
+    -n  localAddress 默认显示host:serviceName, 转化为ip:port
+
+ps
+top
+iotop
+
+vmstat [delay [count]]
+    -n  causes the headers not to be reprinted regularly
+
+    输出
+        r  正在running process, 一般小于CPU较好
+        b  正在blocking process,
+iostat [delay [count]]
+    CPU
+        -c 1 10 # 只显示CPU状态 每隔1秒显示显示10次
+
+    Device
+        -d []    # 默认显示所有设备磁盘 只显示某块磁盘device即磁盘状态
+        -x       # 显示io的扩展数据,默认不显示扩展数据 有关键字段%util(使用率 如果%util接近100%,说明IO较大,有瓶颈) await(响应时间)
+        -k       # 某些时候的block为单位的列强制转化为kilobytes为单位
+
+    典型用法
+        iostat -c [delay [count]]     #查看CPU
+
+        iostat    -k [delay [count]]  #查看TPS和吞吐量
+        iostat -x -k [delay [count]]  #查看设备device磁盘的使用率(%util) 响应时间(await)
+
+
+
+
+
+
+
+
+
+
+登录
+    last {user}
+    lastlog {user}
+
+    w/who/user      #显示在线用户
+
+    whoami
+    finger {user}   # 显示某用户信息，包括 id, 名字, 登陆状态等
+    id {user}       # 查看用户的 uid，gid 以及所属其他用户组
+
+
+    write {user}    #向某人发送一段话
+查找
+    whereis         # 搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
+    locate 
+    which
+目录/文件
+    pushd {dirname}     # 目录压栈并进入新目录
+    popd                # 弹出并进入栈顶的目录
+    dirs -v             # 列出当前目录栈
+    cd -                # 回到之前的目录
+    cd -{N}             # 切换到目录栈中的第 N个目录，比如 cd -2 将切换到第二个
+
+    stat {file}
+
+    du -sh {file|dir}
+进程
+    pgrep {proName} 
+    pidof {progname}
+
+    pkill {proName}
+    killall {progname}
+
+    后台进程 使用&启动的程序  不能接受输入,但可以有输出
+    CTRL-Z 
+    jobs              查看后台进程
+    bg                查看后台进程,并切换过去
+    fg {n}            将后台进程切换到前台  如在vi某文件时,CTRL-Z,再fg
+    disown {pid|jid}  将进程从后台任务列表（jobs）移除
+    wait              等待所有后台进程任务结束
+
+ping -c N {host}
+
+
+ls无色 alias ls='ls --color=auto '
+       alias grep='grep --color=auto '
+       alias egrep='egrep --color=auto '
+       alias fgrep='fgrep --color=auto '
