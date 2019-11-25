@@ -45,9 +45,11 @@ eval $script                       # 对 script 变量中的字符串求值（�
     echo $!                   # 查看最近调用的后台任务进程号
     echo $?                   # 查看最近一条命令的返回码
 用户定义变量
-	local var=""              #在等号前不能有空格 左边不需要,右边引用变量需要
-	local var=$(id -u user)   #运行命令，并将标准输出内容捕获并将返回值赋值
+	local var=''   #在单引号里不能进行任何变量转义
+	local var="x ${var2} yy"   #在等号前不能有空格 左边不需要,右边引用变量需要 在双引号$变量可以转义
 	local var=`id -u user`
+	local var=$(id -u user)   #运行命令，并将标准输出内容捕获并将返回值赋值
+	
 变量定界符  主要是拼接字符串变量
 	local var="visitor"; 
 	${var}or        #visitor 拼接字符串,为了明确变量的边界,需要添加{}
@@ -437,6 +439,46 @@ ssh -CqTnN -L 0.0.0.0:8443:192.168.1.2:443  user@192.168.1.3
 
 # socks5 代理：把本地 1080 端口的 socks5 的代理请求通过远程主机转发出去
 ssh -CqTnN -D localhost:1080  user@202.115.8.1
+```
+
+#  防火墙
+
+```
+firewall-cmd --zone=public --add-port=80/tcp --permanent
+firewall-cmd --zone=public --remove-port=80/tcp --permanent
+firewall-cmd --reload
+firewall-cmd --list-all
+firewall-cmd --query-port=8080/tcp
+//临时关闭防火墙,重启后会重新自动打开
+systemctl restart firewalld
+//检查防火墙状态
+firewall-cmd --state
+firewall-cmd --list-all
+//Disable firewall
+systemctl disable firewalld
+systemctl stop firewalld
+systemctl status firewalld
+//Enable firewall
+systemctl enable firewalld
+systemctl start firewalld
+systemctl status firewalld
+```
+
+#  services
+
+```
+ntsysv 图形界面
+chkconfig --list
+service --status-all 
+rpm -qa
+rpm -ql
+
+systemctl is-enabled $service  //查看服务是否开机启动
+systemctl enable $service
+systemctl disable $service
+systemctl start $service
+systemctl stop $service
+systemctl status $service
 ```
 
 #  za
