@@ -16,7 +16,7 @@ ipfs3	192.168.1.120	22	root	13622228504
 
 git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
 
-
+https://www.xiaoz.me/archives/11916
 
 alias | grep -E "b\."
 echo $DIFOSS_ENV_BASE/.privacy/__init__.sh

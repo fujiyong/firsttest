@@ -375,18 +375,22 @@ arp -n | sort -t . -k1,1n -k2,2n -k3,3n -k4,4n  #查询局域网内所有主机�
 		配置
 
 	DNS    #https://help.aliyun.com/knowledge_detail/29725.html
-		A		实现域名指向IP   
+		A	 地址Address IP4 	实现域名指向IP   最重要的  
 			www   @          记录值$IP
-		AAAA  IPV6
+			场景： 我们最终的查询的IP就是这条记录的IP
+		AAAA  Address IPV6  实现域名指向IP   A记录的升级版
 							 记录值$IP6
-		CNAME   
+		NS   名称服务器NameServer 当需要将子域名的解析交给其他DNS服务商解析
+					记录值 被授权的其他DNS服务器域名
+			场景： 上级查询下级时， 比如com查询baudu.com时
+			
+		CNAME   canonicalName
 			当需要将域名指向另一个域名,再由另一个域名提供IP地址  场景:CDN 企业邮箱 全局流量管理
 				www @        记录值 另一个域名
 		MX   用于解析电子邮件地址中@后面的内容进行解析
 		TXT  对域名进行标识或说明   多用于反垃圾邮件SPF记录
 							记录值 "v=spf1 a mx ~all"
-		NS   当需要将子域名的解析交给其他DNS服务商解析
-							记录值 被授权的其他DNS服务器域名
+
 		SRV   用来标识某台服务器使用了某个服务, 常用于微软系统的目录管理
 							记录值的格式  优先级 权重 端口 目标地址 0 5 5060 sipserver.example.com
 		CAA
@@ -394,6 +398,23 @@ arp -n | sort -t . -k1,1n -k2,2n -k3,3n -k4,4n  #查询局域网内所有主机�
 			隐性  浏览器地址栏输入 http://a.com   打开的是http://b.com 浏览器地址栏显示http://a.com
 			显性  浏览器地址栏输入 http://a.com   打开的是http://b.com 浏览器地址栏显示http://b.com   类似于http301 302
 
+		host [-a] www.baidu.com [$dns-server]
+			-a #all 所有信息
+			#dns-server  指定使用特定的dns server查询
+			
+		nslookup www.baidu.com [$dns-server]
+		
+		dig [option] www.baidu.com [$dns-server]
+			option
+				+trace            从根节点.开始跟踪
+				-type [mx A ns]   记录类型
+				-x                反查
+			正查	
+				dig        www.baidu.com
+				dig +trace www.baidu.com
+			反查
+				dig -x     $ip
+		
 
 
 /etc/rc.d/init.d/network start
