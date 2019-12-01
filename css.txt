@@ -1,0 +1,277 @@
+border box-shadow border-radius transition-duration color
+
+min-height
+line-height 
+
+text-shadow
+
+
+transition
+
+
+
+
+
+
+
+
+
+来源
+     外部 <link rel="stylesheet" type="text/css" href=""  />
+     内部 只能位于head内。<head><style> h2{color:#F00;}</style></head>
+     行内 style属性 <p style="font-size:18px;"></p>
+     导入 在一纯css文件中引入另一纯css文件，类似于include。 @import url("/css/global.css")
+选择符 selector { 声明}
+     通配符选择符  *            #universal selector
+     id选择符         #id         #id在单个文档中必须唯一 没有id列表
+     单类选择符     *.classname 
+                            E.classname   # p.classA  #class为A的p元素 <p class="classA">  不匹配 <span class="classA">
+     多类选择器   .classA.classC  #某一元素既包括classA，也包括classC.原来，在class属性中，可以有class列表，且列表元素没有顺序差别
+                                 # eg <p class="classA classB classC"> ，所以 === <p class="classA classC classB">
+                                 #    .classA.classC{} === .classC.classA{}  class属性中既包括classA也包括classC，所以匹配元素<p class="classA classC classB">
+     元素选择符    body        #标签选择器 类型type选择器
+     属性选择符    *[attr]  E[attr]
+                  *[attr="value"]  E[attr="value"]
+                  =完全匹配 
+                  ~=包含一个完整的词汇
+                  *=正则匹配，只要包含即可，可以不是一个完整的单词
+                  ^=类似于vi，以开始
+                  $=类似于vi，以结束 
+                  |= 以一个完整单词或后跟连字符-开始 
+             
+     兄弟选择符    sa + sb     #adjacent sibling selector 紧紧相邻选择符，中间不能有其他任何元素，且二者有相同的父亲
+     子选择符        sa > sb     #child selector
+     后代选择符     sa   sb     #descendant seletor 派生选择符  sa的所有后代sb，并且sb可以不是直接后代
+     
+     组合选择符    .a, .b body, h1 #group selector  p.classA
+     伪类选择符    selector:pseudoClass 
+                  :focus          #向拥有焦点的对象添加样式    eg input:focus{color:#FFFFFF}
+                  :first-child    #向元素的首个子对象添加样式  在IE中头部必须声明DOCTYPE才生效。 eg： p:first-child{}    #表示文档中的第一个p元素
+                  :lang            #向带有lang属性的元素添加样式 eg q:lang(no){ quotes: ~ ~} #将q元素的lang[no]的元素中引号“”转变为~
+                  
+                  :link              #向未访问的元素添加样式
+                  :visited         #向已经访问的元素添加样式
+                  :hover           #当鼠标悬浮于元素上方时，向元素添加样式
+                  :active          #链接被点击时添加样式  a.classA:link {color:#FFFFFF} a:visited{} a:hover{} a:active{} 
+                                  #在css中，书写顺序第一梯队link、visited 第二梯队hover 第三梯队active
+                  
+     伪对象选择符  selector:Pseudo-elements 
+                  :first-line   #向文本的第一行添加样式                 
+                                #p:first-line   {font color background word-spacing letter-spacing text-decoration vertical-align text-transform line-height clear}
+                  :first-letter #向文本的第一个字母添加特殊样式         
+                                #p:first-letter {font color background margin padding border text-decoration vertical-align text-transform line-height float clear}
+                  :before       #在元素之前添加内容  content是必选字段    h1:before{content:""}
+                  :after        #在元素之后添加内容  content是必选字段    h1:after{content:""}
+优先级
+     单一的id高于公用的class
+     指定的高于继承的
+     行内样式高于内部或外部样式
+
+
+样式
+     文本属性
+          color           #设置文本颜色
+          direction       #设置文本方向       ltr(left_to_right) rtl  
+          line-height     #设置行高           normal number length % inherit
+          letter-sapcing  #设置字符间距       normal length inherit
+          text-align      #控制文本对齐       left right center justify(两端对齐) inherit
+          text-decoration #控制文本添加修饰    none underline overline line-through blink inherit
+          text-indent     #控制文本首行的缩进  length %
+          text-shadow
+          text-transform  #设置控制文本的字母   none capitalize uppercase lowercase inherit
+          white-space     #设置空白处理方式     normal pre nowrap pre-wrap pre-line inherit
+          word-space      #设置字符间距        normal length inherit
+     字体属性
+          font:font-style || font-variant || font-weight || font-size/line-height || font-family       
+               normal        normal          normal         medium/normal            "Times New Roman"  #默认值。如若要修改，font-size和font-family必不可少
+     列表属性
+          list-style: 缩写 list-style-image || list-style-position || list-style-type
+                                              none                outside                disc            #默认值 inside下,style-type属于文字内容; outside不属于
+                         例如:
+                                 ul  {list-style:none; margin:0px; }
+                                 ul li {float: left;}
+     表格属性
+     背景属性
+        background:缩写color    || image || repeat || attachment || postion
+                            transparent || none   || repeat || scroll           || 0% 0%   #各字段的默认值
+                    background-color:#FFFFFF;     #背景颜色
+                    background-image: url(1.gif);    #背景图片
+                    background-repeat: no-repeat; #背景图片无平铺                    repeat repeat-x repeat-y no repeat
+                    background-attachment:fixed;  #背景图片固定，不随页面的滚动而滚动 fixed scroll inhrit
+                    background-postion: 0 0    ;      #定义图片的位置                    top center bottom left rigth center x% y% xpos ypos
+                    例如:  background: #FFFFFF url(1.gif) no-repeat fixed 0 0;
+
+盒模型  
+          width、heigh根据无才是内容的宽高,但ie6 width、height是指border+pading+content
+          background不作用margin,只作用于border及以内
+          单位 em(the height of the element's font) ex(the height of letter 'x') px(pixels) %(percentage相对于其父元素的width来计算的)
+         margin: top || right || bottom || left z-index(该属性在postion设置absolute或relative时有效，值越大，越在上,默认为0）
+                     margin在很多情况下为负值;理论默认值为0,但实际上浏览器支持不一样。
+                        v1               #缺左用右 缺下用上 缺右用上 右时针转轮盘
+                        v1 v2          #top=bottom=v1 right=right=v2
+                        v1 v2 v3      #top=v1 right=left=v2 bottom=v3
+                        v1 v2 v3 v4 #
+         border 不能为负
+                width取值范围 thin(细)/medium(default中)/thick(粗)|length|inherit
+                style取值范围 none(default) hidden solid dashed double dotted outset等11种  在style为none的情况下，width和color的设定就没有任何意义。
+                color取值范围
+                      hex_num(#123456 #123)
+                      rgb(255,255,255) rgb(25%,0,100%)
+                      color_name(yellow red blue gold oragne)
+                      transparent(default)
+                      inherit
+                通用写法：top right bottom left z-index 四个方向可以不一致
+                    border-width: 1px                #四个方向都是1px 右时针转轮盘
+                    border-style:
+                    border-color:
+                    border-top-width border-right-width border-bottom-width border-left-width
+                    border-top-style border-right-style border-bottom-style border-left-style
+                    border-top-color border-right-color border-bottom-color border-left-color
+                四个方向都一致时，可采用三元组缩写width || style || color
+        padding：与margin类似 不能为负值
+             auto(浏览器计算) length(em ex px) %(基于父元素的宽度计算) inherit(从父元素继承内边距)
+       width: 
+       height:
+
+        top  基于margin还是padding?
+        left
+        bottom
+        right
+            只能是相邻的2条边,不能只是上下或只是左右.
+
+定位
+    三种定位机制：
+          不脱离文档
+               普通流
+          脱离文档
+               浮动
+               绝对
+     postion属性  这里是left right top bottom，而不是margin/padding-top
+          static：默认值，没有定位。 会将元素框正常地融入到文档流中，忽略z-index,left,right,top,bottom
+          relative:原来所占的空间仍然自己保留 ，参照自己原来的位置设定偏移。元素仍然保持其未定位前的形状。元素的位置可以同left,right,top,bottom设置,无-index属性
+          absolute:参照最近的已定位(即有position属性)的祖先元素进行定位，如不存在已定位的祖先元素，则相对于最初的包含块（可能是画布或html.body元素）。
+                   生成的元素框一定是一块级框，而不论原来他在正常流中生成何种类型的框。会脱离文档流，原来的空间会被相邻的元素框占领，而本身会覆盖其他元素。
+                   元素的位置可以同z-index,left,right,top,bottom设置
+                   absolute的使用条件：
+                         1、父级元素也拥有定位的属性，一般使用relative属性
+                         2、给子元素加绝对定位属性(position:absolute ),同时增加方向属性(left,rigth,top,bottom) 层叠属性z-index
+                    例如:  垂直2列,达到浮动效果
+                             #div_parent { position: relative }
+                             #div_child1 { position: absolute; top:0; left:0; width:50%;} 
+                             #div_child2 { position: absolute; top:0; right:0; width:50%}
+                            <div id=div_parent> <div id=div_child1/> <div id=div_child2/> </div>
+          fixed：参照body进行定位。元素的位置可以同z-index,left,right,top,bottom设置。
+                 常见于浮动广告。无论如何拖动浏览器的滚动条，始终悬浮在某个固定位置。
+                 由于该属性只能被Firefox浏览器支持。
+          inherit:
+                 继承父元素的position属性。
+     float属性  
+         特点：
+               浮：自身先浮起来脱离原来的文档流，然后向左或向右移动，直到他的外边缘碰到包含框或另一个浮动框为止；
+               动：后面的元素填充原来前面由于浮动而脱离文档流元素所占的位置；
+               任何元素都可以浮动。浮动可以生成一个块级框，而不论它本身是何种元素。
+          left
+          right
+          none 清除浮动，一般用于清除整体浮动元素中额外某个元素的浮动属性。
+               清除相对于自身元素之前的元素所设置的浮动属性，从而消除之前元素设置的浮动属性而造成自身元素的排列变化。
+          inherit
+     Clear属性：用于控制浮动元素的后继元素的行为 规定元素的哪一侧不允许出现浮动元素。
+          Left:     不允许在自己势力范围内的左侧出现别的浮动元素         [                   在这儿不允许浮动元素] 在这儿允许浮动元素
+          Rigth:   不允许在自己势力范围内的右侧出现别的浮动元素        在这儿允许浮动元素[ 在这儿不允许浮动元素                    ]
+          Both:    在自己势力范围内的左右两侧都不允许出现浮动元素    在这儿允许浮动元素[在这儿不允许浮动元素             在这儿不允许浮动元素 ]在这儿允许浮动元素
+          none:  默认值。左右都允许浮动元素。
+          inherit：从父元素继承。
+     display：
+             inline(default)   #转化为行内框(内联元素)。
+                                span u a em b i strong
+                               #特点：
+                               #     元素前后没有换行符，一般不独占行，除非前面后面都是块元素；相邻的行元素处在同一行，直到一行排不下，才到下一行。
+                               #     width、height无效, 颜色有效
+                               #     垂直方向的margin-top、margin-bottom、pading-top、padding-bootom无效
+                               #     水平方向的margin-left、margin-right、padding-left、padding-rigth有效。
+                               #     缺省宽度就是文字或图片的宽度，不可改变；
+                               #     由一行形成的水平框称为行框(Line Box),行框的高度总是足以容纳它所包含的所有的行内框。不过设置行高可以增加这个框的高度。
+             block             #转化为块框。
+                              div h系列 li dt dd p form table pre dl ol ul
+                               #特点：
+                               #     从新行开始，元素前后有换行符；
+                               #     margin、pading、width、height都可以设定。
+                               #     缺省宽度占用了容器的100%的宽度，除非设定一个值；但即使设定宽，仍然独占行，后面的行元素从新行开始，因为后面有一个换行符。
+             inline-block      #转化为行内块元素。容器对象以inline出现，旁边的内联对象会出现在同一行；
+                                      #                             但容器对象的内容作为block出现，这样可以控制width,height。
+                                      Input img button textarea label select br
+                                      #inline的同行行，block设置width、height的特性。
+             none          #无框.不显示元素,也不占用文档中的空间.一般与js配合
+            Q:
+            A: 一般来说,block元素可以包含block和inline元素,inline元素只能包含inline元素.
+             Q:如何快速判别是block还是inline：
+             A:在标签的前后都添加一inline元素，如一段文字。若其中的标签在新行起始处出现，则为block元素；否则，为inline元素。
+             何时需要使用：
+               (1)当想让一个inline元素从新行开始
+               (2)当想让一个block元素与前面元素保持在同一行上
+               (3)当想控制inline元素的宽度(对导航条特别有用)
+               (4)当想控制inline元素的高度
+               (5)无须设定宽度即可为一个块元素设定与文字同宽的背景色
+     visibility:
+          visible: 默认值。
+          hidden：不可见
+          collapse 作用域表格时，此值删除一行或一列，但不会影响表格布局；作用于其他元素时，等价于hidden.
+          inherit
+     overflow:   溢出时的管理方式
+          auto      如果框放不下，则提供滚动条
+          hidden  隐藏
+          visible   全部可见，撑破外框
+          scroll    始终提供滚动条。有可能框中可以放下所有内容也会出现滚动条。
+          inherit 从父元素继承
+     clip  裁剪   只能作用于postion:absolute元素，定义元素的可见尺寸，这样此元素就会被裁剪为这个形状。当元素原始尺寸超出clip尺寸时，会根据overflow的值进行处理。
+          shape   #设置元素的裁剪形状。 rect(top,right,bottom,left)
+           auto   #默认值。不进行任何裁剪
+           inherit #从父元素继承   
+    z-index: 数值越大,越显示在上边
+
+
+     
+清除浮动对父元素的影响
+当父元素没有指定高度时，而这时的子元素有浮动属性，该父元素不会自适应高度（典型的wrap实例）。解决方法：
+(1)W3C标准（额外标签法）：给父元素增加一个空的div，并设置div的clean属性为both
+(2给父元素添加overflow属性并设置hidden。但如果子元素使用了定位布局，则会造成诸多麻烦，溢出部分会并隐藏掉。
+(3)利用after伪对象（最流行的方式，该方法是第一种w3c的改进方式）
+   .cleanFix:after{
+          clean:both;  //清除相关联元素的浮动属性对自己造成的影响
+          display:block;//变成block元素
+          visibility:hidden;//将该块隐藏 元素位置呈现空白,影响其他元素布局
+          heigh:0 px;//该块的高度为0，实际上已经隐藏，就没必要
+          content:"."; //该块的内容为.,也可以为空。这个属性不能省略，因为这是after伪对象的必须属性
+     }
+    .cleanFix{ zoom:1;} //解决ie6/7的兼容问题
+
+
+Inline-block与float
+相同:
+区别:
+    Inline-block 水平排成一行,即使元素高度不一,也会以高度最大的元素高度为行高,即使高度小的元素周围留空,
+                         也不会有第二行元素上浮补位,
+                         垂直方向是按照父元素的基线来基线排列vertical-align:baseline,水平方向可以通过设置父元素的text-align来使其水平居中
+                        默认有空白
+    float 脱离文档流,呈环绕排列,如遇上空白,而当前元素大小可以挤进去,则这个元素会上行补位.
+            默认是顶部对齐,水平方向不能通过设置父元素的text-align
+            默认没有空白
+            后面的元素需要清除浮动
+
+
+块级元素的显著特点：每个块级元素都从一新行开始显示，且其后的元素也需另起一行
+border-bottom:1px solid #000     #若是行元素，则每一行下都一条黑线；若是块元素，则这块只有一条黑线。
+
+
+visibility:hidden 任然存在文档流中,对布局有影响
+display:none      从文档流中删除,对文档布局没有影响
+
+
+
+<div style=“width:200px;border:1px solid red;” class=“clearfix”>//引用先前定义好的after伪类，来清除浮动，达到高度自动扩张的功能
+      <div style=“float:left;width:80px;height:80px;border:1px solid blue;”>TEST DIV</div>
+      <div style=“float:left;width:80px;height:80px;border:1px solid blue;”>TEST DIV</div>
+      <div style=“float:left;width:80px;height:80px;border:1px solid blue;”>TEST DIV</div>
+      <div style=“float:left;width:80px;height:80px;border:1px solid blue;”>TEST DIV</div>
+      <div style=“float:left;width:80px;height:80px;border:1px solid blue;”>TEST DIV</div>
+</div>
