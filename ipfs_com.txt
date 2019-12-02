@@ -1,0 +1,174 @@
+各平台编译
+	android    make build CGO_ENABLED=0 GOOS=linux  GOARCH=arm
+	centos     make build CGO_ENABLED=0 GOOS=linux  GOARCH=386   #GOARCH=amd64  make install
+	mac        make build CGO_ENABLED=1 GOOS=darwin GOARCH=amd64
+	windows    make build               GOOS=windows GOARCH=amd64
+	
+
+
+使用
+	帮助
+		ipfs --help
+
+	环境变量
+		默认数据文件夹是~/.ipfs,通过环境变量IPFS_PATH修改
+
+	初始化	
+		ipfs init
+	配置
+		允许跨域访问   ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
+					  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Credentials '["true"]'
+					  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST", "OPTIONS"]'
+		配置api监听    ipfs config --json Addresses.API '"/ip4/0.0.0.0/tcp/5001"'              #默认只能通过127.0.0.1:5001本机访问
+		配置网关监听   ipfs config --json Addresses.Gateway '"/ip4/0.0.0.0/tcp/8080"'          #默认只能通过127.0.0.1:8080本机访问
+	启动
+		ipfs daemon
+	管理界面
+		http://192.168.1.152:5001/webui
+	网关
+		个人 https://localhost:8080/ipfs/$hash
+		官方 https://ipfs.io/ipfs/$hash
+		理想 ipfs://$hash
+
+	操作
+		添加 add 
+			ipfs add    $filename       
+			ipfs add -r $dirname
+		查看
+			本地节点
+				ipfs cat /ipfs/$hash   
+			全网节点
+				https://ipfs.io/ipfs/$hash 
+			绑定ipns 解决文件更新问题
+				绑定根节点     ipfs name publish --key=self $raw_dir_root_name_hash
+				根据跟节点访问 ipfs cat /ipfs/$raw_dir_root_name_hash/$raw_dir_second_level_name/$file_name
+				              ipfs cat /ipns/`ipfs id`/$raw_dir_second_level_name/$file_name
+			dns 使用域名来代替ipns的peer hashID, 解决了需要记忆跟节点hash的问题
+				ipfs cat /ipfs/ipfs.$raw_dir_root_name.org/$raw_dir_name/$file_name   
+		拉取
+			ipfs get /ipfs/$hash   
+
+	缓存
+		文件本地持久化 ipfs pin ls        
+                      ipfs pin ls --type=all $hash  
+                      ipfs pin add $hash      
+                      ipfs pin rm $hash    
+                      ipfs pin rm -r $hash 
+
+
+	查看
+		id            ipfs id       #实际就是hash(rsa.publicKey)
+        配置参数含义   ipfs help init
+
+        其他节点       ipfs swarm peers
+					  ipfs swarm addrs
+					  ipfs swarm connect /ipv4/$config中peer表示法
+
+    修改配置.ipfs/config,再reboot
+    	先修后改
+    		导出原来配置     ipfs config show > ipfs.conf.json
+    		导入修改后的配置 ipfs config replace ipfs.conf.json
+    	直接修改
+    		ipfs config edit
+
+
+协议栈
+	身份				Self Describing format
+	网络层Network   establishing connections between peers                                
+	路由层Routing   locating peers and objects              DHT结构                  
+	交换层Exchange  block transport and replication         BitSwap协议/BitTorrent
+	对象层Object                                            MerkleDAG/IPLD        
+	文件层File                                              Git                   
+	命名层Naming    a Self-certifying PKI namespace (IPNS)  IPNS/SFS自验证文件系统 Self-Certifying File System
+
+
+
+
+
+
+ipfs dag
+	put        
+	get        
+	resolve
+ipfs block 
+	put
+	get      
+	rm   
+	stat 
+ifps object  
+	put 
+	get 
+	data 
+	stat 
+	links 
+	diff  
+	new   
+	patch
+ipfs files
+	write    
+	flush    
+	read     
+	ls       
+	rm       
+	stat     
+	cp
+	mkdir   
+	mv
+
+
+bootstrap 启动节点
+	add
+	rm
+	rm all
+	list
+diag 诊断
+	cmds
+	cmds clear
+	cmds set-time
+	sys
+ipfs bitswap  交换协议
+	ledger
+	reprovide
+	stat
+	wantlist
+
+cid内容识别符
+	base32
+	bases
+	codes
+	format
+	hashes
+config
+	edit
+	profile
+	profile apply
+	replace
+	show
+key
+	gen
+	list
+	rename
+	rm
+log
+	level
+	ls
+	tail
+
+ipfs filestore
+	dups
+	ls
+	verify
+name
+	publish
+	pubsub
+	pubsub cancel
+	pubsub state
+	resolve
+
+p2p
+	close
+	forward
+	listen
+	stream
+	stream close
+	stream ls
