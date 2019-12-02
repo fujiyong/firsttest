@@ -1,0 +1,59 @@
+需要的文件:
+/root/app/svds
+/root/app/svds-init.json
+/root/app/svds.toml
+
+
+
+1、在各台机器上初始化创世纪块
+	rm -rf $HOME/svds-data && mkdir -p $HOME/svds-data && cd /root/app && ./svds --datadir $HOME/svds-data init /root/app/svds-init.json
+	文件svds-init.json不需要修改
+	cat svds-init.json
+	{
+	    "config": {
+	        "chainId": 1688,		
+	        "homesteadBlock": 0,
+	        "eip155Block": 0,
+	        "eip158Block": 0
+	    },
+	    "coinbase" : "0x0000000000000000000000000000000000000000",
+	    "difficulty" : "0x40000",
+	    "extraData" : "",
+	    "gasLimit" : "0xffffffff",
+	    "nonce" : "0x0000000000000042",
+	    "mixhash" : "0x0000000000000000000000000000000000000000000000000000000000000000",
+	    "parentHash" : "0x0000000000000000000000000000000000000000000000000000000000000000",
+	    "timestamp" : "0x00",
+	    "alloc": { }
+	}
+
+2、在各台机器上产生并获取节点enode信息
+	./svds --datadir $HOME/svds-data --nodiscover console 并输入admin.nodeInfo.enode 可以获取enode信息
+	但是需要修改，只有@前面是有效的，其余替换为该机IP和port
+3、在各台机器上编辑svds.toml
+	将下述文件的encode替换为上述结果，每个节点都是一条记录。如下所示，有三个节点的svds	格式如下
+	$cat svds.toml 各enode请替换为对应的字符串
+	[Node.P2P]
+    MaxPeers = 50
+    StaticNodes = [
+    "enode://9b6f45ce65d784618aca3b794e760a358e5206e42b5df9d5a77186812038693bcab7b509946188d87bf1179a9a4829efd778bdb53febd2a916b0ca95f9138d74@192.168.1.106:30303",
+    "enode://0d982c332ad5b32feb2dcfe4482a73f0cf73d8afb7ae90f443175675ae8e010105a551632b033e0a440622b42dc29645421a700f0d6741c0a6c2a0649ba9c6f5@192.168.1.120:30303",
+    "enode://47222200d394f67a95cf0d8f3eb0a059fc93d1094c8929440559ff3e0f5f8b847cac02636e497a912804ad0fad6261ca913ae961cec02b9905e6c637d3aadddd@192.168.1.178:30303",
+    ]
+
+    TrustedNodes = [
+    "enode://9b6f45ce65d784618aca3b794e760a358e5206e42b5df9d5a77186812038693bcab7b509946188d87bf1179a9a4829efd778bdb53febd2a916b0ca95f9138d74@192.168.1.106:30303",
+    "enode://0d982c332ad5b32feb2dcfe4482a73f0cf73d8afb7ae90f443175675ae8e010105a551632b033e0a440622b42dc29645421a700f0d6741c0a6c2a0649ba9c6f5@192.168.1.120:30303",
+    "enode://47222200d394f67a95cf0d8f3eb0a059fc93d1094c8929440559ff3e0f5f8b847cac02636e497a912804ad0fad6261ca913ae961cec02b9905e6c637d3aadddd@192.168.1.178:30303",
+    ]
+4、在各台机器上启动节点
+	nohup ./svds --datadir $HOME/svds-data --config /root/app/svds.toml --rpc --rpcaddr "0.0.0.0" --rpcapi "db,eth,net,web3,personal,admin,miner" --rpccorsdomain "*"  --nodiscover --networkid 1688  >> $HOME/svds-data/debug.log 2>&1 &
+5、在某台机器上创建账户
+	./svds attach --datadir $HOME/svds-data 之后输入
+	personal.newAccount('111111')
+	输入exit可以退出console   
+	注意：括号中的是密码，请务必记住下方的字符串，该子串就是地址0xa74146b61c8452a7f707edf72be6bd81d7ef2111
+	这样就创建了一个用户为0xa74146b61c8452a7f707edf72be6bd81d7ef2111密码为111111的账户
+6、最后一步就是在创建了账户的机器上挖矿了 
+    ./svds attach --datadir $HOME/svds-data
+    miner.start()

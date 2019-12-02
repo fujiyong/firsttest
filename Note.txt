@@ -1,0 +1,413 @@
+WIFI 13622228504
+ftp \192.168.1.182
+git fu_ji_yong fujy6789
+bug fu_ji_yong pass@2019
+
+
+测试机	121.9.227.91	22124	root	pass@2019
+数据库	192.168.1.102	5432	postgres	pass@2018
+ipfs1	192.168.1.106	22	root	13622228504
+ipfs2	192.168.1.178	22	root	13622228504
+ipfs3	192.168.1.120	22	root	13622228504
+以太坊1	120.79.97.248	22	root	Svdsdev2019*$()
+以太坊2	120.78.173.134	22	root	Svdsdev2019*$()
+以太坊3	39.108.104.133	22	root	Svdsdev2019*$()
+
+git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
+
+
+
+alias | grep -E "b\."
+echo $DIFOSS_ENV_BASE/.privacy/__init__.sh
+b.privacy
+
+
+https://www.npmjs.com/package/windows-build-tools  npm安装windows编译工具
+
+linux命令  column -t
+            for i in 0 1 2 3 4 5 6 7 8 9; do iostat | column -t; sleep 1; done
+            for i in {0..9} ; do iostat 1 1 | column -t; sleep 1; done
+            vmstat 1 10 | while read line
+            do
+                echo "$line" | column -t
+            done
+
+            在终端直接执行在a.sh中定义的函数say():  chmod +x a.sh && source a.sh && say
+            last     最后登录信息,每个用户可以多行
+            lastlog  最后各个用户的登录信息,每个登录用户一行
+
+软件 web        hbuilder 
+     数据库客   dbeave  pgadmin
+     cmder     设置分屏
+     markdonw  typora
+     截图       snipaste
+
+     nodejs进程管理  pm2  process manager
+
+     mac      dash参考文档
+
+
+
+docker
+    仓库hub registry
+    镜像
+    容器  镜像的实例
+    
+    制作镜像
+        编辑
+            Dockfile
+                # Use an official Python runtime as a parent image
+                FROM python:2.7-slim
+
+                # Set the working directory to /app
+                WORKDIR /app
+
+                # Copy the current directory contents into the container at /app
+                ADD . /app
+
+                # Install any needed packages specified in requirements.txt
+                RUN pip install --trusted-host pypi.python.org -r requirements.txt
+                #第二个RUN
+                # RUN
+
+                # Make port 80 available to the world outside this container
+                EXPOSE 80
+                # 第二个EXPOSE
+                # EXPOSE 22
+
+                # Define environment variable
+                ENV NAME World
+
+                # Run app.py when the container launches
+                CMD ["python", "app.py"]    
+            requirements.txt
+                Flask
+                Redis
+            app.py
+                from flask import Flask
+                from redis import Redis, RedisError
+                import os
+                import socket
+
+                # Connect to Redis
+                redis = Redis(host="redis", db=0, socket_connect_timeout=2, socket_timeout=2)
+
+                app = Flask(__name__)
+
+                @app.route("/")
+                def hello():
+                    try:
+                        visits = redis.incr("counter")
+                    except RedisError:
+                        visits = "<i>cannot connect to Redis, counter disabled</i>"
+
+                    html = "<h3>Hello {name}!</h3>" \
+                        "<b>Hostname:</b> {hostname}<br/>" \
+                        "<b>Visits:</b> {visits}"
+                    return html.format(name=os.getenv("NAME", "world"), hostname=socket.gethostname(), visits=visits)
+
+                if __name__ == "__main__":
+                    app.run(host='0.0.0.0', port=80)
+
+        构建镜像 docker build -t $image:tag .  //.表示dockfile的路径
+
+    查看镜像 docker images
+    运行镜像 docker run --name $container-name -p 4000:80 -d $image:tag $app $app-args -v ~/nginx/www:/user/share/nginx/html 
+                                        //端口映射 -P内部端口随机映射到主机端口 -p内部端口指定绑定到主机端口 默认TCP，默认127.0.0.1 127.0.0.1:5000:5000/udp
+                                        //-v文件夹映射 docker cp $container-id:/etc/nginx/nginx.conf ~/nginx/conf
+            docker restart $container-name 
+    
+
+    查看容器 docker container ls  
+             docker ps  //port进行端口映射   
+    停止容器 docker container stop $container-id
+             docker kill -s HUP $container-id
+    删除容器 docker rm $container-id
+
+    发布镜像
+        以docker id登录 docker login
+        标记镜像 docker tag image username/repository:image:tag
+        发布镜像 docker push username/repository:image-tag
+
+    依据已有镜像定制新镜像
+            $docker run -t -i $image /bin/bash   //终端登录docker  
+            #apt-get update
+            #exit                                //退出docker终端
+            $docker commit -m "commit msg" -a="author" $container-id $image-tag
+
+    搜索镜像 docker search nginx
+    拉取镜像 docker pull nginx     //默认从docker hub拉取
+
+    拉取并运行
+        docker run -p 4000:80 username/repository:image:tag
+
+    查看容器内部
+        查看端口映射 docker port $container-id 
+        查看运行进程 docker top $container-id  
+                    docker inspect $container-id
+        查看日志     docker log -f $container-id
+
+
+
+
+mist 以太坊节点/钱包
+metamask chrome插件方式的以太坊节点、钱包， 可以连接到本地或实际的
+truffle  以太坊开发框架，内置了只能合约的编译 链接 部署
+remix   智能合约开发环境
+whisper 集成进以太坊的非实时消息系统
+
+ganache 在公链上测试部署dapp或只能合约需要消耗gas， 使用ganache可以创建本地区块链
+
+
+npm install -g truffle  && truffle --version 
+
+
+git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
+
+
+
+npm
+    npm init
+    npm adduser && npm publish
+
+    npm install [-g] $pkg@tag/version
+    npm uninstall $pkg
+    npm update [-g] $pkg
+    npm search $pkg
+
+    npm list -g  //查看安装的全局包的版本
+    npm list $pkg //查看某个包的版本
+
+    npm cache clear 清空本地缓存，用于使用相同的版本号发布
+
+    npm unpublish $pkg@version 取消某版本的发布
+
+    npm install -g cnpm --registry=https://registry.npm.taobao.org //淘宝的npm镜像
+
+    npm run 可以查看package.json里有哪些可以通过npm run start|stop|test|dev|debug等命令
+
+nodejs
+    创建工程 cd projDir && npm init 会产生package.json文件
+    添加依赖库  在package.json中的dependencies中添加 然后npm install 就可
+    启动程序
+        命令行 node --use_strict a.js  //让node为所有的js开启strict模式  这也是vscode launch.json文件中的配置
+        命令行 npm start               //在package.json中配置"scripts": {"start": "node app.js"}
+
+a.js
+    // @ts-check 或者在jsconfig.json中添加{"compilerOptions": {"checkJs": true},"exclude": ["node_modules"]}
+    //npm i @types/第三方库名  //为第三方库安装类型声明文件.d.ts
+
+    数据类型
+        bool    0 NaN null undefined
+        Number  NaN  isNaN(NaN)
+        string  多行时``  +  模板字符串`${x}`                    length  下标引用[0]/substring()      indexOf(str)
+
+        array  [] new Array()  元素类型可以不同, 可以越组访问/赋值 length  下标引用[0]/slice([s[,e])    indexOf(ele)  push(...)/pop unshift(...)/shift() sort() reverse() concat(...,[1,2]) join('-') splice(s,e[,ele...])
+        map       new map([[k1,v1],[k2,v2]]) has(k) get(k) set(k,v) delete(k)
+        set       new set([v1,v2])                         add(v1)  delete(v1)
+
+        Object  访问/赋值/新增o.field  删除delete o.field   判断field in o o.hasOwnProperty('field')
+
+        null
+        undefined
+
+    运算符
+        == ===
+        if()else if(){}else{} for(;;)  while(){}  do{}whle()
+
+        for(var i in arr){} //获取数组的索引i
+        for(var f in o){} //获取所有属性f
+
+    iterable  
+        ES5.1
+            forEach(function(ele, index, x){
+                //arr ele index arr
+                //set ele ele   set
+                //map v   k     m
+            })
+
+        ES6
+            for(var v of arr){}
+            for(var kv of map){kv[0] kv[1]}
+            for(var v of set){}
+
+    解构赋值ES6
+        数组
+            let [x, [y, z]] = ['hello', ['JavaScript', 'ES6']]
+            let [, , z] = ['hello', 'JavaScript', 'ES6']
+        对象
+            var person = {
+                name: '小明',
+                age: 20,
+                gender: 'male',
+                passport: 'G-12345678',
+                school: 'No.4 middle school',
+                address: {
+                    city: 'Beijing',
+                    street: 'No.1 Road',
+                    zipcode: '100001'
+                }
+            };
+            var {name, age, passport, single=true} = person //single有默认值true
+            var {name, address: {city, zip}} = person;//address不是变量，而是为了让city和zip获得嵌套的address对象的属性
+            let {name, passport:id} = person;// 注意: passport不是变量，而是为了让变量id获得passport属性:
+
+    Function
+        不定参数关键字arguments,rest
+            function foo(a, b, ...rest){ //ES6引入了rest，表示其余的参数数组，当少参数时数组为null
+                console.log(arguments.length) 
+            }
+
+        apply/call
+            function.apply(obj, []) //obj为function中this的指向， 第二个参数为function的入参数组
+            function.call(obj,...) //obj为function中this的指向， 第二个参数为function的入参数组的顺序传入
+
+        高阶函数Hight-Order function： 函数的形参可以接受一个参数指针
+            arr.Map(x=>{return x*1})           //对数组对象arr中的每个元素都调用箭头函数并返回新数组
+            arr.reduce((x,y)=>{return x + y})
+            arr.filter(function(ele){return true;}); //返回为true的
+            arr.filger(function(ele, index, self){return self.indexOf(ele) === index;}) //数组去重
+            arr.sort(function(x,y){if(x>y){return 1}else if(x<y){return -1}else{return 0;}}) //默认将ele转化为字符串按ascii排序
+            arr.every(function(x){return x>1;}) //是否都>1
+            arr.find(function(x){return x>1;})  //查询是否有大于1的元素并返回元素
+            arr.findIndex(function(x){return x>1;}) //查询是否有大于1的元素并返回元素索引
+            arr.forEach(console.log)
+    异常
+        try{
+
+        }catch(e){
+            console.log(e)
+            throw new error("my err")
+        }finally{
+
+        }
+
+    闭包
+
+    产生器
+        function* f(){yield x; return}
+        var gen = f(5)  //产生一个generator
+        gen.next()      //返回一个对象{value:x, done:true/false} x就是yield产生的 或 return返回的；  当是return直接返回时是value是undefined
+        for (var x of f(5))
+
+    标准对象
+        Date  new Date()  Date.now()
+        Json  Json.stringify(o,["f1", "f2"], '\t')  JSON.stringify(o, (k,v){}, '\t')  JSON.stringify(o)//优先调用o的toJson()成员函数
+              JSON.Parse(o,(k,v){return v})
+        RegExp
+
+    面向对象
+        var xiaoming = {}  xiaoming.__proto__ = Student  //xiaoming继承了Student
+
+        var xiaoming = Object.create(Student)//根据Student原型创建对象 xiaoming有Student所有属性但为null  xiaoming.__proto__ === Student
+
+        function Student(props){
+            this.name = props.name
+            this.grade = props.grade
+            this.hello = function(){}  //每个对象都有一个hello函数
+        }
+        Stdent.prototype.hello = function(){} //在prototype中定义，则所有对象共享一个hello函数
+        var xiaoming = new Student() //使用函数必须new默认返回this，否则返回undefined
+
+        class ES6 需要Babel工具从class转换为prototype
+            Class Base{
+                constructor(name){
+                    this.name = name
+                }
+
+                hello(){   //没有function
+                    console.log(this.name)
+                }
+
+                this.byebye = function(){}
+            }
+            class Derived extends Base{
+                constructor(name, age){
+                    super(name)
+                    this.grade = grade
+                }
+
+                myGrade(){}
+            }
+    
+
+
+
+
+
+
+
+
+    作用域
+        全局
+            //在 HTML 中, 全局作用域是针对 window 对象
+            //在 JavaScript 中, 全局作用域是针对 JavaScript 环境
+            var x = 10    //使用 var 关键字声明的全局作用域变量属于 window 对象, 可以使用 window.carName 访问变量
+            let x1 = 20   //使用 let 关键字声明的全局作用域变量不属于 window 对象, 不能使用 window.carName 访问变量
+            {
+                var x2 = 100 //不在函数体内，即使在{}内var修饰的仍然是全局变量
+            }
+            function foo(){
+                y = 20       //函数体内没有var的一定是全局变量
+            }
+        块局
+            {
+                let x = 10
+            }
+            funtion foo(){
+                var z = 1   //函数体内有var修饰的是局部变量
+            }
+
+    变量重置
+
+
+    变量提升
+        var可以  let不行
+
+
+
+    
+
+
+新建工程
+    新建目录，切换到目录然后npm init, 产生package.json文件
+引用
+    引用具体的文件b.js中的export
+        //export module.exports = {f1, f2}
+
+        // var b = require("./b/b.js")
+        // b.f1()
+        // b.f2()
+
+        module.exports = {
+            k : require("./b.js")
+        }
+
+        var x = require("./b")
+        x.k.f1()
+        x.k.f2()
+引用第三方库
+    安装npm install -g date-fmt
+调试
+    点击最左边的调试，然后右边的setting，在编辑器上方弹出的地方选择node.js，然后产生launch.json文件，在里面的"program": "${workspaceFolder}\\a.js"，
+    在具体的文件里行号左边点击添加断点
+
+
+
+
+
+全屏  F11
+sidebar ctrl+b
+move up/down  alt+up/down
+
+copy up/down  alt+shit+up/down
+format        alt+shift+F
+
+
+
+
+move line up/down       alt+shift+up/down
+move statement up/down  ctrl+shift+up/down
+
+
+浏览器  ctrl+shift+B
