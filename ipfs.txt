@@ -233,26 +233,33 @@ ifps object  操作dag的plumbing command 底层命令
 ipfs files
 	write    //echo "hello world" | ipfs files write --create -p /myfs/a
 	flush    //ipfs files flush  /myfs/a
-	read     //ipfs files read /myfs/a
-	ls       //ipfs files ls  /myfs
-	rm       //ipfs files rm   /myfs/a
-	stat     //ipfs files stat /myfs/a
+	read     //ipfs files read   /myfs/a
+	ls       //ipfs files ls     /myfs
+	rm       //ipfs files rm     /myfs/a
+	stat     //ipfs files stat   /myfs/a
 
 	cp
 	mkdir   //ipfs files mkdir -p /test/does/not/exist/yet
 	mv
 
 
-bootstrap 启动节点
-	add
-	rm
+bootstrap 修改配种文件中的启动节点
+	add /ip4/$ip4/tcp/4001/ipfs/`ipfs id`    #multiAddr
+	rm  /ip4/$ip4/tcp/4001/ipfs/`ipfs id`
 	rm all
 	list
+swarm	在ipfs运行时执行命令
+	peers                                       
+	connect  /ip4/$ip4/tcp/4001/ipfs/`ipfs id`  //直连
 dht  分布式hash表
 	findpeer   `ipfs id` 
+	query	`ipfs id`
+
 	findprovs  $hash   //返回哪些peer可以提供查询这个hash 即hash内容的分部部署情况
-	put
-	query
+	provide $hash      //向network宣称自己有hash,只是有hash但不能提供查询hash所指的content的场合  比如自身节点有问题,不能提供查询服务
+
+	put /ipns/${peer-id}    "xxxx"
+	get  $hash
 diag 诊断
 	cmds
 	cmds clear
