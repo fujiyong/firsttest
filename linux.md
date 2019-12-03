@@ -12,6 +12,10 @@
 whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
 man yum.conf   #查看配置文件的说明
 
+ubuntu debian
+centos fedora
+mac
+
 ```
 
 
@@ -47,6 +51,9 @@ man set
 man bash
 getconf LONG_BIT                   # 查看系统是 32 位还是 64 位
 bind -P                            # 列出所有 bash 的快捷键
+
+stty -a                            #查看发送信号的快捷键
+kill -l                            #查看有哪些信号
 
 eval $script                       # 对 script 变量中的字符串求值（执行）
 ```
@@ -462,6 +469,53 @@ lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2 # 显示当前正在使用网
 
 ##  top
 
+##  free
+
+```
+               1             2          3          4          5          6
+1              total       used       free     shared    buffers     cached
+2 Mem:      24677460   23276064    1401396          0     870540   12084008
+3 -/+ buffers/cache:   10321516   14355944
+4 Swap:     25151484     224188   24927296
+
+#FO is short of freeOutput
+FO[2][1] = 24677460	FO[3][2] = 10321516
+total = used + free   #FO[2][1] = FO[2][2] + FO[2][3]
+used – buffers – cached #FO[3][2] = FO[2][2] - FO[2][5] - FO[2][6]	
+free + buffers + cached #FO[3][3] = FO[2][3] + FO[2][5] + FO[2][6]
+//执行sync命令
+A buffer is something that has yet to be "written" to disk.  
+A cache is something that has been "read" from the disk and stored for later use.
+//执行 echo N>/proc/sys/vm/drop_caches
+也就是说buffer是用于存放要输出到disk（块设备）的数据的，而cache是存放从disk上读出的数据。这二者是为了提高IO性能的，并由OS管理。
+对于FO[3][2]，即-buffers/cache，表示一个应用程序认为系统被用掉多少内存；
+对于FO[3][3]，即+buffers/cache，表示一个应用程序认为系统还有多少内存；
+因为被系统cache和buffer占用的内存可以被快速回收，所以通常FO[3][3]比FO[2][3]会大很多
+
+https://www.kernel.org/doc/Documentation/sysctl/vm.txt
+
+This is a non-destructive operation and will not free any dirty objects.
+To increase the number of objects freed by this operation, the user may run
+`sync' prior to writing to /proc/sys/vm/drop_caches.  This will minimize the
+number of dirty objects on the system and create more candidates to be
+dropped. 
+To free pagecache:
+	echo 1 > /proc/sys/vm/drop_caches
+To free reclaimable slab objects (includes dentries and inodes):
+	echo 2 > /proc/sys/vm/drop_caches
+To free slab objects and pagecache:
+	echo 3 > /proc/sys/vm/drop_caches
+优先执行sync, 然后执行 echo N > /proc/sys/vm/drop_caches
+
+
+```
+
+##  swap
+
+```
+swapoff -a  && swapon -a
+```
+
 ##  iotop
 
 ##   vmstat
@@ -510,10 +564,30 @@ iostat [delay [count]]
 netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
 ```
 
+##  ss
+
+CentOS7中netstat的升级版   处理大量连接时更高效
+
+##  iptraf
+
+CentOS7 为iptraf-ng
+
+iptraf -g //每个网卡从启动以来的流量
+
+iptraf -d eth0 //eth0 总体流量、流入量、流出量、以及按协议分类的流量统计 
+
+iptraf -s eth0 //各端口统计
+
+iptraf -i eth0 //某端口统计
+
 #  ssh
 
 ```
-ssh-copy-id user@host     # 拷贝你的 ssh key 到远程主机，避免重复输入密码
+ssh -v      user@host
+ssh         user@host "$cmd"    # 远程执行命令
+sshfs -o pi@host:/home/pi ~/pi 	# 将远程目录/home/pi挂载到当前主机目录~/pi
+
+ssh-copy-id user@host        	# 拷贝你的 ssh key 到远程主机，避免重复输入密码
 
 # 通过主机 A 直接 ssh 到主机 B
 ssh -t hostA ssh hostB
@@ -582,17 +656,33 @@ systemctl status $service
  
  # 只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
  yum install --downloadonly dhcp
-rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
+ rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
  yum install yum-utils
  repoquery -q -l dhcp
  
- yum deplsit openssh-server
+ yum deplist openssh-server
  yum info openssh-server
  yum provides openssh-server   // yum whatprovidesd "*bin/nc"
-
 ```
 
+#  Tool
 
+## ldd
+
+##  nm -C 
+
+##  dd
+
+```
+dd bs=4M if=/path/to/image of=/dev/sdx
+pkill –USR1 –n –x dd  #查看dd进度
+```
+
+##  tcpdump
+
+##  pstack
+
+##  strace/ltrace
 
 #  za
 
