@@ -25,8 +25,22 @@ mac
 ##  命令
 
 ```
-source a.sh   #source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
+主要就是为了设置PS1这个环境变量,也就是shell输入命令的前缀
+/etc/profile                                 #system-wide .profile file for the Bourne shell
+(~/.bash_profile|~/.bash_login|~/.profile)   #executed by Bourne-compatible login shells.
+~/.bashrc                                    #executed by bash(1) for non-login shells
+/etc/bashrc                          # System-wide .bashrc file for interactive bash(1) shells.
+~/.bash_logout
+
 env
+
+cat /etc/shells   #查看系统支持的shell
+echo $SHELL       #查看使用哪种shell  env | grep SHELL
+chsh -s /bin/bash #更改默认shell
+
+man bash          #查看命令行的快捷方式
+
+source a.sh   #source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
 set
 unset
     unset
@@ -583,15 +597,38 @@ iptraf -i eth0 //某端口统计
 #  ssh
 
 ```
-ssh -v      user@host
+ssh -v      user@host           #打开debug模式
+
 ssh         user@host "$cmd"    # 远程执行命令
+ssh host -l user “`cat cmd.txt`”  #ssh host -l user $(<cmd.txt)
+ssh user@host cat /path/to/remotefile | diff /path/to/localfile –
+
+挂载文件系统
 sshfs -o pi@host:/home/pi ~/pi 	# 将远程目录/home/pi挂载到当前主机目录~/pi
 
-ssh-copy-id user@host        	# 拷贝你的 ssh key 到远程主机，避免重复输入密码
+#ls -l ~/.ssh
+authorized_keys    #chmod 600
+id_rsa             #chmod 600
+id_rsa.pub         #chmod 644
+known_hosts        #chmod 644
 
 # 通过主机 A 直接 ssh 到主机 B
 ssh -t hostA ssh hostB
 ```
+
+##  无密码登录三部曲
+
+- ssh-keygen                                  #id_rsa.pub的格式为type pubkey user@host
+
+- ssh-copy-id -i .ssh/id_rsa.pub user@host
+
+  等价于 cat ~/.ssh/id_rsa.pub | ssh user@machine “mkdir ~/.ssh; cat >> ~/.ssh/authorized_keys”
+
+- ssh user@host "chmod ~/.ssh/authorized_keys 600"
+
+  一步到位  ssh-keygen; ssh-copy-id user@host; ssh user@host
+
+  
 
 ##  代理
 
@@ -609,7 +646,7 @@ ssh -CqTnN -D localhost:1080  user@202.115.8.1
 #  防火墙
 
 ```
-firewall-cmd --zone=public --add-port=80/tcp --permanent
+firewall-cmd --zone=public --add-port=4001/tcp --permanent
 firewall-cmd --zone=public --remove-port=80/tcp --permanent
 firewall-cmd --reload
 firewall-cmd --list-all
@@ -627,6 +664,20 @@ systemctl status firewalld
 systemctl enable firewalld
 systemctl start firewalld
 systemctl status firewalld
+
+
+
+ufw disable/enabel          #设置开机是否启动
+ufw default allow/deny      #设置默认策略, ufw默认不允许外部访问,但能访问外部
+
+ufw reload
+ufw status            	    #inactive
+
+ufw allow $port
+ufw delete allow $port
+
+ufw allow $service           #smtp  来自/etc/services
+ufw delete allow $servie     #等价于ufw deny $service
 ```
 
 #  services
@@ -671,7 +722,7 @@ systemctl status $service
 
 ##  nm -C 
 
-##  dd
+##  fdisk-mount-dd-unmount
 
 ```
 dd bs=4M if=/path/to/image of=/dev/sdx
@@ -683,6 +734,13 @@ pkill –USR1 –n –x dd  #查看dd进度
 ##  pstack
 
 ##  strace/ltrace
+
+##  timedatectl
+
+```
+timedatectl status
+timedatectl set-ntp true
+```
 
 #  za
 

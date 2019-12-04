@@ -29,6 +29,13 @@ Android
 
 	初始化	
 		ipfs init
+			#ls -1 $IPFS_PATH
+			blocks            #cid目录
+			config            #配置文件
+			datastore         #levelDb数据文件目录
+			datastore_spec    #levelDb数据文件目录的缓存
+			keystore          #密钥对文件 执行ipfs key gen时产生
+			version
 	配置
 		允许跨域访问   ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
 					  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Credentials '["true"]'
@@ -466,3 +473,85 @@ service network restart
 /etc/rc.d/rc.local
 
 
+
+
+################ Master ###################
+local pubKeyFile="~/.ssh/id_rsa.pub"
+if [ -f $pubKeyFile ]; then
+	ssh-keygen 
+fi
+
+MasterHostIP=""
+MasterPeerID=""
+
+############## Slave #######################
+local ips=()
+
+#确保免密登录
+for ip in $ips; do
+	ssh-copy-id -i $pubKeyFile  root@$ip
+done
+
+
+
+#删除ipfs垃圾数据
+for ip in $ips; do
+	ssh root@ip "rm -rf ~/{ipfs,ipfs-data}"
+	scp -r ~/ipfs       root@$ip
+	scp -r ~/ipfs-data  root@$ip
+done
+
+
+#环境变量
+for ip in $ips; do
+
+	ssh root@$ip "source ~/.bash_profile"
+
+	local r=`ssh root@$ip "which ipfs"`
+	if [ $r == "" ]; then
+		setPath='export PATH=$PATH:~/ipfs'
+		ssh root@ip "echo $setPath >> ~/.bash_profile;"
+	fi
+
+	r=`ssh root@$ip "env | grep \"IPPS_PATH\""`
+	if [ $r == "" ]; then
+		setPath='export IPPS_PATH=~/ipfs-data'
+		ssh root@ip "echo $IPPS_PATH >> ~/.bash_profile;"
+	fi
+
+done
+
+#防火墙
+
+
+#初始化
+for ip in $ips; do
+	ssh root@$ip "ipfs init"
+	ssh root@$ip "ipfs bootstrap rm --all"
+	ssh root@$ip "ipfs bootstrap add /ip4/${MasterHostIP}/tcp/4001/ipfs/${MasterPeerID}"
+done
+
+
+#数据
+dirHash=`ipfs add -r ~/ipfstestdata | tail -n 1 | cut -d' ' -f 2`
+[ -z $dirHash ] && return
+ipfs name publish $dirHash
+
+
+
+
+#运行
+for ip in $ips; do
+	ssh root@$ip "ipfs daemon 2>&1 1>>~/ipfs.log &
+done
+
+
+#测试
+for ip in $ips; do
+	r=`ssh root@$ip "ipfs cat /ipns/${MasterPeerID}/a/a.txt"`
+	if [ $r == "aaa" ]; then
+		echo "$ip OK"
+	else
+		echo "$ip Fail and return $r"
+	fi
+done

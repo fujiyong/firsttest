@@ -1,5 +1,5 @@
 WIFI 13622228504
-ftp \192.168.1.182
+ftp \\192.168.1.182     user:user
 git fu_ji_yong fujy6789
 bug fu_ji_yong pass@2019
 
@@ -12,6 +12,7 @@ ipfs3	192.168.1.120	22	root	13622228504
 以太坊1	120.79.97.248	22	root	Svdsdev2019*$()
 以太坊2	120.78.173.134	22	root	Svdsdev2019*$()
 以太坊3	39.108.104.133	22	root	Svdsdev2019*$()
+测试机  192.168.1.128  root/orangepi  orangepi  
 
 git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
 
