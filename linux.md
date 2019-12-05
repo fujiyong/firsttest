@@ -250,17 +250,16 @@ until condition; do
 statements
 done
 
-case expression in 
+#菜单选择
+select name [in list]; do 
+	case $name in 
     pattern1 )
     	statements ;;
     pattern2 )
     	statements ;;
     * )
     	otherwise ;;
-esac
-
-select name [in list]; do
-	statements that can use $name
+	esac
 done
 ```
 
@@ -646,7 +645,7 @@ ssh -CqTnN -D localhost:1080  user@202.115.8.1
 #  防火墙
 
 ```
-firewall-cmd --zone=public --add-port=4001/tcp --permanent
+firewall-cmd --zone=public --add-port=8080/tcp --permanent
 firewall-cmd --zone=public --remove-port=80/tcp --permanent
 firewall-cmd --reload
 firewall-cmd --list-all
@@ -695,7 +694,116 @@ systemctl disable $service
 systemctl start $service
 systemctl stop $service
 systemctl status $service
+
+运行级别0：shutdown.target  		系统停机状态，系统默认运行级别不能设为0，否则不能正常启动
+运行级别1：rescue.target    		单用户工作状态，root权限，用于系统维护，禁止远程登陆
+运行级别2：multi-user.target		多用户状态(没有联网NFS)
+运行级别3：full multi-user.target		完全的多用户状态(有联网NFS)，登陆后进入控制台命令行模式
+运行级别4：multi-user.target		系统未使用，保留
+运行级别5：graphical.target 		X11控制台，登陆后进入图形GUI模式
+运行级别6：reboot.target    		系统正常关闭并重启，默认运行级别不能设为6，否则不能正常启动
+查看运行级别 who -r 或 runlevel
+切换运行级别 init N   //init 0关机   init 6重启
+
+
+
+SysVInit
+运行级别0 - /etc/rc.d/rc0.d/
+运行级别1 - /etc/rc.d/rc1.d/
+运行级别2 - /etc/rc.d/rc2.d/
+运行级别3 - /etc/rc.d/rc3.d/
+运行级别4 - /etc/rc.d/rc4.d/
+运行级别5 - /etc/rc.d/rc5.d/
+运行级别6 - /etc/rc.d/rc6.d/
+系统的默认运行级别在 SysVinit System 的 /etc/inittab 文件中指定。
+
+开机自动执行/etc/rc.local
+用户登录自动执行/etc/profile,然后在/etc/profile中遍历顺序执行/etc/profile.d中的文件
+/etc/init       //配置文件.conf
+/etc/init.d     //bash文件 start stop restart status
+
+
+手动添加开机启动
+    /etc/rc[0-6].d  //快捷方式 ln -s /etc/init.d/$servived /etc/rc.d/rc3.d/S100$service
+                   //多个运行级别,需要在多个rc[0-6]建立链接
+                    //	以S100为例, 
+                    //		S表示开机启动; 可以替换为K表示开机关闭
+                    //		100表示启动顺序
+命令chkconfig添加开机启动ubuntu为sysv-rc-conf
+    chkconfig --list        #列出所有的系统服务在各运行级别是否运行情况
+    chkconfig --list httpd  #列出系统服务httpd在各运行级别是否运行情况
+    chkconfig --add httpd
+    chkconfig --del httpd
+    chkconfig --level35 http on
+    chkconfig --level35 http off
+    chkconfig httpd on
+    chkconfig httpd off
+redhat tui添加ntsysv
+	默认情况下，当前运行级别为多少，在ntsysv中设置的启动服务的级别便是多少
+    比如，我当前的运行级别是3,那么我在伪图形界面中选择启动服务后，它的运行级别也会是3
+    如果想自定义运行级别可使用ntsysv --level方式
+
+
+临时启动
+基础方式/etc/init.d/$service start
+快捷方式service $service start         //service就是一脚本sh文件
+
+
+systemd系统
+runlevel1.target – /etc/systemd/system/rescue.target
+runlevel2.target – /etc/systemd/system/multi-user.target.wants
+runlevel3.target – /etc/systemd/system/multi-user.target.wants
+runlevel4.target – /etc/systemd/system/multi-user.target.wants
+runlevel5.target – /etc/systemd/system/graphical.target.wants
+系统的默认运行级别在 systemd System 的 /etc/systemd/system/default.target 文件中指定
+systemctl get-default
+systemctl set-default TARGET.target
+
+
+systemctl enable
+systemctl disable
+systemctl is-enable
+systemctl mask	   #注销
+systemctl unmask   #取消注销
+systemctl static   #不可以自己启动,只能被其他enable的unit唤醒
+
+systemctl start
+systemctl stop
+systemctl restart
+systemctl reload
+systemctl status    #active inactive active(exited)只执行一次就退出 active(waiting)等待比如打印
+systemctl is-active
+
+systemctl kill
+systemctl show     #列出配置
+
+systemctl [cmd] [--type=TYPE] [--all]
+cmd
+	list-units       #列出已启动的unit 如果添加--all则未启动的也会列出
+	list-unit-files：#根据 /lib/systemd/system/ 目录内的文件列出所有的 unit
+type=TYPE：           #可以过滤某个类型的 unit
+	service 
+	mount
+    target
+#不带任何参数执行 systemctl 命令会列出所有已启动的 unit
+
+systemctl list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁在使用这个 unit
 ```
+
+|                | SysVInit                              | systemd                            |
+| -------------- | ------------------------------------- | ---------------------------------- |
+| pid==1的进程名 | init                                  | systemd                            |
+| 命令集         | 编写/etc/init.d脚本 chkconfig service | systemctl                          |
+| 运行默认级别   | 在/etc/inittab 文件中指定             | /etc/systemd/system/default.target |
+|                |                                       |                                    |
+|                |                                       |                                    |
+|                |                                       |                                    |
+|                |                                       |                                    |
+|                |                                       |                                    |
+|                |                                       |                                    |
+|                |                                       |                                    |
+
+
 
 # yum
 

@@ -85,7 +85,7 @@ Android
 				              ipfs cat /ipns/`ipfs id`/$raw_dir_second_level_name/$file_name
 				# publish之后就可以查看根上传的根目录的hash与ipfs id的对应关系
 				ipfs name resolve `ipfs id`  #返回根目录的hash值对应的哪个publish操作时的hash值  ipns->ipfs之间的映射
-			dns 使用域名来代替ipns的peer hashID, 解决了需要记忆跟节点hash的问题
+			dns link 使用域名来代替ipns的peer hashID, 解决了需要记忆跟节点hash的问题
 				ipfs cat /ipfs/ipfs.$raw_dir_root_name.org/$raw_dir_name/$file_name   //使用域名系统dns,保留原来的目录结构 
 			                                                                      	  //dns系统需要添加一条记录txt记录
 			                                                                          //   记录类型 txt
