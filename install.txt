@@ -1,3 +1,8 @@
+
+git pull origin master 
+git log -p -1
+make geth  或 make geth
+
 需要的文件,各文件可以从root@192.168.1.120:22 密码为13622228504
 geth
 /root/geth-init.json
@@ -7,6 +12,7 @@ geth
 
 1、在各台机器上初始化创世纪块
 	rm -rf $HOME/geth-data && mkdir -p $HOME/geth-data && ./geth --datadir $HOME/geth-data init /root/geth-init.json console
+	rm -rf $HOME/geth-data && mkdir -p $HOME/geth-data && $GETH_BIN_ROOT/geth --datadir $HOME/geth-data init /root/geth-init.json console
 	文件geth-init.json不需要修改
 	cat geth-init.json 
 	{
@@ -29,6 +35,7 @@ geth
 
 2、在各台机器上产生并获取节点enode信息
 	./geth --datadir $HOME/geth-data --nodiscover console 并输入admin.nodeInfo.enode 可以获取enode信息
+	$GETH_BIN_ROOT/geth --datadir $HOME/geth-data --nodiscover console 并输入admin.nodeInfo.enode 可以获取enode信息
 	但是需要修改，只有@前面是有效的，其余替换为该机IP和port
 3、在各台机器上编辑gethConfig.svds.toml
 	将下述文件的encode替换为上述结果，每个节点都是一条记录。如下所示，有三个节点的geth
@@ -50,6 +57,7 @@ geth
 4、在各台机器上启动节点
 	nohup ./geth --datadir $HOME/geth-data --config /root/gethConfig.svds.toml --rpc --rpcaddr "0.0.0.0" --rpcapi "db,eth,net,web3,personal,admin,miner" --rpccorsdomain "*"  --nodiscover --networkid 1688  --allow-insecure-unlock >> $HOME/geth-data/debug.log 2>&1 &
 
+    nohup ./geth --datadir $HOME/geth-data --rpc --rpcaddr "0.0.0.0" --rpcapi "db,eth,net,web3,personal,admin,miner" --rpccorsdomain "*"  --nodiscover --networkid 1688  --allow-insecure-unlock >> $HOME/geth-data/debug.log 2>&1 &
 	nohup ./geth --datadir $HOME/geth-data --config /root/gethConfig.svds.toml --ws --wsaddr "0.0.0.0" --wsport="8545" --wsapi "db,eth,net,web3,personal,admin,miner" --wsorigins="*" --rpccorsdomain "*"  --nodiscover --networkid 1688  --allow-insecure-unlock >> $HOME/geth-data/debug.log 2>&1 &
 
 

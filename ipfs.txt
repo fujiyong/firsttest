@@ -22,7 +22,7 @@ Android
 	帮助
 		ipfs --help
 		ipfs commands
-		ipfs $cmd help
+		ipfs $cmd --help
 
 	环境变量
 		默认数据文件夹是~/.ipfs,通过环境变量IPFS_PATH修改
@@ -56,8 +56,8 @@ Android
 			ipfs add    $filename       #返回的是用私钥签名的hash值只是文件内容的hash值,而没有文件名的信息  其实这里的hash用key更准确 key使用SFS的multi-format中的multi-hash表示
 			                            # key = 1个字节的hash类型 + 1 个字节的hash值长度 + digest(hash(content),private_key) 是hash(content)的摘要,不是hash  
 										#  访问内容的时候使用hash($digest) =? hash(content)这样的步骤进行验证
-			ipfs add -r $dirname
-			ipfs add -r .
+			ipfs add -rQ $dirname       #安静模式Q
+			ipfs add -rQ .
 
 			Wrapped形式   //总结 ls操作对象只能是目录  cat的对象只能是文件
 				ipfs add -w $filename              #--wrap-with-directory 返回2个hash值 第一个是文件内容的hash值 第二个是文件名和文件所处的路径信息的hash值
@@ -80,7 +80,11 @@ Android
 			全网节点
 				https://ipfs.io/ipfs/$hash #若有内容,则上传至全网
 			绑定ipns 解决文件更新问题, add a.txt && publish hash(a.txt) 以后a.txt内容变更也可以使用以前的hash(a.txt)
-				绑定根节点     ipfs name publish --key=self $raw_dir_root_name_hash #绑定跟节点,以后访问都可以根据跟节点的相对路径访问 默认使用selfKey  #如果网站重新部署,需要重新publish
+				绑定根节点     ipfs name publish --lifetime 999999h --ttl 300s --key=self /ipfs/$raw_dir_root_name_hash 
+							  #绑定跟节点,以后访问都可以根据跟节点的相对路径访问 默认使用selfKey  
+							  #如果网站重新部署,需要重新publish
+							  #lifetime 就是可以用ifns替代ipfs的访问时长, 默认是24h
+							  #ttl 就是 可以用ifns替代ipfs的访问的 在缓存中的时长, 如果超过这个时间就不能从缓存中访问,只能再请求一次实体
 				根据跟节点访问 ipfs cat /ipfs/$raw_dir_root_name_hash/$raw_dir_second_level_name/$file_name
 				              ipfs cat /ipns/`ipfs id`/$raw_dir_second_level_name/$file_name
 				# publish之后就可以查看根上传的根目录的hash与ipfs id的对应关系
@@ -103,11 +107,12 @@ Android
 		为防止一些需要的文件被剔除,需要使用pin命令固定在cache
 		通过add添加的文件默认就是pin过的
 		文件本地持久化 ipfs pin ls        #查看哪些文件是在本地的,没有从远程服务器下载下载.pin将长期保留在本地,而不会被垃圾回收
-                      ipfs pin ls --type=all $hash  #查看$hash对应的文件时候被pin
-                      ipfs pin add $hash      #一般添加其他ipfs节点的根目录hash值, 这样就将remote host的文件系统同步到本地 以便加速访问
-                      ipfs pin rm $hash    #文件的hash  删除文件的pin状态
-                      ipfs pin rm -r $hash #目录的hash  删除目录的pin状态
+                      ipfs pin ls [-t | --type=all/direct/indirect/recursive] $hash  #查看$hash对应的文件时候被pin
 
+                      ipfs pin add [-r | --recursive=true] $hash #一般添加其他ipfs节点的根目录hash值, 这样就将remote host的文件系统同步到本地 以便加速访问
+
+                      ipfs pin rm -r false   $hash    #文件的hash  删除文件的pin状态
+                      ipfs pin rm [-r true]  $hash    #目录的hash  删除目录的pin状态  recursive默认是true
 
 	查看
 		id            ipfs id       #实际就是hash(rsa.publicKey)
@@ -130,7 +135,9 @@ Android
     	ipfs add a.txt 
     	ipfs name publish --key=mykey $hash
 
-
+终极删除
+	ipfs pin ls -t recursive | cut -d ' ' -f1 | xargs -n1 ipfs pin rm
+	ipfs repo gc
 
 编码
 	$cat tos.go
@@ -355,116 +362,37 @@ user:password@host:port
 
 nmtui  pe
 ip/mask_len     10.0.0.10/8 已知IP是32位,8位掩码即255.0.0.0
-Gateway
-DNS
-Routing
 
-IP 
-	cat /etc/sysconfig/network-scripts/ifcfg-eth0
-		NAME=eth0                                               ##指定网络链接的名字为eth0，个人习惯，开心就好
-		DEVICE=eth0                                             ##指定文件管理的网卡名称
-		ONBOOT=yes                                              ##是否开机启动
+arp -n | sort -t . -k1,1n -k2,2n -k3,3n -k4,4n  #查询局域网内所有主机并按IP排序
 
-		####DHCP网络配置####
-		BOOTPROTO=dhcp                                          ##dhcp动态获取，none和static都表示静态网络
 		
-		####静态网络地址配置####
-		BOOTPROTO=static                                        ##dhcp动态获取，none和static都表示静态网络
-		IPADDR=10.0.0.10                                        ##设定ip为10.0.0.10
-		NETMASK=255.0.0.0|PREFIX=8                              ##子网掩码为255.0.0.0
-		
-		GATEWAY=10.0.0.1                                        ##网关地址,如果需要访问外网需要设置
-		DNS=***.***.***.***                                     ##DNS地址，如需域名解析需要设置
-		PEERDNS=yes|no                                          ##是否修改/etc/resolv.conf,no表示不修改
-		####IPADDR、NETMASK、PREFIX、GATEWAY、DNS后面加数字,可以同时设置多组IP地址
-		####当然还有更多的参数可以配置,如果需要可以查看帮助文档/usr/share/doc/initscripts-*/sysconfig.txt
 
 
-	命令
-		ifconfig 
-			查看
-				查看active 和 loop
-				-a      所有接口,包括非活动的
-				eth0    特定接口
 
-			动态获取IP
-				ifconfig eth0 --dynamic    
+网络
+	DHCP  dynamic host configuration protocol
+		安装 yum install dhcpd
+		配置
 
-			临时修改,重启机器重新读取配置文件
-				ifconfig eth0 192.168.1.222   netmask 255.255.255.0
-				ifconfig eth0:1 192.168.1.222 netmask 255.0.0.0
-				ifconfig eth0 hw ether MAC地址                            #修改mac地址  先ifdown   eth0; 再修改 最后ifup     eth0;
-
-			启动/停止
-				ifconfig eth0 up
-				ifconfig eth0 down
-				ifdown   eth0;
-				ifup     eth0;
-
-		dhclient 可以从dhcp服务器申请新的网络配置(ip-gateway-dns)到当前主机
-
-		nmcli device show eth0
-		nmcli device status eth0
-
-Gateway 接收发送方请求
-
-路由  将发送方的IP地址进行转换
-	域名解析DNS
-		本地
-			cat /etc/hosts   类似于windows的host文件
-				127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 ipfs1
-				::1         localhost localhost.localdomain localhost6 localhost6.localdomain6 ipfs1
-
-		网络  
-			格式 ServerName	IP   
-			最多可以设置3行，前面的生效
-			万能DNS 114.114.114.114
-			cat /etc/resolv.conf
-				# Generated by NetworkManager
-				nameserver 202.96.128.86
-				nameserver 202.96.134.33
-
-
-	优先级
-		先查询本地host 本地dns 根域dns服务器 .com服务器 baidu.com服务器
-
-	命令
-		host  www.google.com
-		nslookup    直接模式一般用于查询域名对应的IP   交互模式用于对DNS服务器进行测试
-			nslookup www.sohu.com.cn
-				Server:		202.96.128.86                          #本地配置的dns的IP地址
-				Address:	202.96.128.86#53
-
-				Non-authoritative answer:
-				www.sohu.com.cn	canonical name = gd.a.sohu.com.
-				gd.a.sohu.com	canonical name = f7gz.a.sohu.com.
-				Name:	f7gz.a.sohu.com
-				Address: 14.18.240.77
-		dig
-
-		route    
-			echo 1 > /proc/sys/netipv4/ip_forward  #1打开路由功能 0为关闭路由功能
-			查看主机路由信息route -n #类似于netstat -tlpn中的n将主机名转化为IP default转化为0.0.0.0
-				Kernel IP routing table
-				Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
-				default         gateway         0.0.0.0         UG    100    0        0 eth0
-				192.168.1.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0
-			修改
-				route del default gw   #route del –net 0.0.0.0 netmask 0.0.0.0 gw 192.168.0.1
-				route add default gw   #route add –net 0.0.0.0 netmask 0.0.0.0 gw 192.168.0.1
-		traceroute 一般用于查看到目录所经过的路径
-			traceroute www.baidu.com
-
-主机名
-	cat /etc/sysconfig/network
-		NETWORKING=yes      #网络是否可用。
-	　　HOSTNAME=xxxx       #xxxx为新设置的主机名。
-
-	命令
-		hostname
-			查看
-			修改 
-				hostname yy
+	DNS    #https://help.aliyun.com/knowledge_detail/29725.html
+		A		实现域名指向IP   
+			www   @          记录值$IP
+		AAAA  IPV6
+							 记录值$IP6
+		CNAME   
+			当需要将域名指向另一个域名,再由另一个域名提供IP地址  场景:CDN 企业邮箱 全局流量管理
+				www @        记录值 另一个域名
+		MX   用于解析电子邮件地址中@后面的内容进行解析
+		TXT  对域名进行标识或说明   多用于反垃圾邮件SPF记录
+							记录值 "v=spf1 a mx ~all"
+		NS   当需要将子域名的解析交给其他DNS服务商解析
+							记录值 被授权的其他DNS服务器域名
+		SRV   用来标识某台服务器使用了某个服务, 常用于微软系统的目录管理
+							记录值的格式  优先级 权重 端口 目标地址 0 5 5060 sipserver.example.com
+		CAA
+		URL显性/隐形转发
+			隐性  浏览器地址栏输入 http://a.com   打开的是http://b.com 浏览器地址栏显示http://a.com
+			显性  浏览器地址栏输入 http://a.com   打开的是http://b.com 浏览器地址栏显示http://b.com   类似于http301 302
 
 
 
