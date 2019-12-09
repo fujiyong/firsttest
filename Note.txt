@@ -47,7 +47,8 @@ linux命令  column -t
 
      mac      dash参考文档
 
-
+https://www.xiaoz.me/archives/11916
+https://www.cnblogs.com/the-tops/p/7600985.html
 知识点
     git fetch --all  //所有分支
     确定自己所在分支 git pull origin master && git log -p -1   //-p 以patch方式  
