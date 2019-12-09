@@ -48,6 +48,23 @@ linux命令  column -t
      mac      dash参考文档
 
 
+知识点
+    git fetch --all  //所有分支
+    确定自己所在分支 git pull origin master && git log -p -1   //-p 以patch方式  
+    git shortlog
+    git log 
+            --stat 
+            -p
+
+
+             符号位     指数位     尾数位
+    float    1          8         23
+    double   1          11        52
+
+    mkdir -pv a/b/c
+    realpath $file
+    ssh user@hostname/ip
+
 
 docker
     仓库hub registry

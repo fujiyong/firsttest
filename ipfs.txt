@@ -375,19 +375,23 @@ arp -n | sort -t . -k1,1n -k2,2n -k3,3n -k4,4n  #查询局域网内所有主机�
 		配置
 
 	DNS    #https://help.aliyun.com/knowledge_detail/29725.html
-		A	 地址Address IP4 	实现域名指向IP   最重要的  
+		A	 IP指向地址Address IP4 	实现域名指向IP   最重要的  
 			www   @          记录值$IP
 			场景： 我们最终的查询的IP就是这条记录的IP
+			多条记录实现负载均衡
 		AAAA  Address IPV6  实现域名指向IP   A记录的升级版
 							 记录值$IP6
 		NS   名称服务器NameServer 当需要将子域名的解析交给其他DNS服务商解析
-					记录值 被授权的其他DNS服务器域名
+					记录值 被授权的其他DNS服务器域名,可以是IP或主机名
 			场景： 上级查询下级时， 比如com查询baudu.com时
+			记录优先级高于A记录
 			
-		CNAME   canonicalName
+		CNAME  别名指向canonicalName   优先级低于A记录
 			当需要将域名指向另一个域名,再由另一个域名提供IP地址  场景:CDN 企业邮箱 全局流量管理
-				www @        记录值 另一个域名
+				www @        记录值 另一个域名,只能使用主机名,不能是IP值
 		MX   用于解析电子邮件地址中@后面的内容进行解析
+		                     记录值可以是IP或主机名
+			 多条记录实现负载均衡
 		TXT  对域名进行标识或说明   多用于反垃圾邮件SPF记录
 							记录值 "v=spf1 a mx ~all"
 
@@ -397,6 +401,8 @@ arp -n | sort -t . -k1,1n -k2,2n -k3,3n -k4,4n  #查询局域网内所有主机�
 		URL显性/隐形转发
 			隐性  浏览器地址栏输入 http://a.com   打开的是http://b.com 浏览器地址栏显示http://a.com
 			显性  浏览器地址栏输入 http://a.com   打开的是http://b.com 浏览器地址栏显示http://b.com   类似于http301 302
+
+		Non-authoritative answer: 查询的是缓存,不是实际查询, 这个缓存时间就是TTL
 
 		host [-a] www.baidu.com [$dns-server]
 			-a #all 所有信息
@@ -414,7 +420,23 @@ arp -n | sort -t . -k1,1n -k2,2n -k3,3n -k4,4n  #查询局域网内所有主机�
 				dig +trace www.baidu.com
 			反查
 				dig -x     $ip
+
+		whois baidu.com   #查询域名的create/expire time 
+
+
+		nmcli device show eth0  #CentOS 查IP GateWay/Route DNS   //apt-get install network-manager
+
+#### 设置
+#my-dns-tool set --type=TXT --ttl=60 --domain=libp2p.io --name=_dnslink --value="dnslink=/ipfs/Qmc2o4ZNtbinEmRF9UGouBYTuiHbtCSShMFRbBY5ZiZDmU"
+_dnslink.libp2p.io TXT 60 dnslink=/ipfs/Qmc2o4ZNtbinEmRF9UGouBYTuiHbtCSShMFRbBY5ZiZDmU
 		
+### 自检
+#dig +short TXT _dnslink.libp2p.io
+dnslink=/ipfs/Qmc2o4ZNtbinEmRF9UGouBYTuiHbtCSShMFRbBY5ZiZDmU
+#dig +noall +answer TXT _dnslink.docs.ipfs.io
+
+### 运用
+#ipfs ls /ipns/libp2p.io
 
 
 /etc/rc.d/init.d/network start

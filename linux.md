@@ -1,12 +1,6 @@
 
 
-[TOC]
-
-
-
 帮助
-
-
 
 ```
 whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
@@ -17,8 +11,6 @@ centos fedora
 mac
 
 ```
-
-
 
 # bash
 
@@ -338,6 +330,15 @@ set -o xtrace  #bash -x
 
 #  命令
 
+##  echo
+
+```
+-e   //转义生效  echo -e "print\tprint2"
+-n   //不换行
+```
+
+
+
 ## date
 
 ##  printf
@@ -356,6 +357,15 @@ find . -type f -newermt "2010-01-01" ! -newermt "2010-06-01"
 
 ```
 grep
+	-a //将binary file 当做 txt文件
+	-n //行号
+	-i //ignore case
+	-H //with filename
+	-r //recursive
+	
+
+
+
 	""  双引号中可以含有变量${var} ''不能含有变量
 	^   行首
 	$	行尾
@@ -369,7 +379,7 @@ grep
 	
 	[-]
 	[^]
-	\(..\)
+	\(..\)   
 	
 	{m}
 	{m,}
@@ -406,7 +416,8 @@ egrep == grep -E
 	?
 	+
 	a|b|c
-	()  字符组
+	()  字符组 # 查找C++文件   ".*\.(cpp|hpp|c|h|hh|cxx|cc)" 
+	           # 查找makefile  '(.*\.mak$)|(.*\.mk$)|(makefile)$'
 	()()\1\2  模板匹配\1表示前一个模板 \2表示后一个模板
 fgrep == grep -F  #fixed 即pattern不转义,为字面字符
 ```
@@ -463,6 +474,7 @@ awk '/str/ {print $2}' file                              # 打印文件中包含
 awk '{s+=$1} END {print s}' file                         # 计算所有第一列的合
 awk 'NR%3==1' file                                       # 从第一行开始，每隔三行打印一行
 awk '{for (i=0; i<$NF; i++){print $i;}}'
+awk '{i=1;while(i<NF) {printf(\"%s\n\", \$i);i++}}'
 
 history | awk '{a[$2]++}END{for(i in a){print a[i] " " i}}' | sort -rn | head
 netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
@@ -597,7 +609,7 @@ iptraf -i eth0 //某端口统计
 #  ssh
 
 ```
-ssh -v      user@host           #打开debug模式
+ssh -v      user@host           #打开debug模式  host既可为主机名也可为IP
 
 ssh [-i /path/to/id_rsa]  user@host "$cmd"    # 远程执行命令
 ssh host -l user “`cat cmd.txt`”  #ssh host -l user $(<cmd.txt)
@@ -606,14 +618,27 @@ ssh user@host cat /path/to/remotefile | diff /path/to/localfile –
 挂载文件系统
 sshfs -o pi@host:/home/pi ~/pi 	# 将远程目录/home/pi挂载到当前主机目录~/pi
 
-#ls -l ~/.ssh
+#ls -l ~/.ssh      #chmod .ssh 700
 authorized_keys    #chmod 600
 id_rsa             #chmod 600
 id_rsa.pub         #chmod 644
 known_hosts        #chmod 644
 
-# 通过主机 A 直接 ssh 到主机 B
-ssh -t hostA ssh hostB
+################代理转发
+ssh -t hostB ssh hostC # 在机器A中通过跳转机/中转机/堡垒机B ssh到主机C
+
+################端口转发 ssh隧道
+
+
+
+ssh-keygen -t rsa -b 1024 -P '' -f /home/yy/id_rsa
+	-t type dsa ecdsa rsa
+	-b bytes 
+	-P 密码   若需为空,直接""即可
+ssh-keygen -p //会进入交互模式 密码操作
+              //如若原来没有密码,则直接设置新密码;
+              //如若原来有密码,则先输入老密码,然后再输入新密码;若需新密码为空,直接回车即可
+ssh-keygen -f /home/yy/id_rsa -y #-y表示根据私钥产生公钥
 ```
 
 ##  无密码登录三部曲
@@ -837,7 +862,7 @@ systemctl list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁
 
 ## ldd
 
-##  nm -C 
+##  nm -CA 
 
 ##  fdisk-mount-dd-unmount
 
@@ -987,7 +1012,11 @@ gateway
     	traceroute www.baidu.com
 ```
 
+##  ip
 
+```
+ip -f inet address show  | grep -A 1 -E "[[:digit:]]+\: eth0:" | tail -1 | awk -F"[ //]+" '{print $3}'
+```
 
 
 
