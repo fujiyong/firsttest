@@ -28,7 +28,7 @@ Android
 		默认数据文件夹是~/.ipfs,通过环境变量IPFS_PATH修改
 
 	初始化	
-		ipfs init
+		ipfs init -b -e -p  //b bytes秘钥长度  eemptyProject没有帮助文件 -p profile server/test/dedfault-store
 			#ls -1 $IPFS_PATH
 			blocks            #cid目录
 			config            #配置文件
@@ -56,6 +56,7 @@ Android
 			ipfs add    $filename       #返回的是用私钥签名的hash值只是文件内容的hash值,而没有文件名的信息  其实这里的hash用key更准确 key使用SFS的multi-format中的multi-hash表示
 			                            # key = 1个字节的hash类型 + 1 个字节的hash值长度 + digest(hash(content),private_key) 是hash(content)的摘要,不是hash  
 										#  访问内容的时候使用hash($digest) =? hash(content)这样的步骤进行验证
+										# hash函数为sha-256
 			ipfs add -rQ $dirname       #安静模式Q
 			ipfs add -rQ .
 

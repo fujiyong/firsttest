@@ -31,6 +31,7 @@ echo $SHELL       #查看使用哪种shell  env | grep SHELL
 chsh -s /bin/bash #更改默认shell
 
 man bash          #查看命令行的快捷方式
+set -o vi         #设置在命令行的操作方式  默认是emacs
 
 source a.sh   #source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
 set
