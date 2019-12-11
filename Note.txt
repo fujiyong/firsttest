@@ -3,6 +3,8 @@ ftp \\192.168.1.182     user:user
 git fu_ji_yong fujy6789
 bug fu_ji_yong pass@2019
 
+google youtube  fujiyong2000@gmail.com  sr
+
 
 测试机	121.9.227.91	22124	root	pass@2019
 数据库	192.168.1.102	5432	postgres	pass@2018
