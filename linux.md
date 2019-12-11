@@ -890,6 +890,25 @@ remove
 
 update
 
+ * base: mirror.bit.edu.cn
+ * epel: hkg.mirror.rackspace.com
+ * extras: mirrors.aliyun.com
+ * updates: mirror.bit.edu.cn
+ 
+ # 只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
+ yum install --downloadonly dhcp
+ rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
+ 
+ 正查pkg里有何文件
+ yum install yum-utils
+ repoquery -ql dhcp
+ 反差文件来自哪个pkg
+ yum whatprovidesd "*bin/nc"
+ 
+ yum deplist openssh-server
+ yum info openssh-server
+ yum provides openssh-server   // 
+
 
 
 ##  dpkg
@@ -946,24 +965,7 @@ apt-get check                         检查是否有损坏的依赖
 ```
 
 ```
- * base: mirror.bit.edu.cn
- * epel: hkg.mirror.rackspace.com
- * extras: mirrors.aliyun.com
- * updates: mirror.bit.edu.cn
- 
- # 只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
- yum install --downloadonly dhcp
- rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
- 
- 正查pkg里有何文件
- yum install yum-utils
- repoquery -ql dhcp
- 反差文件来自哪个pkg
- yum whatprovidesd "*bin/nc"
- 
- yum deplist openssh-server
- yum info openssh-server
- yum provides openssh-server   // 
+
 ```
 
 #  Tool
