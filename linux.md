@@ -9,7 +9,10 @@ man yum.conf   #查看配置文件的说明
 centos fedora
 mac
 
-
+man bash | col -bx > bash.txt
+:%s/^\([A-Z]\)/#\1/g                     #在行首有字母的行前添加#使之成为一级标题
+:%s/^[ ]\{3\}\([A-Z]\)/##\1/g            #在行首为3个空格的非空白行前添加##使之成为二级标题
+mv bash.txt bash.md
 ```
 
 # bash
@@ -378,11 +381,12 @@ grep
 	
 	[-]
 	[^]
+	
 	\(..\)   
 	
-	{m}
-	{m,}
-	{m,n}
+	\{m\}
+	\{m,\}
+	\{m,n\}
 	*
 	
 	posix
@@ -866,9 +870,27 @@ systemctl list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁
 | redhat/Fedora      | rpm  | yum  |
 | debian/ubuntu      | dpkg | apt  |
 
+由于rpm和dpkg不自动提供依赖包,所以一般只用于安装后的查询;安装前的查找包/更新/卸载由yum和apt负责
+
 ## rpm
 
+-i    //install
+
+-e  //erase
+
+-qi  增加i选项会得到pkg的相关信息
+
+-ql 列出pkg中的文件  -c限制为配置文件 -d限制为文档文件
+
+-qp *.rpm 
+
 ##  yum
+
+remove
+
+update
+
+
 
 ##  dpkg
 

@@ -432,3 +432,11 @@ move statement up/down  ctrl+shift+up/down
 
 
 浏览器  ctrl+shift+B
+
+
+
+:%s/^\([A-Z]\)/#\1/g
+
+
+https://www.ibm.com/developerworks/cn/linux/l-lpic1-v3-102-5/index.html
+https://segmentfault.com/a/1190000011200461
