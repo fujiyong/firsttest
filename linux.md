@@ -28,6 +28,12 @@ chsh -s /bin/bash #更改默认shell
 /etc/bashrc                          # System-wide .bashrc file for interactive bash(1) shells.
 ~/.bash_logout
 
+env
+```
+
+###  内置命令
+
+```
 enable                   #查看bash的所有内置命令, 或禁止某命令
 help    ${builtin_cmd}   #查看bash的内置命令的帮助,类似于查看用户命令的帮助man {user_cmd}
 builtin ${builtin-cmd}   #忽略alias, 直接运行内置命令
@@ -49,11 +55,14 @@ type function  user_cmd builtin_cmd
 unset
     unset
 	unset f
+```
 
-env
+###  用户命令
+
+```
+man bash                           # 查看命令行的快捷方式
 man hier                           # 查看文件系统的结构和含义
 man test                           # 查看 posix sh 的条件判断帮助
-man bash                           # 查看命令行的快捷方式
 getconf LONG_BIT                   # 查看系统是 32 位还是 64 位
 stty -a                            # 查看发送信号的快捷键
 kill -l                            # 查看有哪些信号
@@ -332,8 +341,6 @@ set -o xtrace  #bash -x
 -n   //不换行
 ```
 
-
-
 ## date
 
 ##  printf
@@ -358,9 +365,6 @@ grep
 	-H //with filename
 	-r //recursive
 	
-
-
-
 	""  双引号中可以含有变量${var} ''不能含有变量
 	^   行首
 	$	行尾
