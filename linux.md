@@ -6,9 +6,9 @@
 whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
 man yum.conf   #查看配置文件的说明
 
-ubuntu debian
 centos fedora
 mac
+
 
 ```
 
@@ -17,6 +17,10 @@ mac
 ##  命令
 
 ```
+cat /etc/shells   #查看系统支持的shell
+echo $SHELL       #查看使用哪种shell  env | grep SHELL
+chsh -s /bin/bash #更改默认shell
+
 主要就是为了设置PS1这个环境变量,也就是shell输入命令的前缀
 /etc/profile                                 #system-wide .profile file for the Bourne shell
 (~/.bash_profile|~/.bash_login|~/.profile)   #executed by Bourne-compatible login shells.
@@ -24,20 +28,12 @@ mac
 /etc/bashrc                          # System-wide .bashrc file for interactive bash(1) shells.
 ~/.bash_logout
 
-env
+enable                   #查看bash的所有内置命令, 或禁止某命令
+help    ${builtin_cmd}   #查看bash的内置命令的帮助,类似于查看用户命令的帮助man {user_cmd}
+builtin ${builtin-cmd}   #忽略alias, 直接运行内置命令
+command ${buildin_cmd}   #忽略alias, 直接运行内置命令或执行程序
 
-cat /etc/shells   #查看系统支持的shell
-echo $SHELL       #查看使用哪种shell  env | grep SHELL
-chsh -s /bin/bash #更改默认shell
-
-man bash          #查看命令行的快捷方式
-set -o vi         #设置在命令行的操作方式  默认是emacs
-
-source a.sh   #source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
-set
-unset
-    unset
-	unset f
+bind -P                       # 列出所有 bash 的快捷键
 declare
     declare -a                # 查看所有数组
     declare -f                # 查看所有函数
@@ -46,23 +42,21 @@ declare
     declare -r                # 查看所有只读变量
     declare -x                # 查看所有被导出成环境变量的东西
     declare -p varname        # 输出变量是怎么定义的（类型+值）
-    
-command ls                         # 忽略 alias 直接执行程序或者内建命令 ls
-builtin cd                         # 忽略 alias 直接运行内建的 cd 命令
-enable                             # 列出所有 bash 内置命令，或禁止某命令
-help {builtin_command}             # 查看内置命令的帮助（仅限 bash 内置命令）
+eval $script                       # 对 script 变量中的字符串求值（执行）
+source a.sh   #source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
+set -o vi     #设置在命令行的操作方式  默认是emacs
+type function  user_cmd builtin_cmd 
+unset
+    unset
+	unset f
 
+env
 man hier                           # 查看文件系统的结构和含义
 man test                           # 查看 posix sh 的条件判断帮助
-man set
-man bash
+man bash                           # 查看命令行的快捷方式
 getconf LONG_BIT                   # 查看系统是 32 位还是 64 位
-bind -P                            # 列出所有 bash 的快捷键
-
-stty -a                            #查看发送信号的快捷键
-kill -l                            #查看有哪些信号
-
-eval $script                       # 对 script 变量中的字符串求值（执行）
+stty -a                            # 查看发送信号的快捷键
+kill -l                            # 查看有哪些信号
 ```
 
 ## 变量
@@ -431,6 +425,7 @@ sort -u file                       # 去重排序
 sort -r file                       # 反向排序（降序）
 sort -n file                       # 使用数字而不是字符串进行比较
 sort -t: -k 3n /etc/passwd         # 按 passwd 文件的第三列进行排序
+arp -n | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4  #linux命令查询局域网内所有主机并按ip排序
 ```
 
 ##  cut
@@ -488,8 +483,6 @@ lsof -i [$proto_name]:80
 lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2 # 显示当前正在使用网络的进程
 ```
 
-
-
 #  性能状态
 
 ##  ps
@@ -533,8 +526,6 @@ To free reclaimable slab objects (includes dentries and inodes):
 To free slab objects and pagecache:
 	echo 3 > /proc/sys/vm/drop_caches
 优先执行sync, 然后执行 echo N > /proc/sys/vm/drop_caches
-
-
 ```
 
 ##  swap
@@ -589,6 +580,7 @@ iostat [delay [count]]
 
 经典用法
 netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
+netstat -rn    #查看路由
 ```
 
 ##  ss
@@ -606,6 +598,31 @@ iptraf -d eth0 //eth0 总体流量、流入量、流出量、以及按协议分�
 iptraf -s eth0 //各端口统计
 
 iptraf -i eth0 //某端口统计
+
+#  用户权限
+
+- su
+
+  su   root
+
+  su - root
+
+- sudo
+
+  - sudo -l                                  #查看以超级用户运行时的权限,即当用户在root组中的权限
+  - sudo -u yy $cmd                #以超级用户yy
+
+- visudo   = vi /etc/sudoers + 检查文件格式 
+
+  - 设置可以执行的命令 
+
+    \#yy可以在192.168.175.136,192.168.175.138机器
+
+    \#以root身份执行/usr/sbin/下的所有命令，除了/usr/sbin/useradd
+
+    yy 192.168.175.136,192.168.175.138=(root) /usr/sbin/,!/usr/sbin/useradd
+
+  - 
 
 #  ssh
 
@@ -640,6 +657,10 @@ ssh-keygen -p //会进入交互模式 密码操作
               //如若原来没有密码,则直接设置新密码;
               //如若原来有密码,则先输入老密码,然后再输入新密码;若需新密码为空,直接回车即可
 ssh-keygen -f /home/yy/id_rsa -y #-y表示根据私钥产生公钥
+
+openssl
+	openssl genrsa -out private.pem 2048
+	openssl req -new -x509 -key private.pem -out public.crt -days 99999
 ```
 
 ##  无密码登录三部曲
@@ -703,10 +724,10 @@ ufw default allow/deny      #设置默认策略, ufw默认不允许外部访问,
 ufw reload
 ufw status            	    #inactive
 
-ufw allow $port
+ufw        allow $port
 ufw delete allow $port
 
-ufw allow $service           #smtp  来自/etc/services
+ufw        allow $service    #smtp  来自/etc/services
 ufw delete allow $servie     #等价于ufw deny $service
 ```
 
@@ -834,9 +855,69 @@ systemctl list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁
 |                |                                       |                                    |
 |                |                                       |                                    |
 
+#  包管理
 
+| distribution发行版 |      |      |
+| ------------------ | ---- | ---- |
+| redhat/Fedora      | rpm  | yum  |
+| debian/ubuntu      | dpkg | apt  |
 
-# yum
+## rpm
+
+##  yum
+
+##  dpkg
+
+- dpkg -l   package-name-pattern         List packages matching given pattern
+- dpkg **-s**  package-name...                     Report status 查看描述 依赖dep 大小size
+- dpkg **-L** package-name...                      正查  List files 列举安装了哪些文件到文件系统
+- dpkg **-S**  filename-search-pattern...    反查  Search 查询某一文件来源于哪一安装包
+
+查看没有安装的deb包命令
+
+dpkg -I *.deb                                                 Show information about a package.
+
+dpkg -c *deb                                                  List contents of a deb package rpm -qlp 
+
+安装卸载deb
+
+dpkg -i *.deb                                                 文件的安装
+dpkg -r *.deb                                                文件的卸载;
+dpkg -P                                                          彻底的卸载 包括软件的配置文件等等
+
+##  apt
+
+官方包源网址       http://packages.ubuntu.com/ 
+
+下载保存位置       /var/cache/apt/archives 
+
+安装位置              /usr/share/applications 
+
+```
+apt-cache search   package   搜索包
+apt-cache show     package   获取包的相关信息，如说明、大小、版本等
+apt-cache depends  package   了解使用依赖
+apt-cache rdepends package   了解某个具体的依赖
+
+apt-get install              package  安装包
+apt-get install -f           package  强制安装
+apt-get install --reinstall  package  重新安装包
+
+apt-get remove         package        删除包
+apt-get remove --purge package        删除包，包括删除配置文件等
+
+apt-get dist-upgrade                  升级系统
+apt-get update                        更新源
+apt-get upgrade                       更新已安装的包
+apt-get dselect-upgrade               使用 dselect 升级
+
+apt-get autoremove                    自动删除不需要的包
+apt-get clean && apt-get autoclean    清理下载文件的存档
+
+apt-get build-dep package             安装相关的编译环境
+apt-get source package                下载该包的源代码
+apt-get check                         检查是否有损坏的依赖
+```
 
 ```
  * base: mirror.bit.edu.cn
@@ -1019,7 +1100,17 @@ gateway
 ip -f inet address show  | grep -A 1 -E "[[:digit:]]+\: eth0:" | tail -1 | awk -F"[ //]+" '{print $3}'
 ```
 
+##  wget/curl
 
+```
+
+```
+
+##  scp/rsync
+
+```
+rsync -avzh
+```
 
 #  za
 
