@@ -336,7 +336,6 @@ set -o xtrace  #bash -x
 ```
 
 #  命令
-
 ##  echo
 
 ```
@@ -346,7 +345,15 @@ set -o xtrace  #bash -x
 
 ## date
 
+```
+date --date='@2147483647'
+```
+
 ##  printf
+
+```
+printf "dev%03d" $machine_num
+```
 
 ##  xargs
 
@@ -436,6 +443,12 @@ sort -t: -k 3n /etc/passwd         # 按 passwd 文件的第三列进行排序
 arp -n | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4  #linux命令查询局域网内所有主机并按ip排序
 ```
 
+##  uniq
+
+```
+-c 
+```
+
 ##  cut
 
 ```
@@ -453,6 +466,43 @@ arp -n | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4  #linux命令查询局域网内所�
 ##  sed
 
 ```
+-e --expression=
+-f --file=
+-n --quiet --silent
+
+范围scope
+    # 数字行号
+        2      #数字行号
+        2,$    #数字行号 $最后一行
+        2,+3   #数字行号 +-表示相对行号  +3后面连续3行
+    # 正则表达式
+        /$reg/
+        /$reg/,$
+        /$reg/,+3
+
+//增
+    '${scope}i${content}'   #insert ${content}中"\"表示换行
+    '${scope}a${content}'   #append ${content}中"\"表示换行
+
+    '${scope}d'             #delete 整个${scope}删除
+
+    '${scope}p'             #print
+//改
+c
+    '${scope}c${content}'   #change 整个${scope}改为${content}
+s
+    '${scope}s/${src}/${dst}/${occure_scope}g'
+    dst
+        用&表示整个${src}, 类似于正则中group表示\1
+        用\1表示group
+    occure_scope
+        1   #行内第一处
+        N   #行内第N处
+        Ng  #从行内第N处开始
+
+
+
+
 sed 's/find/replace/' file         # 替换文件中首次出现的字符串并输出结果 
 sed '10s/find/replace/' file       # 替换文件第 10 行内容
 sed '10,20s/find/replace/' file    # 替换文件中 10-20 行内容
@@ -640,6 +690,8 @@ ssh -v      user@host           #打开debug模式  host既可为主机名也可
 ssh [-i /path/to/id_rsa]  user@host "$cmd"    # 远程执行命令
 ssh host -l user “`cat cmd.txt`”  #ssh host -l user $(<cmd.txt)
 ssh user@host cat /path/to/remotefile | diff /path/to/localfile –
+ssh user@server 'bash -s' < local.script.sh
+ssh user@server ARG1="arg1" ARG2="arg2" 'bash -s' < local_script.sh
 
 挂载文件系统
 sshfs -o pi@host:/home/pi ~/pi 	# 将远程目录/home/pi挂载到当前主机目录~/pi
@@ -878,36 +930,23 @@ systemctl list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁
 
 -e  //erase
 
+-qa //all
+
 -qi  增加i选项会得到pkg的相关信息
 
--ql 列出pkg中的文件  -c限制为配置文件 -d限制为文档文件
-
 -qp *.rpm 
+
+-ql  nginx-1.16.1-1.el7.x86_64           #l表示list 列出pkg中的文件  -c限制为配置文件 -d限制为文档文件
+
+-qf  /etc/nginx/nginx.conf                 #f表示file  nginx-1.16.1-1.el7.x86_64
+
+
 
 ##  yum
 
 remove
 
 update
-
- * base: mirror.bit.edu.cn
- * epel: hkg.mirror.rackspace.com
- * extras: mirrors.aliyun.com
- * updates: mirror.bit.edu.cn
- 
- # 只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
- yum install --downloadonly dhcp
- rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
- 
- 正查pkg里有何文件
- yum install yum-utils
- repoquery -ql dhcp
- 反差文件来自哪个pkg
- yum whatprovidesd "*bin/nc"
- 
- yum deplist openssh-server
- yum info openssh-server
- yum provides openssh-server   // 
 
 
 
@@ -965,7 +1004,24 @@ apt-get check                         检查是否有损坏的依赖
 ```
 
 ```
-
+ * base: mirror.bit.edu.cn
+ * epel: hkg.mirror.rackspace.com
+ * extras: mirrors.aliyun.com
+ * updates: mirror.bit.edu.cn
+ 
+ # 只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
+ yum install --downloadonly dhcp
+ rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
+ 
+ 正查pkg里有何文件
+ yum install yum-utils
+ repoquery -ql dhcp
+ 反差文件来自哪个pkg
+ yum whatprovidesd "*bin/nc"
+ 
+ yum deplist openssh-server
+ yum info openssh-server
+ yum provides openssh-server   // 
 ```
 
 #  Tool
