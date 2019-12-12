@@ -1,3 +1,6 @@
+我的google账号  fujiyong2000@gmail.com  yaxin
+
+
 WIFI 13622228504
 ftp \\192.168.1.182     user:user
 git fu_ji_yong fujy6789
@@ -67,6 +70,9 @@ https://www.cnblogs.com/the-tops/p/7600985.html
     mkdir -pv a/b/c
     realpath $file
     ssh user@hostname/ip
+
+    在命令行上参数上有些--符号,表示--跟在--之后的就不再是不确定参数,即参数不再是变量,而是确定量
+    --             indicates the unambiguous end of options    #man awk 
 
 
 docker

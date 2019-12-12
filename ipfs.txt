@@ -264,8 +264,18 @@ bootstrap 修改配种文件中的启动节点
 	rm all
 	list
 swarm	在ipfs运行时执行命令
-	peers                                       
+	addrs   
+		listen   lists all interface addresses the node is listening on
+		local    lists all local listening addresses announced to the network
+	peers  -v  已经connect                                   
 	connect  /ip4/$ip4/tcp/4001/ipfs/`ipfs id`  //直连
+p2p
+	close
+	forward
+	listen
+	stream
+	stream close
+	stream ls
 dht  分布式hash表
 	findpeer   `ipfs id` 
 	query	`ipfs id`
@@ -319,19 +329,12 @@ name
 	pubsub state
 	resolve
 
-p2p
-	close
-	forward
-	listen
-	stream
-	stream close
-	stream ls
 
 pubsub	
 	ls   本节点订阅的主题
-	peer 于本节点相连的开通pubsub的节点
-	pub topic content
-	sub topic 
+	peer 与本节点相连的开通pubsub的节点
+	pub <topic> <content>
+	sub <topic>
 
 
 
