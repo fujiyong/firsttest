@@ -1213,7 +1213,7 @@ ip -f inet address show  | grep -A 1 -E "[[:digit:]]+\: eth0:" | tail -1 | awk -
 ##  scp/rsync
 
 ```
-rsync -avzh
+rsync -avzh   --verbose  -h进度条
 ```
 
 #  za

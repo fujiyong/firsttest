@@ -74,6 +74,9 @@ https://www.cnblogs.com/the-tops/p/7600985.html
     在命令行上参数上有些--符号,表示--跟在--之后的就不再是不确定参数,即参数不再是变量,而是确定量
     --             indicates the unambiguous end of options    #man awk 
 
+    vi  set cursorline
+        set cursorcolumn   https://github.com/nathanaelkane/vim-indent-guides
+
 
 docker
     仓库hub registry
