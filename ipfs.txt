@@ -56,7 +56,7 @@ Android
 			ipfs add    $filename       #返回的是用私钥签名的hash值只是文件内容的hash值,而没有文件名的信息  其实这里的hash用key更准确 key使用SFS的multi-format中的multi-hash表示
 			                            # key = 1个字节的hash类型 + 1 个字节的hash值长度 + digest(hash(content),private_key) 是hash(content)的摘要,不是hash  
 										#  访问内容的时候使用hash($digest) =? hash(content)这样的步骤进行验证
-										# hash函数为sha-256
+										# hash函数为sha-256   CIDV0
 			ipfs add -rQ $dirname       #安静模式Q
 			ipfs add -rQ .
 
@@ -207,7 +207,7 @@ CID   内容识别符 实际就是返回的hash值 如/ipfs/xxxxxxx中的xxxx
 		身份				Self Describing format
 	传递数据	     libp2p	       用于适配各种各样的传输层协议和连接众多复杂的设备
 		网络层Network   establishing connections between peers                       config文件里的bootstrap节点定义了ip/协议          
-		路由层Routing   locating peers and objects              DHT结构                  value长度小的值直接存储到dht上;更大的值,dht只存储值索引,索引就是一个节点的NodeID
+		路由层Routing   locating peers and objects              DHT结构/mdns/snr/dns                  value长度小的值直接存储到dht上;更大的值,dht只存储值索引,索引就是一个节点的NodeID
 		交换层Exchange  block transport and replication         BitSwap协议/BitTorrent
 	结构数据  IPLD 
 		对象层Object                                            MerkleDAG/IPLD        个人理解单节点MerkleDAG, 节点之间IPLD CID
@@ -232,7 +232,7 @@ ipfs block 操作raw ipfs blocks的plumbing command 底层命令
 	get  $hash
 	rm   $hash
 	stat $hash  //返回hash和size
-ifps object  操作dag的plumbing command 底层命令
+ifps object  操作dag的plumbing command 底层命令 CIDV1
 	put <data> 
 	get $hash
 	data $hash
@@ -245,7 +245,7 @@ ifps object  操作dag的plumbing command 底层命令
 		patch add-link
 		patch append-data  $hash $data
 		patch rm-link
-ipfs files
+ipfs files (MFS)  CIDV1
 	write    //echo "hello world" | ipfs files write --create -p /myfs/a
 	flush    //ipfs files flush  /myfs/a
 	read     //ipfs files read   /myfs/a
