@@ -354,6 +354,83 @@ set -o xtrace  #bash -x
 
 ```
 date --date='@2147483647'
+
+时间标准
+    观察天体
+        GMT: Greenwich Mean Time         格林威治标准时
+                老的时间标准  根据地球自转和公转计时,每天中午12时经过格林威治天文台 
+                由于地球自转正在缓慢变慢,尽管感觉不到差异,会不太精准
+        UTC: Universal Time Coordinated  世界时
+                新的时间标准  最精准的原子钟50亿年才误差1秒,可以说非常精准
+    
+    CST:  China Standard Time 中国标准时间
+    DST:  Daylight Saving Time 
+    	  夏令时 指在夏天太阳升起比较早时,将始终拨快1小时,以提早日光的使用. (中国不使用)
+
+    GMT+8 == UTC+8 == CST
+
+时区
+    查看时区 
+        date -R  
+        timedatectl
+    更改时区 
+        先获取时区 
+            方法1:  tzselect  #按照指引一路选择,就可以获取时区值
+            特殊:  
+                    CentOS/Linux:  timedatectl list-timezones    
+                                    timeconfig --utc "Asia/Shanghai"
+                    Debian:        dpkg-reconfigure tzdata
+        再设置时区
+            方法1:  export TZ='Asia/Shanghai';
+            方法2:  ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+            特殊:
+                CentOS7/RHEL7/SLinux7: timedatectl set-timezone Asia/Shanghai
+
+时间
+    系统时间/软件时间/WallTime
+        WallTime 系统时间  由系统维护,可以是临时的,可以是网络上同步来的,可以是硬件读取的,
+                          前提是系统服务正常,如果系统关机了,就不存在WallTime
+        查看
+            date 
+            timedatectl
+        更改
+            date -s  06/22/96
+            date -s  17:55:55
+            date -s "11/03/2009 17:55:55"
+            date 1005113817.30              #格式MMDDhhmmYYYY.ss
+
+            timedatectl set-time "2018-11-24 12:00:30"
+
+            网络同步时间
+                yum install ntp ntpdate sntp
+
+                ntpdate -u ntp.api.bz  //断点式校正
+                service ntpd start   //步进式校正
+                service ntpd status
+                ntpstat  //查看服务状态及NTP时钟源服务器
+                systemctl enable ntpd.service//开机启动   
+                						   #systemctl is-enabled chronyd.service   
+                						   #systemctl disable chronyd.service
+                #crontab -e 每天凌晨0点同步时间并写入硬件 假设NTP服务器IP为123.123.123.123
+                0 0 * * * /usr/sbin/sntp -P no -r 123.123.123.123;hwclock -w 
+                
+    硬件时间
+        RTC:     RealTimeClock  CMOS时间  BIOS时间   仅保存日期和时间,不保存时区和夏令时
+        查看
+            方法1:  clock -r   #hwclock是clock的软连接
+            方法2:  clock --show
+        更改
+            clock --set --date="10/06/17 11:55"   #格式（月/日/年时:分:秒）
+
+    软硬同步
+        软同步到硬中
+            clock -w         #将系统日期时间写入BIOS
+            clock --systohc  #systeim-time to hardclock 
+            timedatectl set-local-rtc 1 #将硬件时钟调整为与本地时钟一致  
+                                        #0为将硬件时钟调整为与UTC时钟一致
+
+        硬同步到软中
+            clock --hctosys  #hardclock to  system-time  以硬件时间为准
 ```
 
 ##  printf
@@ -557,7 +634,34 @@ netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
 ## lsof
 
 ```
-lsof -i [$proto_name]:80
+用户
+    -u $user      #支持正则  ^$user表示不是这个用户的其他用户
+    -g $groupID
+进程号
+    -p $pid       #pid
+进程名
+    -c $progName  #cmd  列出进程以progName开始的文件  等价于lsof | grep  $progName
+文件/目录
+    $filename            #全路径 lsof `which httpd`
+    -d $fd               #
+    +d $dirName          #列出目录下打开的文件
+    +D $dirName          #递归列出目录下打开的文件
+网络
+    -i[46] [protocol][@hostname|hostaddr][:service|port] [-r] [+r] [-n]
+        46  #ip4 ip6 
+        protocol #tcp udp 
+        Hostname 
+        hostaddr #ipAddr 
+        service  #/etc/service中的serviceName,可以不止一个
+        port     #可以不止一个    2150=2180
+        -r       #一直执行,直到收到中断信号
+        +r       #一直执行,直到没有档案显示,缺省15s刷新
+        -n       #不将IP转换为hostname，缺省是不加上-n参数
+
+
+-t   #只返回pid
++L1  #显示打开文件数小于1的进程,这通常（当不总是）表示某个攻击者正尝试通过删除文件入口来隐藏文件内容
+    
 lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2 # 显示当前正在使用网络的进程
 ```
 
@@ -777,31 +881,22 @@ ssh -CqTnN -D localhost:1080  user@202.115.8.1
 #  防火墙
 
 ```
+systemctl enable/disable     firewalld   #设置是否开机启动
+systemctl start/stop/restart firewalld   #启动/停止
+systemctl status             firewalld
+firewall-cmd --stat
+firewall-cmd --list-all                 #检查防火墙状态
+
 firewall-cmd --zone=public --add-port=8080/tcp --permanent
 firewall-cmd --zone=public --remove-port=80/tcp --permanent
 firewall-cmd --reload
 firewall-cmd --list-all
 firewall-cmd --query-port=8080/tcp
-//临时关闭防火墙,重启后会重新自动打开
-systemctl restart firewalld
-//检查防火墙状态
-firewall-cmd --state
-firewall-cmd --list-all
-//Disable firewall
-systemctl disable firewalld
-systemctl stop firewalld
-systemctl status firewalld
-//Enable firewall
-systemctl enable firewalld
-systemctl start firewalld
-systemctl status firewalld
-
 
 
 ufw disable/enabel          #设置开机是否启动
 ufw default allow/deny      #设置默认策略, ufw默认不允许外部访问,但能访问外部
 
-ufw reload
 ufw status            	    #inactive
 
 ufw        allow $port
@@ -809,9 +904,38 @@ ufw delete allow $port
 
 ufw        allow $service    #smtp  来自/etc/services
 ufw delete allow $servie     #等价于ufw deny $service
+
+ufw reload
+ufw status            	     #inactive
 ```
 
 #  services
+|                    | SysVInit                                     | systemd                            |
+| ------------------ | -------------------------------------------- | ---------------------------------- |
+| pid==1的进程名     | init                                         | systemd                            |
+| 查看默认运行级别   | /etc/inittab     runlevel     who -r         | /etc/systemd/system/default.target |
+| 编写脚本目录       | /etc/init.d/redis.service                    | /lib/systemd/system/redis.service  |
+| 设置运行级别       | 见PS 1                                       | 见PS 2                             |
+| 重新载入使脚本生效 |                                              | systemctl daemon-reload            |
+| 查看安装了哪些服务 | chkconfig --list                             | systemctl list-unit-files          |
+| 设置开机启动       | chkconfig --add/--del  $service  on/off      | systemctrl enable/disable $service |
+| 查看是否开机启动   | chkconfig --list  $service                   | systemctl is-enabled $service      |
+| 查看哪些服务在运行 | service --status-all \| grep                 | systemctl list-unit -t service -a  |
+| 直接从脚本执行     | /etc/init.d/redis.service start/stop/restart |                                    |
+| 启动/停止/重启     | service $service start/stop/restart          |                                    |
+PS:
+
+​	1. ln -s /etc/init.d/$servived /etc/rc.d/rc3.d/S100$service
+
+​	2.  ln -s /lib/systemd/system/redis.service /etc/systemd/system/multi-user.target.wants/redis.service 
+
+​	chkconfig --list           #列出在各级别是否运行	
+
+​        service --status-all    #[+] 表示正在运行   [-]表示停止运行   [?]表示编写的service脚本不支持status命令
+
+##  SysVInit
+
+##  systemd
 
 ```
 ntsysv 图形界面
@@ -819,13 +943,6 @@ chkconfig --list
 service --status-all 
 rpm -qa
 rpm -ql
-
-systemctl is-enabled $service  //查看服务是否开机启动
-systemctl enable $service
-systemctl disable $service
-systemctl start $service
-systemctl stop $service
-systemctl status $service
 
 运行级别0：shutdown.target  		系统停机状态，系统默认运行级别不能设为0，否则不能正常启动
 运行级别1：rescue.target    		单用户工作状态，root权限，用于系统维护，禁止远程登陆
@@ -838,7 +955,6 @@ systemctl status $service
 切换运行级别 init N   //init 0关机   init 6重启
 
 
-
 SysVInit
 运行级别0 - /etc/rc.d/rc0.d/
 运行级别1 - /etc/rc.d/rc1.d/
@@ -848,6 +964,7 @@ SysVInit
 运行级别5 - /etc/rc.d/rc5.d/
 运行级别6 - /etc/rc.d/rc6.d/
 系统的默认运行级别在 SysVinit System 的 /etc/inittab 文件中指定。
+
 
 开机自动执行/etc/rc.local
 用户登录自动执行/etc/profile,然后在/etc/profile中遍历顺序执行/etc/profile.d中的文件
@@ -861,7 +978,7 @@ SysVInit
                     //	以S100为例, 
                     //		S表示开机启动; 可以替换为K表示开机关闭
                     //		100表示启动顺序
-命令chkconfig添加开机启动ubuntu为sysv-rc-conf
+命令chkconfig添加开机启动ubuntu为apt-get install sysv-rc-conf
     chkconfig --list        #列出所有的系统服务在各运行级别是否运行情况
     chkconfig --list httpd  #列出系统服务httpd在各运行级别是否运行情况
     chkconfig --add httpd
@@ -887,53 +1004,54 @@ runlevel2.target – /etc/systemd/system/multi-user.target.wants
 runlevel3.target – /etc/systemd/system/multi-user.target.wants
 runlevel4.target – /etc/systemd/system/multi-user.target.wants
 runlevel5.target – /etc/systemd/system/graphical.target.wants
-系统的默认运行级别在 systemd System 的 /etc/systemd/system/default.target 文件中指定
-systemctl get-default
+
+systemctl get-default  #系统的默认运行级别在/etc/systemd/system/default.target文件中指定
 systemctl set-default TARGET.target
 
+systemctl [option] [cmd]  
+	option
+        -t,--type=TYPE：          #可以过滤某个类型的 unit
+            automount
+            freedesktop
+            mount
+            path
+            service
+            slice
+            socket
+            target
+            timer
+        -a, --all
+    cmd
+		#Unit Commands
+         	 list-units   #不带参数逇默认命令.  列出已启动的unit 如果添加--all则未启动的也会列出
+             list-sockets 
+             list-timers
+             list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁在使用这个 unit
+             start/stop/reload/restart/kill/status/is-active/show
+       	 #Unit File Commands
+        	list-unit-files：#根据/lib/systemd/system/目录内的文件列出所有的unit
+        	enable/disable/is-enabled/mask/unmask
+        	get-default #系统的默认运行级别在/etc/systemd/system/default.target文件中指定
+        	set-default TARGET.target
+         #Machine Commands
+         #Job Commands
+         #Snapshot Commands
+        	
+systemctl is-enabled $service  #查看服务是否开机启动
+                               #若返回static, 则表示不可以自己启动,只能被其他enable的unit唤醒
+systemctl enable     $service
+systemctl disable    $service
+systemctl mask	     $service   #注销
+systemctl unmask     $service   #取消注销
 
-systemctl enable
-systemctl disable
-systemctl is-enable
-systemctl mask	   #注销
-systemctl unmask   #取消注销
-systemctl static   #不可以自己启动,只能被其他enable的unit唤醒
-
-systemctl start
-systemctl stop
-systemctl restart
-systemctl reload
-systemctl status    #active inactive active(exited)只执行一次就退出 active(waiting)等待比如打印
-systemctl is-active
-
-systemctl kill
-systemctl show     #列出配置
-
-systemctl [cmd] [--type=TYPE] [--all]
-cmd
-	list-units       #列出已启动的unit 如果添加--all则未启动的也会列出
-	list-unit-files：#根据 /lib/systemd/system/ 目录内的文件列出所有的 unit
-type=TYPE：           #可以过滤某个类型的 unit
-	service 
-	mount
-    target
-#不带任何参数执行 systemctl 命令会列出所有已启动的 unit
-
-systemctl list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁在使用这个 unit
+systemctl start/stop/restart/kill $service
+systemctl reload     $service
+systemctl status     $service  #active inactive 
+                               #active(exited)只执行一次就退出 
+                               #active(waiting)等待比如打印    
+systemctl is-active  $service
+systemctl show       $service  #列出配置
 ```
-
-|                | SysVInit                              | systemd                            |
-| -------------- | ------------------------------------- | ---------------------------------- |
-| pid==1的进程名 | init                                  | systemd                            |
-| 命令集         | 编写/etc/init.d脚本 chkconfig service | systemctl                          |
-| 运行默认级别   | 在/etc/inittab 文件中指定             | /etc/systemd/system/default.target |
-|                |                                       |                                    |
-|                |                                       |                                    |
-|                |                                       |                                    |
-|                |                                       |                                    |
-|                |                                       |                                    |
-|                |                                       |                                    |
-|                |                                       |                                    |
 
 #  包管理
 
