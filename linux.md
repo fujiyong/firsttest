@@ -6,13 +6,18 @@
 whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
 man yum.conf   #查看配置文件的说明
 
-centos fedora
-mac
+ubuntu Debian
+centos fedora redhat
+mac    freeBSD
+
+col  vs column -t
 
 man bash | col -bx > bash.txt
-:%s/^\([A-Z]\)/#\1/g                     #在行首有字母的行前添加#使之成为一级标题
-:%s/^[ ]\{3\}\([A-Z]\)/##\1/g            #在行首为3个空格的非空白行前添加##使之成为二级标题
-mv bash.txt bash.md
+方法1:转化为md
+    :%s/^\([A-Z]\)/#\1/g                     #在行首有字母的行前添加#使之成为一级标题
+    :%s/^[ ]\{3\}\([A-Z]\)/##\1/g            #在行首为3个空格的非空白行前添加##使之成为二级标题
+    mv bash.txt bash.md
+方法2: 直接使用vscode, 根据缩进折叠展开
 ```
 
 # bash
@@ -31,8 +36,6 @@ chsh -s /bin/bash #更改默认shell
 ~/.bashrc                                    #executed by bash(1) for non-login shells
 /etc/bashrc                          # System-wide .bashrc file for interactive bash(1) shells.
 ~/.bash_logout
-
-env
 ```
 
 ###  内置命令
@@ -81,6 +84,8 @@ stty -a                            # 查看发送信号的快捷键
 ## 变量
 
 ```
+环境变量
+	set
 预定义变量
     echo $$                   # 查看当前 shell 的进程号
     echo $!                   # 查看最近调用的后台任务进程号
@@ -350,7 +355,7 @@ set -o xtrace  #bash -x
 -n   //不换行
 ```
 
-## date
+## date/timedatectl
 
 ```
 date --date='@2147483647'
@@ -431,6 +436,11 @@ date --date='@2147483647'
 
         硬同步到软中
             clock --hctosys  #hardclock to  system-time  以硬件时间为准
+```
+
+```
+timedatectl status
+timedatectl set-ntp true
 ```
 
 ##  printf
@@ -671,6 +681,8 @@ lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2 # 显示当前正在使用网
 
 ##  top
 
+##  mpstat
+
 ##  free
 
 ```
@@ -709,15 +721,7 @@ To free slab objects and pagecache:
 	echo 3 > /proc/sys/vm/drop_caches
 优先执行sync, 然后执行 echo N > /proc/sys/vm/drop_caches
 ```
-
-##  swap
-
 ```
-swapoff -a  && swapon -a
-```
-
-##  iotop
-
 ##   vmstat
 
 ```
@@ -727,7 +731,13 @@ vmstat [delay [count]]
     输出
         r  正在running process, 一般小于CPU较好
         b  正在blocking process,
+##  swap
+
 ```
+swapoff -a  && swapon -a
+```
+
+##  iotop
 
 ##  iostat
 
@@ -909,107 +919,80 @@ ufw reload
 ufw status            	     #inactive
 ```
 
-#  services
-|                    | SysVInit                                     | systemd                            |
-| ------------------ | -------------------------------------------- | ---------------------------------- |
-| pid==1的进程名     | init                                         | systemd                            |
-| 查看默认运行级别   | /etc/inittab     runlevel     who -r         | /etc/systemd/system/default.target |
-| 编写脚本目录       | /etc/init.d/redis.service                    | /lib/systemd/system/redis.service  |
-| 设置运行级别       | 见PS 1                                       | 见PS 2                             |
-| 重新载入使脚本生效 |                                              | systemctl daemon-reload            |
-| 查看安装了哪些服务 | chkconfig --list                             | systemctl list-unit-files          |
-| 设置开机启动       | chkconfig --add/--del  $service  on/off      | systemctrl enable/disable $service |
-| 查看是否开机启动   | chkconfig --list  $service                   | systemctl is-enabled $service      |
-| 查看哪些服务在运行 | service --status-all \| grep                 | systemctl list-unit -t service -a  |
-| 直接从脚本执行     | /etc/init.d/redis.service start/stop/restart |                                    |
-| 启动/停止/重启     | service $service start/stop/restart          |                                    |
+#  services/units
+|                    | SysVInit                                     | systemd                              |
+| ------------------ | -------------------------------------------- | ------------------------------------ |
+| pid==1的进程名     | init                                         | systemd                              |
+| 查看默认运行级别   | 1.runlevel   2.who -r 3.cat /etc/inittab     | /systemd/system/default.target       |
+| 编写脚本目录       | cat /etc/init.d/redis.service                | /lib/systemd/system/redis.service    |
+| 设置运行级别       | 见PS 1                                       | 见PS 2                               |
+| 重新载入使脚本生效 |                                              | systemctl daemon-reload              |
+| 查看安装了哪些服务 | chkconfig --list                             | systemctl list-unit-files            |
+| 设置开机启动       | chkconfig --add/--del  $service  on/off      | systemctrl enable/disable $service   |
+| 查看是否开机启动   | chkconfig --list  $service                   | systemctl is-enabled $service        |
+| 查看哪些服务在运行 | service --status-all \| grep                 | systemctl list-unit -t service -a    |
+| 直接从脚本执行     | /etc/init.d/redis.service start/stop/restart |                                      |
+| 启动/停止/重启     | service $service start/stop/restart          | systemctl start/stop/restart $servic |
 PS:
 
 ​	1. ln -s /etc/init.d/$servived /etc/rc.d/rc3.d/S100$service
 
 ​	2.  ln -s /lib/systemd/system/redis.service /etc/systemd/system/multi-user.target.wants/redis.service 
 
-​	chkconfig --list           #列出在各级别是否运行	
-
-​        service --status-all    #[+] 表示正在运行   [-]表示停止运行   [?]表示编写的service脚本不支持status命令
-
 ##  SysVInit
+
+###  写脚本
+
+在目录/etc/init.d下编写服务start/stop/status脚本
+
+/etc/init        #配置文件.conf
+/etc/init.d     #bash文件 start stop restart status
+
+###  配置开机启动
+
+- 手动方式 
+
+  ​	 /etc/rc.d/rc[0-6].d  #快捷方式 ln -s /etc/init.d/redisd      /etc/rc.d/rc3.d/S100redis
+                                    \#多个运行级别,需要在多个rc[0-6]建立链接
+                                    \#	以S100为例, 
+                      		  \#		S表示开机启动; 可以替换为K表示开机关闭
+                                   \#		100表示启动顺序
+
+- 命令行方式 chkconfig     ubuntu为apt-get install sysv-rc-conf
+
+  ​	--list               [$service]                   #列出所有/某服务的运行级别  eg.  chkconfig --list httpd
+
+  ​	--add/--del    $service                     #设置开机启动                           eg. chkconfig --add httpd 
+
+  ​	[--level35]     $service   on/off        #设置开机启动                          eg. chkconfig --level35 http on
+
+- TUI方式redhat之ntsysv
+
+  ​	默认情况下，当前运行级别为多少，在ntsysv中设置的启动服务的级别便是多少
+      	比如，我当前的运行级别是3,那么我在伪图形界面中选择启动服务后，它的运行级别也会是3
+      	如果想自定义运行级别可使用ntsysv --level方式
+
+###  临时启动
+
+- 基础方式/etc/init.d/$service start
+- 快捷方式service $service start         //service就是一脚本sh文件
+
+###  命令总结
+
+chkconfig --list              [service]   #配置状态
+
+chkconfig --add/--del   $service
+
+chkconfig [--level35]    $service on/off
+
+service start/stop/restart/reload/status $service
+
+service --status-all            #运行状态[+] 表示正在运行   [-]停止运行   [?]编写的service脚本不支持status命令
 
 ##  systemd
 
-```
-ntsysv 图形界面
-chkconfig --list
-service --status-all 
-rpm -qa
-rpm -ql
-
-运行级别0：shutdown.target  		系统停机状态，系统默认运行级别不能设为0，否则不能正常启动
-运行级别1：rescue.target    		单用户工作状态，root权限，用于系统维护，禁止远程登陆
-运行级别2：multi-user.target		多用户状态(没有联网NFS)
-运行级别3：full multi-user.target		完全的多用户状态(有联网NFS)，登陆后进入控制台命令行模式
-运行级别4：multi-user.target		系统未使用，保留
-运行级别5：graphical.target 		X11控制台，登陆后进入图形GUI模式
-运行级别6：reboot.target    		系统正常关闭并重启，默认运行级别不能设为6，否则不能正常启动
-查看运行级别 who -r 或 runlevel
-切换运行级别 init N   //init 0关机   init 6重启
-
-
-SysVInit
-运行级别0 - /etc/rc.d/rc0.d/
-运行级别1 - /etc/rc.d/rc1.d/
-运行级别2 - /etc/rc.d/rc2.d/
-运行级别3 - /etc/rc.d/rc3.d/
-运行级别4 - /etc/rc.d/rc4.d/
-运行级别5 - /etc/rc.d/rc5.d/
-运行级别6 - /etc/rc.d/rc6.d/
-系统的默认运行级别在 SysVinit System 的 /etc/inittab 文件中指定。
-
-
-开机自动执行/etc/rc.local
-用户登录自动执行/etc/profile,然后在/etc/profile中遍历顺序执行/etc/profile.d中的文件
-/etc/init       //配置文件.conf
-/etc/init.d     //bash文件 start stop restart status
-
-
-手动添加开机启动
-    /etc/rc[0-6].d  //快捷方式 ln -s /etc/init.d/$servived /etc/rc.d/rc3.d/S100$service
-                   //多个运行级别,需要在多个rc[0-6]建立链接
-                    //	以S100为例, 
-                    //		S表示开机启动; 可以替换为K表示开机关闭
-                    //		100表示启动顺序
-命令chkconfig添加开机启动ubuntu为apt-get install sysv-rc-conf
-    chkconfig --list        #列出所有的系统服务在各运行级别是否运行情况
-    chkconfig --list httpd  #列出系统服务httpd在各运行级别是否运行情况
-    chkconfig --add httpd
-    chkconfig --del httpd
-    chkconfig --level35 http on
-    chkconfig --level35 http off
-    chkconfig httpd on
-    chkconfig httpd off
-redhat tui添加ntsysv
-	默认情况下，当前运行级别为多少，在ntsysv中设置的启动服务的级别便是多少
-    比如，我当前的运行级别是3,那么我在伪图形界面中选择启动服务后，它的运行级别也会是3
-    如果想自定义运行级别可使用ntsysv --level方式
-
-
-临时启动
-基础方式/etc/init.d/$service start
-快捷方式service $service start         //service就是一脚本sh文件
-
-
-systemd系统
-runlevel1.target – /etc/systemd/system/rescue.target
-runlevel2.target – /etc/systemd/system/multi-user.target.wants
-runlevel3.target – /etc/systemd/system/multi-user.target.wants
-runlevel4.target – /etc/systemd/system/multi-user.target.wants
-runlevel5.target – /etc/systemd/system/graphical.target.wants
-
-systemctl get-default  #系统的默认运行级别在/etc/systemd/system/default.target文件中指定
-systemctl set-default TARGET.target
-
-systemctl [option] [cmd]  
-	option
+systemctl [option][cmd]  cmd
+  option
         -t,--type=TYPE：          #可以过滤某个类型的 unit
             automount
             freedesktop
@@ -1020,78 +1003,230 @@ systemctl [option] [cmd]
             socket
             target
             timer
-        -a, --all
+        **-a, --all**    #如果添加--all则未启动的也会列出
     cmd
-		#Unit Commands
-         	 list-units   #不带参数逇默认命令.  列出已启动的unit 如果添加--all则未启动的也会列出
+	\#Unit Commands
+             **list-units **#不带参数   默认命令.  列出已启动的unit 如果添加--all则未启动的也会列出 service --status-all
              list-sockets 
              list-timers
-             list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁在使用这个 unit
-             start/stop/reload/restart/kill/status/is-active/show
-       	 #Unit File Commands
-        	list-unit-files：#根据/lib/systemd/system/目录内的文件列出所有的unit
-        	enable/disable/is-enabled/mask/unmask
+             list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁在使用这个unit
+             **start/stop/reload/restart/kill/status/is-active/show  $unit**                            #service start/stop
+       	 \#Unit File Commands
+        	**list-unit-files**              #根据/lib/systemd/system/目录内的文件列出所有的unit  chkconfig --list
+        	**enable/disable/is-enabled/mask/unmask  $unit**                                              #chkconfig --add/--del
         	get-default #系统的默认运行级别在/etc/systemd/system/default.target文件中指定
         	set-default TARGET.target
-         #Machine Commands
-         #Job Commands
-         #Snapshot Commands
-        	
+         \#Machine Commands
+         \#Job Commands
+         \#Snapshot Commands
+
+### unit-file
+
+systemctl list-unit-files
+
 systemctl is-enabled $service  #查看服务是否开机启动
-                               #若返回static, 则表示不可以自己启动,只能被其他enable的unit唤醒
-systemctl enable     $service
-systemctl disable    $service
+                                                     \#若返回static, 则表示不可以自己启动,只能被其他enable的unit唤醒
+systemctl enable       $service
+systemctl disable      $service
 systemctl mask	     $service   #注销
 systemctl unmask     $service   #取消注销
 
+###  unit
+
+systemctl list-units [-t service]   \[-a\]        #-,--type 
+
 systemctl start/stop/restart/kill $service
-systemctl reload     $service
-systemctl status     $service  #active inactive 
-                               #active(exited)只执行一次就退出 
-                               #active(waiting)等待比如打印    
+systemctl reload       $service
+systemctl status        $service  #active inactive 
+                                                     \#active(exited)只执行一次就退出 
+                                                     \#active(waiting)等待比如打印    
 systemctl is-active  $service
 systemctl show       $service  #列出配置
+
+```
+查看运行级别 who -r 或 runlevel
+切换运行级别 init N   //init 0关机   init 6重启
+
+SysVInit
+运行级别0 - /etc/rc.d/rc0.d/
+运行级别1 - /etc/rc.d/rc1.d/
+运行级别2 - /etc/rc.d/rc2.d/
+运行级别3 - /etc/rc.d/rc3.d/
+运行级别4 - /etc/rc.d/rc4.d/
+运行级别5 - /etc/rc.d/rc5.d/
+运行级别6 - /etc/rc.d/rc6.d/
+系统的默认运行级别在CentOS的/etc/inittab文件中指定。
+
+
+开机自动执行/etc/rc.local
+用户登录自动执行/etc/profile,然后在/etc/profile中遍历顺序执行/etc/profile.d中的文件
+
+systemd系统
+0：shutdown.target  		               系统停机状态，系统默认运行级别不能设为0，否则不能正常启动
+1：/etc/systemd/system/rescue.target    单用户工作状态，root权限，用于系统维护，禁止远程登陆
+2：/etc/systemd/system/multi-user.target.wants   多用户状态(没有联网NFS)
+3：full multi-user.targe                 完全的多用户状态(有联网NFS)，登陆后进入控制台命令行模式
+4：multi-user.target		                系统未使用，保留
+5：/etc/systemd/system/graphical.target.wants  X11控制台，登陆后进入图形GUI模式
+6：reboot.target    		系统正常关闭并重启，默认运行级别不能设为6，否则不能正常启动
+systemctl get-default  #系统的默认运行级别在/etc/systemd/system/default.target文件中指定
+systemctl set-default TARGET.target
 ```
 
 #  包管理
 
-| distribution发行版 |      |      |
-| ------------------ | ---- | ---- |
-| redhat/Fedora      | rpm  | yum  |
-| debian/ubuntu      | dpkg | apt  |
+##  源码包安装 
+
+​	一般为tar包,安装后都在/usr/local目录中
+
+​	./configure --prefix=/usr/local            /usr/local/bin /usr/local/lib /usr/local/etc /usr/local/man
+
+​	./configure --prefix=/usr/local/xxx      所有的都在/usr/local/xxx下
+
+​	修改man的路径   man.conf manpath.conf 添加一行 MANPATH	/usr/local/xxx/man
+
+##  二进制包安装
+
+| distribution发行版       |      |      |
+| ------------------------ | ---- | ---- |
+| redhat/Fedora/CenOS/SuSE | rpm  | yum  |
+| debian/ubuntu            | dpkg | apt  |
 
 由于rpm和dpkg不自动提供依赖包,所以一般只用于安装后的查询;安装前的查找包/更新/卸载由yum和apt负责
 
-## rpm
+###  rpm
 
--i    //install
+- 软件包名格式:   
 
--e  //erase
+  ​	软件名称-版本号-发布次数.适合linux系统.硬件平台.rpm  #ftp-0.17-74.fc27.i686.rpm 
 
--qa //all
+- 安装位置
 
--qi  增加i选项会得到pkg的相关信息
+  ​	/etc
 
--qp *.rpm 
+  ​	/usr/bin
 
--ql  nginx-1.16.1-1.el7.x86_64           #l表示list 列出pkg中的文件  -c限制为配置文件 -d限制为文档文件
+  ​	/usr/lib
 
--qf  /etc/nginx/nginx.conf                 #f表示file  nginx-1.16.1-1.el7.x86_64
+  ​	/usr/share/doc     #一些基本的软件使用手册与说明文件 
 
+  ​	/usr/share/man   #man手册
 
+- 安装后的信息都保存在/var/lib/rpm目录中
 
-##  yum
+  
 
-remove
+- -ivh    *.rpm            //install  v:verbose h:进度条
 
-update
+- -e       $pkgName    //erase
 
+- -Uvh   *.rpm           //update  更新
 
+  
 
-##  dpkg
+  rpm {-q|--query}  [select-options][query-options] [query-options] 
 
-- dpkg -l   package-name-pattern         List packages matching given pattern
+- **-qa**                     //all    Query all installed packages
+
+  ​                           \#yum list                  
+
+- -qp  *.rpm         //package Query an (uninstalled) package 
+
+- -q    $pkgName //查询是否安装了该软件
+
+- -qi   $pkgName //Display package information, including name, version, and description. 
+
+  ​                             \# yum info openssh-server
+
+- **-ql**   $pkgName  //list 列出该软件所有的文件与目录所在完整文件名 
+
+  ​			     \# yum install yum-utils && repoquery -ql dhcp
+
+- -qc   $pkgName  //configures list only configuration files (找出在/etc/下面的文件名而已) 
+
+- -qd   $pkgName  //document 列出该软件所有的帮助文档（List only documentation files） 
+
+- **-qf**    $filename   //file 根据文件名查询属于哪个已安装的包 List file in package
+
+  ​				\# yum whatprovidesd \`which sshd`
+
+  ​			        \# yum provides \`which sshd`
+
+- -qR   $pkgName //required List capabilities on which this depends. 
+
+  ​                             \# yum deplist openssh-server
+
+###  yum
+
+Server将pkg根据类别存放到不同Repo中,包的依赖的关系存放在xml中
+
+Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下载依赖文件xml于本地/var/cache/yum中
+
+- yum repolist all                                #查询有哪些库Repo可以install
+
+- yum search [all]  $pkgName          #
+
+- group
+
+  yum group list          
+
+  yum group install      $groupName
+
+  yum group remove   $groupName
+
+  yum group info          $groupName                    #yum group info "Development Tools"
+
+- list
+
+  yum list updates  #可供升级
+
+  yum list ssh*
+
+- 
+
+  yum install -y  $pkgName
+
+  yum remove   $pkgName
+
+  yum update   $pkgName
+
+只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
+
+ yum install --downloadonly dhcp
+ rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
+
+###  dpkg
+
+格式 Package_Version-Build_Architecture.deb  #nano_1.3.10-2_i386.deb 
+
+主要用于对已下载到本地和已安装的软件包进行管理 
+
+/etc/dpkg/dpkg.cfg              dpkg包管理软件的配置文件【Configuration file with default options】
+
+/var/log/dpkg.log                dpkg包管理软件的日志文件【Default log file (see /etc/dpkg/dpkg.cfg(5) 】
+
+/var/lib/dpkg/available       存放系统所有安装过的软件包信息【List of available packages.】
+
+/var/lib/dpkg/status            存放系统现在所有安装软件的状态信息和控制信息
+
+/var/lib/dpkg/info                备份安装软件包控制目录的控制信息文件
+
+/var/lib/dpkg/info/.list        记录安装文件的清单
+
+/var/lib/dpkg/info /.mdasums  保存文件的md5编码
+
+- dpkg -l [pkgName-pat]     #List packages matching given pattern
+
+  ​                    \#第一列期望Desired请求  iInstall安装 rRemove下载 pPurge清除 hHol锁定软件版本
+
+  ​                    \#第二列请求结果Status状态 nNot未安装 iInst已安装 cConf-files以前安装过并卸载剩下配置文件
+
+  ​                    \#                       uUnpacked被解包但未配置 fHalf-conf试图配置但失败 hHalf-inst试图安装但失败
+
+  ​	           \#                        wTrig-await触发器等待 tTrig-pend触发器未决        
+
 - dpkg **-s**  package-name...                     Report status 查看描述 依赖dep 大小size
+- dpkg -p package-name                         --print-avail 显示包的具体信息
 - dpkg **-L** package-name...                      正查  List files 列举安装了哪些文件到文件系统
 - dpkg **-S**  filename-search-pattern...    反查  Search 查询某一文件来源于哪一安装包
 
@@ -1099,67 +1234,59 @@ update
 
 dpkg -I *.deb                                                 Show information about a package.
 
+dpkg --unpack *.deb                                     解开
+
+dpkg --configure *.deb                                配置
+
 dpkg -c *deb                                                  List contents of a deb package rpm -qlp 
 
 安装卸载deb
 
 dpkg -i *.deb                                                 文件的安装
-dpkg -r *.deb                                                文件的卸载;
-dpkg -P                                                          彻底的卸载 包括软件的配置文件等等
+dpkg -r  pkgName                                         下载remove,但保留配置文件
+dpkg -P pkgName                                         彻底卸载Purge 包括软件的配置文件等等
 
-##  apt
+###  apt
 
 官方包源网址       http://packages.ubuntu.com/ 
 
+镜像站点               /etc/apt/sources.list
+
+镜像文件索引位置 /var/lib/apt/lists
+
 下载保存位置       /var/cache/apt/archives 
 
-安装位置              /usr/share/applications 
-
 ```
+apt-get update     更新源   依据/etc/apt/sources.list从镜像站点更新本地文件索引/var/lib/apt/lists
+apt-get dist-upgrade                  根据source.list升级系统到相应的发行版
+apt-get upgrade                       更新所有已安装的包
+apt-get dselect-upgrade               使用 dselect 升级             
+
 apt-cache search   package   搜索包
 apt-cache show     package   获取包的相关信息，如说明、大小、版本等
-apt-cache depends  package   了解使用依赖
-apt-cache rdepends package   了解某个具体的依赖
+apt-cache showpkg  package   获取包的大致信息
+apt-cache depends  package   正向了解这个包使用了哪些依赖
+apt-cache rdepends package   反向了解哪个包使用了这个包
 
-apt-get install              package  安装包
+apt-get 
+	-u                          #显示软件更新列表
+	-y                          #对所有的询问选择是
+
+apt-get -d                   package   仅下载不安装
+
+apt-get install              package=version  安装包
 apt-get install -f           package  强制安装
 apt-get install --reinstall  package  重新安装包
 
 apt-get remove         package        删除包
-apt-get remove --purge package        删除包，包括删除配置文件等
+apt-get purge          package        删除包，包括删除配置文件等
 
-apt-get dist-upgrade                  升级系统
-apt-get update                        更新源
-apt-get upgrade                       更新已安装的包
-apt-get dselect-upgrade               使用 dselect 升级
-
-apt-get autoremove                    自动删除不需要的包
-apt-get clean && apt-get autoclean    清理下载文件的存档
+apt-get autoclean                     清理那些已经被removed/purged软件的安装包*.deb,以释放磁盘空间
+apt-get clean                         清理那些已经被安装了但还有安装包的*.deb,以释放磁盘空间
 
 apt-get build-dep package             安装相关的编译环境
 apt-get source package                下载该包的源代码
 apt-get check                         检查是否有损坏的依赖
-```
-
-```
- * base: mirror.bit.edu.cn
- * epel: hkg.mirror.rackspace.com
- * extras: mirrors.aliyun.com
- * updates: mirror.bit.edu.cn
- 
- # 只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
- yum install --downloadonly dhcp
- rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
- 
- 正查pkg里有何文件
- yum install yum-utils
- repoquery -ql dhcp
- 反差文件来自哪个pkg
- yum whatprovidesd "*bin/nc"
- 
- yum deplist openssh-server
- yum info openssh-server
- yum provides openssh-server   // 
 ```
 
 #  Tool
@@ -1181,13 +1308,6 @@ pkill –USR1 –n –x dd  #查看dd进度
 
 ##  strace/ltrace
 
-##  timedatectl
-
-```
-timedatectl status
-timedatectl set-ntp true
-```
-
 ##  arp
 
 ​	address resolution protocol 将IP->MAC物理地址的转化
@@ -1196,7 +1316,7 @@ timedatectl set-ntp true
 arp -n | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4  #linux命令查询局域网内所有主机并按ip排序
 ```
 
-
+##hostname
 
 ```
 主机名
@@ -1206,11 +1326,15 @@ arp -n | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4  #linux命令查询局域网内所�
 	　　 HOSTNAME=xxxx       #xxxx为新设置的主机名。
 
 	命令
-		hostname
-			查看
-			修改 
-				hostname yy
+		查看
+			hostname
+		修改 
+			hostname yy
+```
 
+
+
+```
 IP
 	本机
 		配置文件
@@ -1484,5 +1608,12 @@ alias fgrep='fgrep --color=auto '
 
 stty -echo    #关闭回显。比如在脚本中用于输入密码时。
 stty echo     #打开回显。
+
+```
+
+解决grep无header  
+
+```
+($cmd |head -n 1)  && ($cmd | grep xx)   #第一步解决输出head的问题
 ```
 
