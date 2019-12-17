@@ -675,6 +675,41 @@ netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
 lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2 # 显示当前正在使用网络的进程
 ```
 
+##  nc/ncat/netcat
+
+```
+
+```
+
+##  nmap
+
+```
+network mapper
+open:
+closed:接收nmap探测报文并作出响应,但没有应用在监听
+filtered:被过滤而无法确定是否open/closed,可能是由于防火墙路由规则等
+unfiltered:未被过滤意味着端口可访问而无法确定是否open/closed
+open|filtered:无法确定是open还是filtered,例如开放的port不响应
+closed|filtered:无法确定是open还是filtered
+
+#默认值扫描1-1024再加上nmap-service列出的端口,所以最好自定义扫描端口
+nmap [-sU] [-Pn] $ip-range [-p$port-range] 
+	sU      #UDP扫描,默认TCP
+	Pn		#不对主机进行ping,即不判断主机是否在线
+    ip-range
+        10.0.1.161	  				#192.168.1.100
+        10.0.1.161 10.0.1.162
+        10.0.1.161,162
+        10.0.1.161-200
+        10.0.3.0/24
+        -iL ip.txt
+        --exclude 10.0.1.161,10.0.1.171-172
+        --excludefile ex_ip.txt
+    port-range
+        1-65535
+        1-5000,6000,7000-8000
+```
+
 #  性能状态
 
 ##  ps
