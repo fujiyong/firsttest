@@ -1215,7 +1215,9 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
 
 /var/lib/dpkg/info /.mdasums  保存文件的md5编码
 
-- dpkg -l [pkgName-pat]     #List packages matching given pattern
+- dpkg **-l** [pkgName-pat]     #List packages matching given pattern
+
+  ​                    \#dpkg-query: no packages found matching logwatch
 
   ​                    \#第一列期望Desired请求  iInstall安装 rRemove下载 pPurge清除 hHol锁定软件版本
 
@@ -1226,8 +1228,15 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
   ​	           \#                        wTrig-await触发器等待 tTrig-pend触发器未决        
 
 - dpkg **-s**  package-name...                     Report status 查看描述 依赖dep 大小size
+
+  ​                                 \#dpkg-query: package 'logwatch' is not installed and no information is availabl
+
 - dpkg -p package-name                         --print-avail 显示包的具体信息
+
 - dpkg **-L** package-name...                      正查  List files 列举安装了哪些文件到文件系统
+
+  ​                                                                  \#dpkg-query: package 'logwatch' is not installed
+
 - dpkg **-S**  filename-search-pattern...    反查  Search 查询某一文件来源于哪一安装包
 
 查看没有安装的deb包命令
@@ -1257,9 +1266,11 @@ dpkg -P pkgName                                         彻底卸载Purge 包括
 下载保存位置       /var/cache/apt/archives 
 
 ```
-apt-get update     更新源   依据/etc/apt/sources.list从镜像站点更新本地文件索引/var/lib/apt/lists
-apt-get dist-upgrade                  根据source.list升级系统到相应的发行版
+apt-get update     #更新源   可以频繁操作,类似于保存文件Ctl-s的频率
+                   #依据/etc/apt/sources.list从镜像站点更新本地文件索引/var/lib/apt/lists
+
 apt-get upgrade                       更新所有已安装的包
+apt-get dist-upgrade                  根据source.list升级系统到相应的发行版
 apt-get dselect-upgrade               使用 dselect 升级             
 
 apt-cache search   package   搜索包
@@ -1303,6 +1314,14 @@ pkill –USR1 –n –x dd  #查看dd进度
 ```
 
 ##  tcpdump
+
+##  pstree -c -p -al
+
+```
+-c      #disable compat 展开不压缩
+-p      #processID  显示进程ID
+-a -l   #arguments long当参数宽度超过环境变量COLUMNS(132)默认会截断,long就不会了
+```
 
 ##  pstack
 
@@ -1576,17 +1595,50 @@ man ascii                          # 显示 ascii 表
 ##  登录用户
 
 ```
-last {user}
-lastlog {user}
+显示以往用户登录情况
+    last    [user]   #读取文件/var/log/wtmp,显示用户每次登录
+    lastb            #读取文件/var/log/btmp, 显示用户登录失败
+    lastlog [user]   #读取文件/var/log/lastlog,显示所有用户最后一次登录
+        -u  $user
+        -b  $n       #指定天数前
+        -t  $n       #指定天数以来
+显示当前用户登录情况
+    w/who/user      #显示在线用户
 
-w/who/user      #显示在线用户
+write {user}    #向某人发送一段话
 
 whoami
 finger {user}   # 显示某用户信息，包括 id, 名字, 登陆状态等
 id {user}       # 查看用户的 uid，gid 以及所属其他用户组
-
-write {user}    #向某人发送一段话
 ```
+
+##  crontab
+
+##  syslog
+
+```
+服务端
+	进程       syslogd
+	配置文件   /etc/syslog.conf
+	日志文件   /var/log/message
+	协议       UDP
+客户端命令
+	logger    #eg. logger [-t $TAG]  this is a msg send to log
+	
+*.info;mail.none;authpriv.none;cron.none                /var/log/messages
+authpriv.*                                              /var/log/secure
+mail.*                                                  -/var/log/maillog
+cron.*                                                  /var/log/cron
+uucp,news.crit                                          /var/log/spooler
+```
+
+##  logrotate
+
+```
+配置文件 /etc/logrotate.conf
+```
+
+##  logwatch
 
 # FAQ
 
