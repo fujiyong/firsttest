@@ -6,9 +6,12 @@
 whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
 man yum.conf   #查看配置文件的说明
 
-ubuntu Debian
-centos fedora redhat
-mac    freeBSD
+linux各家族
+    Debian	ubuntu	linux Mint
+    fedora	RHEL	centos  	Oracle Linux
+    SUSE    SLES	OpenSUSE
+FreeBSD各家族
+    freeBSD	mac    
 
 col  vs column -t
 
@@ -675,11 +678,15 @@ netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
 lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2 # 显示当前正在使用网络的进程
 ```
 
-##  nc/ncat/netcat
+##  nc/netcat
 
 ```
 
 ```
+
+ncat
+
+socat
 
 ##  nmap
 
@@ -769,6 +776,11 @@ vmstat [delay [count]]
 ##  swap
 
 ```
+dd if=/dev/zero of=/swapfile bs=1024 count=262144 #创建256M的文件
+mkswap /swapfile #将这个文件变成swap文件
+swapon /swapfile #启用这个swap文件
+/swapfile swap swap default 0 0 #编辑/etc/fstab文件,每次开机自动加载swap文件
+
 swapoff -a  && swapon -a
 ```
 
@@ -1200,30 +1212,43 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
 - yum repolist all                                #查询有哪些库Repo可以install
 
 - yum search [all]  $pkgName          #
+- 
 
-- group
+  yum check-update  #列出所有可更新的软件
 
-  yum group list          
-
-  yum group install      $groupName
-
-  yum group remove   $groupName
-
-  yum group info          $groupName                    #yum group info "Development Tools"
-
+  yum update             #更新所有软件
 - list
+
+  yum list                  #列出所有可安装的软件
 
   yum list updates  #可供升级
 
-  yum list ssh*
+  yum list ssh*        #installed Packages已安装和可升级/安装Available Packages
 
+- group
+  yum group list          
+  yum group install      $groupName
+  yum group remove   $groupName
+  yum group info          $groupName                    #yum group info "Development Tools"
 - 
-
   yum install -y  $pkgName
-
   yum remove   $pkgName
-
   yum update   $pkgName
+- clean
+
+  yum clean packages
+
+  yum clean headers
+
+  yum clean oldheaders
+
+  yum clean 
+
+  yum clean all == yum clean packages; yum clean oldheaders
+
+yum makecache
+
+
 
 只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
 
@@ -1343,9 +1368,44 @@ apt-get check                         检查是否有损坏的依赖
 
 ##  fdisk-mount-dd-unmount
 
+
+
 ```
-dd bs=4M if=/path/to/image of=/dev/sdx
-pkill –USR1 –n –x dd  #查看dd进度
+#disk dump(destory)
+dd if=/path/to/image of=/dev/sdx bs=4M count=1  
+	#if inputfile默认为stdin
+    #	skip=nBlocks  输入跳过几个block
+	#of outputfile默认为stdout
+    #	seek=nBlocks  输出跳过几个block
+	#bs blockSize 一次同时指定读取输出多大的size
+	#	ibs
+	#	obs
+	#count=nBlock 读取多少block
+	#cbs=nByets   转换区的大小
+	#conv=
+	#	lcase     转换为小写
+	#   ucase     转化为大小
+	#	noerror   出现错误不停止
+pkill –USR1 –n –x dd  #查看dd进度 或 ubuntu的pv命令
+
+dd if=/dev/zero bs=1024 count=1000000 of=/root/1Gb.file #通过命令的执行时间可以计算出硬盘的读写速度
+dd if=/root/1Gb.file bs=64k | dd of=/dev/null
+
+dd if=/dev/zero bs=1024 count=1000000 of=/root/1Gb.file #通过调整blocksize可以确定硬盘的最佳块大小
+dd if=/dev/zero bs=2048 count=500000 of=/root/1Gb.file
+dd if=/dev/zero bs=4096 count=250000 of=/root/1Gb.file
+
+#远程备份
+##源主机
+dd if=/dev/hda bs=1024 | netcat $remote_dst_ip 1234
+##目的主机
+netcat -l -p 1234 | dd of/dev/hdc bs=1024
+netcat -l -p 1234 | bzip2 > partition.img
+
+/dev/null  可以吸收无穷尽的值
+/dev/zero  可以读出无穷尽的0x0值,一般用于填充文件
+/dev/urandom 可以读出无穷尽的随机值,一般用户毁坏文件,rm还是可以恢复的  
+#dd if=/dev/urandom of=/dev/hda1
 ```
 
 ##  tcpdump
@@ -1513,6 +1573,19 @@ rsync -avzh   --verbose  -h进度条
 ```
 
 #  za
+
+##  df/du
+
+```
+df
+	-a  #默认不含特殊内存 swap
+	-T  #列出文件分区格式
+	-h/-i #以inode个数形式统计, 默认以容量统计 
+du
+	-a   #默认仅统计文件量,而没有统计到子目录
+	-s   #列出总量,而不是分别统计各子目录
+	-S   #不统计子目录
+```
 
 ##  目录
 
