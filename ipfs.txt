@@ -91,6 +91,7 @@ Android
 				# publish之后就可以查看根上传的根目录的hash与ipfs id的对应关系
 				ipfs name resolve `ipfs id`  #返回根目录的hash值对应的哪个publish操作时的hash值  ipns->ipfs之间的映射
 			dns link 使用域名来代替ipns的peer hashID, 解决了需要记忆跟节点hash的问题
+				比ipns更快
 				ipfs cat /ipfs/ipfs.$raw_dir_root_name.org/$raw_dir_name/$file_name   //使用域名系统dns,保留原来的目录结构 
 			                                                                      	  //dns系统需要添加一条记录txt记录
 			                                                                          //   记录类型 txt
@@ -208,6 +209,8 @@ CID   内容识别符 实际就是返回的hash值 如/ipfs/xxxxxxx中的xxxx
 	传递数据	     libp2p	       用于适配各种各样的传输层协议和连接众多复杂的设备
 		网络层Network   establishing connections between peers                       config文件里的bootstrap节点定义了ip/协议          
 		路由层Routing   locating peers and objects              DHT结构/mdns/snr/dns                  value长度小的值直接存储到dht上;更大的值,dht只存储值索引,索引就是一个节点的NodeID
+		            	#节点路由 查找其他节点
+						#内容寻址 查找分发到ipfs的数据
 		交换层Exchange  block transport and replication         BitSwap协议/BitTorrent
 	结构数据  IPLD 
 		对象层Object                                            MerkleDAG/IPLD        个人理解单节点MerkleDAG, 节点之间IPLD CID
@@ -219,15 +222,52 @@ CID   内容识别符 实际就是返回的hash值 如/ipfs/xxxxxxx中的xxxx
 		FileCoin                                                激励 交易
 
 
+CID
+	V0  default
+		格式  base58-btc
+			<cidv0> ::= <multibase-prefix><cid-version><multicodec-content-type><multihash-content-address>
+					    base58-btc         cidv0       protobuf-mda             sha256
+		Qm     len()=46
+	V1	适用于file(MFS) + object
+		格式  
+			<cidv1> ::= <multibase-prefix><cid-version><multicodec-content-type><multihash-content-address>
+DHT
+	peer/node
+		角色
+			forward
+				req
+				resp
+			answer
+		优点
+			log2(n)
+			fault             tolerance via redundancy when peer unexpectedly leave or join
+			slow/unavaiblable tolerance 
+			load balancing
+	算法  kademlia (kad)  卡德里亚
+	内容
+						key			value
+						contentID   peerID1,peerID2
+		ipnsRecord      peerID      rootHashID
+
+ 
+ipfs cat       $hash #可以获取以$hash为根节点的整个sub-dag
+ipfs block get $hash #只可以获取某个block为hash的1个block的数据
+
+ipfs ls           $hash  #可以获取dag树中all children的hash和size
+ipfs object links $hash  #可以获取dag树中all children的hash和size
+ipfs ref          $hash  #可以获取dag树中all children的hash
 
 
+block  vs  object
+	block  does not necessary have any sort of format associateed with it. 即是raw data,   不能ipfs cat,只能ipfs block get 
+	object must follow dag protobuf data format                            即是unixfs data format
 
 
 ipfs dag
 	put        //echo  "ccccc" | ipfs dag put
 	get        //ipfs dag get $hash
 	resolve
-ipfs block 操作raw ipfs blocks的plumbing command 底层命令
+ipfs block 只操作这个block,不操作子block  操作raw ipfs blocks的plumbing command 底层命令
 	put         //echo "aaaa" | ipfs block put
 	get  $hash
 	rm   $hash
@@ -263,7 +303,7 @@ bootstrap 修改配种文件中的启动节点
 	rm  /ip4/$ip4/tcp/4001/ipfs/`ipfs id`
 	rm all
 	list
-swarm	在ipfs运行时执行命令
+swarm	在ipfs运行时执行命令  监听端口4001
 	addrs   
 		listen   lists all interface addresses the node is listening on
 		local    lists all local listening addresses announced to the network

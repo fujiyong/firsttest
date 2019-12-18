@@ -32,6 +32,7 @@ cat /etc/shells   #查看系统支持的shell
 chsh -l           #等价cat /etc/shells
 echo $SHELL       #查看使用哪种shell  env | grep SHELL
 chsh -s /bin/bash #更改默认shell
+export PS1="[\u@\h \W $(getGitBranchFuncName) ]$\n$"    #man bash 搜索PS1,根据提示搜索PROMPTING
 
 主要就是为了设置PS1这个环境变量,也就是shell输入命令的前缀
 /etc/profile                                 #system-wide .profile file for the Bourne shell
@@ -1366,48 +1367,6 @@ apt-get check                         检查是否有损坏的依赖
 
 ##  nm -CA 
 
-##  fdisk-mount-dd-unmount
-
-
-
-```
-#disk dump(destory)
-dd if=/path/to/image of=/dev/sdx bs=4M count=1  
-	#if inputfile默认为stdin
-    #	skip=nBlocks  输入跳过几个block
-	#of outputfile默认为stdout
-    #	seek=nBlocks  输出跳过几个block
-	#bs blockSize 一次同时指定读取输出多大的size
-	#	ibs
-	#	obs
-	#count=nBlock 读取多少block
-	#cbs=nByets   转换区的大小
-	#conv=
-	#	lcase     转换为小写
-	#   ucase     转化为大小
-	#	noerror   出现错误不停止
-pkill –USR1 –n –x dd  #查看dd进度 或 ubuntu的pv命令
-
-dd if=/dev/zero bs=1024 count=1000000 of=/root/1Gb.file #通过命令的执行时间可以计算出硬盘的读写速度
-dd if=/root/1Gb.file bs=64k | dd of=/dev/null
-
-dd if=/dev/zero bs=1024 count=1000000 of=/root/1Gb.file #通过调整blocksize可以确定硬盘的最佳块大小
-dd if=/dev/zero bs=2048 count=500000 of=/root/1Gb.file
-dd if=/dev/zero bs=4096 count=250000 of=/root/1Gb.file
-
-#远程备份
-##源主机
-dd if=/dev/hda bs=1024 | netcat $remote_dst_ip 1234
-##目的主机
-netcat -l -p 1234 | dd of/dev/hdc bs=1024
-netcat -l -p 1234 | bzip2 > partition.img
-
-/dev/null  可以吸收无穷尽的值
-/dev/zero  可以读出无穷尽的0x0值,一般用于填充文件
-/dev/urandom 可以读出无穷尽的随机值,一般用户毁坏文件,rm还是可以恢复的  
-#dd if=/dev/urandom of=/dev/hda1
-```
-
 ##  tcpdump
 
 ##  pstree -c -p -al
@@ -1681,8 +1640,6 @@ trap "" sig1 sig2         # 在脚本中屏蔽某信号
 trap - sig1 sig2          # 恢复默认信号处理行为
 ```
 
-
-
 ##  系统版本
 
 ```
@@ -1691,6 +1648,48 @@ uname -a
 lsb_release -a     #yum search lsb而不是yum search lsb_release
     查看版本CentOS Redhat Ubuntu
 hostname
+```
+
+##  系统启动
+
+##  fdisk-mount-dd-unmount
+
+```
+#disk dump(destory)
+dd if=/path/to/image of=/dev/sdx bs=4M count=1  
+	#if inputfile默认为stdin
+    #	skip=nBlocks  输入跳过几个block
+	#of outputfile默认为stdout
+    #	seek=nBlocks  输出跳过几个block
+	#bs blockSize 一次同时指定读取输出多大的size
+	#	ibs
+	#	obs
+	#count=nBlock 读取多少block
+	#cbs=nByets   转换区的大小
+	#conv=
+	#	lcase     转换为小写
+	#   ucase     转化为大小
+	#	noerror   出现错误不停止
+pkill –USR1 –n –x dd  #查看dd进度 或 ubuntu的pv命令
+
+dd if=/dev/zero bs=1024 count=1000000 of=/root/1Gb.file #通过命令的执行时间可以计算出硬盘的读写速度
+dd if=/root/1Gb.file bs=64k | dd of=/dev/null
+
+dd if=/dev/zero bs=1024 count=1000000 of=/root/1Gb.file #通过调整blocksize可以确定硬盘的最佳块大小
+dd if=/dev/zero bs=2048 count=500000 of=/root/1Gb.file
+dd if=/dev/zero bs=4096 count=250000 of=/root/1Gb.file
+
+#远程备份
+##源主机
+dd if=/dev/hda bs=1024 | netcat $remote_dst_ip 1234
+##目的主机
+netcat -l -p 1234 | dd of/dev/hdc bs=1024
+netcat -l -p 1234 | bzip2 > partition.img
+
+/dev/null  可以吸收无穷尽的值
+/dev/zero  可以读出无穷尽的0x0值,一般用于填充文件
+/dev/urandom 可以读出无穷尽的随机值,一般用户毁坏文件,rm还是可以恢复的  
+#dd if=/dev/urandom of=/dev/hda1
 ```
 
 ##  ascii
