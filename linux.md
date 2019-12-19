@@ -1470,7 +1470,7 @@ IP
 		先查询本地host 本地dns 根域dns服务器 .com服务器 baidu.com服务器
 		
 	命令 bind-utils
-		dig
+		dig  domain information groper
 		host  www.google.com
 		nslookup    直接模式一般用于查询域名对应的IP   交互模式用于对DNS服务器进行测试
 			nslookup www.sohu.com.cn

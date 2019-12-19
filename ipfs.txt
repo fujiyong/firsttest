@@ -66,6 +66,7 @@ Android
 												   #	/ipfs/<hash-of-bar>/bar/baz
 												   #    /ipfs/<hash-of-bar>/baz
 												   #    /ipfs/<hash-of-baz>
+				ipfs ls -v  $bigFile_hash          # 返回各个子块的hash size
 				ipfs ls -v  $dir_hash2             #返回文件内容的hash1 文件size 文件名
 				ipfs cat    $dir_hash2/$file_name  #不能 ipfs cat $dir_hash
 				ipfs cat    $file_hash
@@ -110,6 +111,7 @@ Android
 		通过add添加的文件默认就是pin过的
 		文件本地持久化 ipfs pin ls        #查看哪些文件是在本地的,没有从远程服务器下载下载.pin将长期保留在本地,而不会被垃圾回收
                       ipfs pin ls [-t | --type=all/direct/indirect/recursive] $hash  #查看$hash对应的文件时候被pin
+					  			direct只有该块与其他块无关联时才是  即 使用ipfs block put 才是direct
 
                       ipfs pin add [-r | --recursive=true] $hash #一般添加其他ipfs节点的根目录hash值, 这样就将remote host的文件系统同步到本地 以便加速访问
 
@@ -300,8 +302,9 @@ ipfs files (MFS)  CIDV1
 
 bootstrap 修改配种文件中的启动节点
 	add /ip4/$ip4/tcp/4001/ipfs/`ipfs id`    #multiAddr
+		--default
 	rm  /ip4/$ip4/tcp/4001/ipfs/`ipfs id`
-	rm all
+	rm --all
 	list
 swarm	在ipfs运行时执行命令  监听端口4001
 	addrs   
