@@ -6,14 +6,29 @@
 whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
 man yum.conf   #查看配置文件的说明
 
-linux各家族
-    Debian	ubuntu	linux Mint
-    fedora	RHEL	centos  	Oracle Linux
-    SUSE    SLES	OpenSUSE
-FreeBSD各家族
-    freeBSD	mac    
+linux各家族  Yellow dog Updater, Modified
+    Debian	ubuntu	linux Mint                   apt-get install jq      advanced package tool
+    fedora	RHEL	centos  	Oracle Linux     dnf     install jq     Dandified YUM
+    SUSE    SLES	OpenSUSE                     zypper   install jq
+    Arch                                          pacman   -Sy    jq     packageMan
+BSD各家族
+    freeBSD	                                     pkg install jq
+    mac                                          brew install jq
+    solaries                                     pkgutil -i jq
+ windows                                         chocolatey install jq
 
 col  vs column -t
+
+命令自动完成
+    compgen 
+        -c #有哪些可用命令complete
+        -b #所有bash内置命令
+        -k #所有bash关键字
+        -A #所有函数
+        #compgen -w "aa ab bb cc" --"a" #从"aa ab bb cc"中找出以"a"开始的单词
+    complete  -F $func	$cmd #当执行命令cmd时,该命令的参数由函数$func获取
+    compopt
+    	-o nospace
 
 man bash | col -bx > bash.txt
 方法1:转化为md
@@ -952,10 +967,10 @@ firewall-cmd --list-all
 firewall-cmd --query-port=8080/tcp
 
 
-ufw disable/enabel          #设置开机是否启动
+ufw disable/enable          #设置开机是否启动
 ufw default allow/deny      #设置默认策略, ufw默认不允许外部访问,但能访问外部
 
-ufw status            	    #inactive
+ufw status verbose          #inactive
 
 ufw        allow $port
 ufw delete allow $port

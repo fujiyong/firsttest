@@ -19,6 +19,7 @@ Android
 
 
 使用
+	source misc/completion/ipfs-completion.bash  #命令自动完成
 	帮助
 		ipfs --help
 		ipfs commands
@@ -28,7 +29,10 @@ Android
 		默认数据文件夹是~/.ipfs,通过环境变量IPFS_PATH修改
 
 	初始化	
-		ipfs init -b -e -p  //b bytes秘钥长度  eemptyProject没有帮助文件 -p profile server/test/dedfault-store
+		ipfs init -b -e -p  //
+			-b bytes秘钥长度
+			-e emptyProject没有帮助文件
+			-p profile server/test/default-store
 			#ls -1 $IPFS_PATH
 			blocks            #cid目录
 			config            #配置文件
@@ -43,7 +47,7 @@ Android
 		允许api监听    ipfs config --json Addresses.API '"/ip4/0.0.0.0/tcp/5001"'              #默认只能通过127.0.0.1:5001本机访问
 		配置网关监听   ipfs config --json Addresses.Gateway '"/ip4/0.0.0.0/tcp/8080"'          #默认只能通过127.0.0.1:8080本机访问
 	启动
-		ipfs daemon  --enable-pubsub-experiment
+		ipfs daemon  --enable-pubsub-experiment --init --migrate
 	管理界面 查看系统状态 管理文件 配置系统
 		http://192.168.1.152:5001/webui
 	网关(ReadOnly)
