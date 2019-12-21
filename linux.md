@@ -864,6 +864,10 @@ iptraf -i eth0 //某端口统计
 
 - sudo
 
+  让大家一起使用root用户, 分辨不出不同的用户的操作.
+
+  为了让用户使用root权限,又为了分辨不同的用户,产生了sudo命令,又称为受限的root
+
   - sudo -l                                  #查看以超级用户运行时的权限,即当用户在root组中的权限
   - sudo -u yy $cmd                #以超级用户yy
 
@@ -1771,7 +1775,6 @@ alias ls='ls --color=auto '
 alias grep='grep --color=auto '
 alias egrep='egrep --color=auto '
 alias fgrep='fgrep --color=auto '
-
 ```
 
 命令行中输入错误按删除键多出字符^H
@@ -1785,9 +1788,16 @@ stty echo     #打开回显。
 
 ```
 
-解决grep无header  
+##  解决grep无header  
 
 ```
 ($cmd |head -n 1)  && ($cmd | grep xx)   #第一步解决输出head的问题
+```
+
+##  如何判定应用是否绑定127.0.0.1
+
+```
+telnet 127.0.0.1 $port  #OK
+telnet $ip       $port  #Fail ip为为127.0.0.1
 ```
 

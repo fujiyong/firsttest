@@ -47,7 +47,7 @@ Android
 		允许api监听    ipfs config --json Addresses.API '"/ip4/0.0.0.0/tcp/5001"'              #默认只能通过127.0.0.1:5001本机访问
 		配置网关监听   ipfs config --json Addresses.Gateway '"/ip4/0.0.0.0/tcp/8080"'          #默认只能通过127.0.0.1:8080本机访问
 	启动
-		ipfs daemon  --enable-pubsub-experiment --init --migrate
+		ipfs daemon  --enable-pubsub-experiment --init --migrate  --enable-gc
 	管理界面 查看系统状态 管理文件 配置系统
 		http://192.168.1.152:5001/webui
 	网关(ReadOnly)
