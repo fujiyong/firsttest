@@ -1191,35 +1191,35 @@ systemctl set-default TARGET.target
 
   
 
-  rpm {-q|--query}  [select-options][query-options] [query-options] 
+  rpm {-q|--query}  [select-options][query-options] [query-options]
 
-- **-qa**                     //all    Query all installed packages
+- -q    $pkgName #查询是否安装了该软件
+
+- -qp  *.rpm         #package Query an (uninstalled) package
+
+- **-qa**                     #all    Query all installed packages
 
   ​                           \#yum list                  
 
-- -qp  *.rpm         //package Query an (uninstalled) package 
+- -qi   $pkgName #Display ***installed*** package information, including name, Install Date, and description. 
 
-- -q    $pkgName //查询是否安装了该软件
+  ​                             \# yum ***info*** openssh-server
 
-- -qi   $pkgName //Display package information, including name, version, and description. 
-
-  ​                             \# yum info openssh-server
-
-- **-ql**   $pkgName  //list 列出该软件所有的文件与目录所在完整文件名 
+- **-ql**   $pkgName  #list 列出该软件所有的文件与目录所在完整文件名 
 
   ​			     \# yum install yum-utils && repoquery -ql dhcp
 
-- -qc   $pkgName  //configures list only configuration files (找出在/etc/下面的文件名而已) 
+- -qc   $pkgName  #configures list only configuration files (找出在/etc/下面的文件名而已) 
 
-- -qd   $pkgName  //document 列出该软件所有的帮助文档（List only documentation files） 
+- -qd   $pkgName  #document 列出该软件所有的帮助文档（List only documentation files） 
 
-- **-qf**    $filename   //file 根据文件名查询属于哪个已安装的包 List file in package
+- **-qf**    $filename   #file 根据文件名查询属于哪个已安装的包 List file in package
 
   ​				\# yum whatprovidesd \`which sshd`
 
   ​			        \# yum provides \`which sshd`
 
-- -qR   $pkgName //required List capabilities on which this depends. 
+- -qR   $pkgName #required List capabilities on which this depends. 
 
   ​                             \# yum deplist openssh-server
 
@@ -1264,7 +1264,7 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
 
   yum clean 
 
-  yum clean all == yum clean packages; yum clean oldheaders
+  yum clean all == yum clean packages &&  yum clean oldheaders
 
 yum makecache
 
@@ -1274,6 +1274,18 @@ yum makecache
 
  yum install --downloadonly dhcp
  rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
+
+
+
+流程
+
+​	rmp -q          $pkgName   #查询是否安装了包 rpm -qa | grep pkgName
+
+​	yum search  $pkgName 
+
+​	yum info       $pkgName
+
+​	yum install    $pkgName
 
 ###  dpkg
 
@@ -1378,6 +1390,13 @@ apt-get clean                         清理那些已经被安装了但还有安
 apt-get build-dep package             安装相关的编译环境
 apt-get source package                下载该包的源代码
 apt-get check                         检查是否有损坏的依赖
+
+流程
+    apt update
+    apt list     $pkgName  #dpkg -l $pkgName
+    apt search   $pkgName
+    apt show     $pkgName  #apt showsrc $pkgName
+    apt install  $pkgName
 ```
 
 #  Tool
@@ -1771,6 +1790,8 @@ uucp,news.crit                                          /var/log/spooler
 ```
 安装
 	阿里云加速
+启动docker服务
+	systemctl start docker
 repo
 image
 	制作dockfile 都是相对contain来说
