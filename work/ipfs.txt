@@ -195,6 +195,14 @@ multi-format: multi是由多部分组成的,类似于通讯协议里的TLV结构
 Self Describing format: 指的是TLV中说明了Type length
 Self-Certifying File System: 指的是TLV中V的自我签名/摘要验证
 
+mDNS  multi-DNS 多播DNS 
+	查询获取局域网中提供某服务的IP,然后与之通讯
+	协议 UDP
+	端口 5353
+	主动方  主动在局域网中广播自己有某服务    消息内容 {$serviceName:$hostName-TTL}
+	被动方  主动在局域网中广播询问谁有某服务  
+
+CID   内容识别符 实际就是返回的hash值 如/ipfs/xxxxxxx中的xxxx
 MerkeleTree
 	叶子是数据块(例如文件交易)的hash值,非叶子节点是对应子节点字符串的hash值
 MerkeleDAG   directed acyclic graph 有向无环图
@@ -206,7 +214,6 @@ MerkeleDAG   directed acyclic graph 有向无环图
 		去重      由于内容相同的数据块 hash值是相同的,很容易去掉重复的数据,节省存储空间
 IPLD  interPlanetary Linked Data
 	  数据格式转换中间件 将现有的异构数据(比特币以太坊的块数据等)统一成一种统一的标准格式进行传输
-CID   内容识别符 实际就是返回的hash值 如/ipfs/xxxxxxx中的xxxx
 
 
 协议栈
