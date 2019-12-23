@@ -1766,6 +1766,140 @@ uucp,news.crit                                          /var/log/spooler
 
 ##  logwatch
 
+#  docker
+
+```
+安装
+	阿里云加速
+repo
+image
+	制作dockfile 都是相对contain来说
+	    # Use an official Python runtime as a parent image
+	    # FROM一定是dockfile的第一条指令, 后面是一父类image 祖先是CentOS,类似于java的Object类
+        FROM python:2.7-slim
+        
+        # Define environment variable
+        # 设置环境变量
+        ENV NAME World
+        
+        # Set the working directory to /app
+        # 设置当前工作目录
+        WORKDIR /app
+
+        # Copy the current directory contents into the container at /app
+        # 拷贝宿主的当前目录到image的/app目录
+        ADD  .          /app
+        # 拷贝宿主机根目录到image的/app目录并解压
+        COPY /a.tar.gz  /app
+
+        # Install any needed packages specified in requirements.txt
+        RUN pip install --trusted-host pypi.python.org -r requirements.txt
+        ##cat requirements.txt
+        ##Flask
+        ##Redis
+        #第二个RUN
+        # RUN yum install y vim net-tools
+
+        # Make port 80 available to the world outside this container
+        EXPOSE 80
+        # 第二个EXPOSE
+        # EXPOSE 22
+        
+        #文件映射       
+
+        # Run app.py when the container launches
+        # 只有最后一条有效 被命令行参数覆盖
+        CMD ["python", "app.py"]    
+        # 被命令行参数追加
+
+        
+        #cat app.py
+        from flask import Flask
+        from redis import Redis, RedisError
+        import os
+        import socket
+
+        # Connect to Redis
+        redis = Redis(host="redis", db=0, socket_connect_timeout=2, socket_timeout=2)
+
+    	app = Flask(__name__)
+
+        @app.route("/")
+        def hello():
+            try:
+            	visits = redis.incr("counter")
+            except RedisError:
+            	visits = "<i>cannot connect to Redis, counter disabled</i>"
+
+            html = "<h3>Hello {name}!</h3>" \
+            	"<b>Hostname:</b> {hostname}<br/>" \
+            	"<b>Visits:</b> {visits}"
+            	return html.format(name=os.getenv("NAME", "world"), 
+                	hostname=socket.gethostname(), visits=visits)
+
+        if __name__ == "__main__":
+        	app.run(host='0.0.0.0', port=80)
+		
+	编译dockfile
+		docker build -f dockfile -t $image:tag .
+		
+		docker commit options $container-id $image-tag
+			-m "commit msg"
+			-a "author"
+		docer login
+		docker tag iamge username/reposity:image:tag
+		docker push username/reposity:image-tag
+	
+	搜索	
+		docker search -s 30 nginx
+		
+	拉取
+		docker pull nginx          #默认从docker hub拉取
+	删除	
+		docker rm
+    查看
+        docker images
+    运行
+        
+    拉取并运行
+        docker run options username/repo:image:tag  $app $app-args /bin/bash
+            -p 3306:3306    #端口固定映射 主机host端口:containerPort
+            -P              #端口随机映射 默认127.0.0.1:5000:5000/udp
+
+            -it             #interactive 交互方式
+            -d              #daemon
+
+            -name $myname   #指定container名字,否则又docker随意指定
+            -v $hostDirectory:$contianerDirectory   #文件映射 主机目录:contain目录 可以多个
+            -v $hostDirectory:$contianerDirectory
+	
+	
+container
+	查看
+		docker container ls
+		docker ps
+		docker top     $container-id   
+		docker port    $container-id   #查看端口映射
+        
+         docker log     $container-id	#查看日志
+		docker inspect $container-id    
+	删除
+		docker rm $container-id
+	停止
+		docker restart      $container-id
+		docker stop         $container-id
+		docker kill -s -HUP $container-id
+
+#当container启动以后,在宿主机上docker attch上去,类似于gdb attach,之后就可以操作container了
+docker attach
+
+exit			#退出登陆container且container也退出 离开且关门
+ctrl+p+q         #退出登陆container且container不退出 离开不关门
+
+#当container启动以后,在宿主机上输入命令让docker container执行,而不用登陆上去
+docker exec  "$cmd"
+```
+
 # FAQ
 
 ## ls无色
