@@ -354,16 +354,40 @@ diff <(cmd1) <(cmd2)               # 比较两个命令的输出
 ##  调试
 
 ```
-set -u    //检测未定义的变量        在shell脚本中或在命令行都可以使用
-set +x    //扩展shell中变量并打印   在shell脚本中或在命令行都可以使用
+$help set
+Set or unset values of shell options and positional parameters
 
-bash -n  //语法检查
+set +x    #扩展shell中变量并打印   在shell脚本中或在命令行都可以使用
+          #Using + rather than - causes these flags to be turned off.  
+    	  #The flags can also be used upon invocation of the shell. eg bash -euo pipefail x.sh
+    	  #The current set of flags may be found in $-   eg  echo $-
+    	  #The remaining n ARGs are positional parameters and are assigned,in order,to $1,.. $n
+    	  #If no ARGs are given, all shell variables are printed
 
 #!/bin/bash
-set -o nounset #默认情况下 遇到未定义的变量仍然会继续往下执行
+bash -n        #语法检查Read commands but do not execute them
+set -o noexec
+set -n
+
+bash -e
 set -o errexit #默认情况下 遇到错误仍然会继续往下执行
-set -o verbose #bash -v		跟踪每个命令的执行
-set -o xtrace  #bash -x
+set -e         #Exit immediately if a command exits with a non-zero status
+
+bash -u
+set -o nounset #默认情况下 遇到未定义的变量仍然会继续往下执行
+set -u         #Treat unset variables as an error when substituting
+
+bash -v        #Print shell input lines as they are read
+set -o verbose #跟踪每个命令的执行
+set -v
+
+bash -x
+set -o xtrace  # Print commands and their arguments as they are executed
+set -x
+
+set -o pipefail #the return value of a pipeline is the status of
+                #the last command to exit with a non-zero status,
+                #or zero if no command exited with a non-zero status
 ```
 
 #  命令
@@ -1560,7 +1584,8 @@ ip -f inet address show  | grep -A 1 -E "[[:digit:]]+\: eth0:" | tail -1 | awk -
 ##  wget/curl
 
 ```
-
+curl -o curl.output -v http://xx.html
+	-POST
 ```
 
 ##  scp/rsync
@@ -1587,9 +1612,15 @@ du
 ##  目录
 
 ```
-pushd {dirname}     # 目录压栈并进入新目录
+mytempdirname=$(mktemp -d)
+pushd ${mytempdirname}     # 目录压栈并进入新目录
+//do something
 popd                # 弹出并进入栈顶的目录
+tar czvf $(uname -n)-$(date +'%Y-%m-%dT%H:%M:%S%z').tar.gz -C $mytempdirname .
+rm -rf ${mytempdirname}
+
 dirs -v             # 列出当前目录栈
+
 cd -                # 回到之前的目录
 cd -{N}             # 切换到目录栈中的第 N个目录，比如 cd -2 将切换到第二个
 

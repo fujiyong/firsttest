@@ -331,11 +331,11 @@ p2p
 	stream close
 	stream ls
 dht  分布式hash表
-	findpeer   `ipfs id` 
-	query	`ipfs id`
-
-	findprovs  $hash   //返回哪些peer可以提供查询这个hash 即hash内容的分部部署情况
 	provide $hash      //向network宣称自己有hash,只是有hash但不能提供查询hash所指的content的场合  比如自身节点有问题,不能提供查询服务
+	findprovs  $hash   //返回哪些peer可以提供查询这个hash 即hash内容的分部部署情况
+
+	findpeer   `ipfs id` #Find the multiaddresses associated with a Peer ID
+	query	`ipfs id`   # Find the closest Peer IDs to a given Peer ID by querying the DHT
 
 	put /ipns/${peer-id}    "xxxx"
 	get  $hash
@@ -392,10 +392,14 @@ pubsub
 
 
 
+go get github.com/Kubuxu/go-ipfs-swarm-key-gen/ipfs-swarm-key-gen
+ipfs-swarm-key-gen > ~/.ipfs/swarm.key
 
 
+ipfs bootstrap rm --all
+ipfs bootstrap add /ip4/104.236.76.40/tcp/4001/ipfs/QmSoLV4Bbm51jM9C4gDYZQ9Cy3U6aXMJDAbzgu2fzaDs64
 
-
+export LIBP2P_FORCE_PNET=1
 
 
 
