@@ -19,6 +19,19 @@ BSD各家族
 
 col  vs column -t
 
+cat > a.txt
+aa
+bb
+Ctrl-d
+
+#如何实现在bash脚本中使文件中插入一段话heredoc
+cat > a.txt << -'EOF'
+aa
+bb
+EOF
+
+
+
 命令自动完成
     compgen 
         -c #有哪些可用命令complete
@@ -572,6 +585,7 @@ fgrep == grep -F  #fixed 即pattern不转义,为字面字符
 ```
 sort file                          # 排序文件
 sort -u file                       # 去重排序
+sort -f file                       # 忽略大小写 ignore case
 sort -r file                       # 反向排序（降序）
 sort -n file                       # 使用数字而不是字符串进行比较
 sort -g file                       # 使用float进行比较
@@ -721,17 +735,60 @@ lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2 # 显示当前正在使用网
 ##  nc/netcat
 
 ```
+Swiss-army knife for TCP/IP
+Hobbit 1996.3发布1.10版,之后没有再维护
 
+传输文件  最初目的
+	在192.168.2.34上： nc -l 1234 > test.txt
+	在192.168.2.33上： nc 192.168.2.34 < test.txt
+	
+端口扫描
+	nc -v -w 2 -z 102.168.1.106 $port1-$port2
+		-v #verbose
+		-w #waittime
+		-z #z mode
+
+监听
+	TCP
+		nc -v -l      $port       #TCP Listen
+		nc -v     $ip $port
+	UDP
+        nc -v -l -u      $port       #UDP Listen
+    	nv -v    -u $ip  $port
+    
+代理/端口转发PortForwarding
+	#单向
+	 ncat -l 8080 | ncat 192.168.1.200 80  #只能从8080到80
+	 
+	 #双向
+	 mkfifo 2way
+	 ncat -l 8080 0<2way | ncat www.google.com 80 1>2way
+	 ###本地启动8080端口,然后转发到www.google.com的80端口
+	 
+后门
+	server端: ncat -k -l $port -e /bin/bash #对每个连接后都执行/bin/bash,之后client就可以命令行操作
+	client端: ncat $ip $port
 ```
 
 ncat
 
+```
+nmap团队对nc改造的升级版
+```
+
 socat
+
+```
+netcat的升级版
+```
 
 ##  nmap
 
 ```
 network mapper
+主要用于端口扫描 由Fyodor 1997年发布 一直在维护
+渗透工具Metasploit、漏洞扫描工具openVAS等工具都内置了Nmap，而漏洞扫描工具Nessus也支持导入Nmap扫描结果
+
 open:
 closed:接收nmap探测报文并作出响应,但没有应用在监听
 filtered:被过滤而无法确定是否open/closed,可能是由于防火墙路由规则等
@@ -995,19 +1052,37 @@ firewall-cmd --list-all
 firewall-cmd --query-port=8080/tcp
 
 
+修改配置文件
+sed IPV6=yes s/IPV6=yes/IPV6=no /etc/default/ufw #修改为不支持ipv6
+
 ufw disable/enable          #设置开机是否启动
 ufw default allow/deny      #设置默认策略, ufw默认不允许外部访问,但能访问外部
 
+ufw reload
+ufw reset
 ufw status verbose          #inactive
 
-ufw        allow $port
+ufw logging on
+ufw logging low/medium/high #tail -f /var/log/ufw.log
+
+ufw        allow $port      #tcp和udp
+ufw        allow $port/tcp
+ufw        allow $port/udp
+uf         allow $port1:$port2/tcp  #允许端口范围,当是范围时必须说明是tcp还是udp
 ufw delete allow $port
+
+ufw 	   allow from $ip
+ufw        allow from $ip to any port 3306
+ufw        allow  from $ip/24    #子网掩码方式
 
 ufw        allow $service    #smtp  来自/etc/services
 ufw delete allow $servie     #等价于ufw deny $service
 
-ufw reload
-ufw status            	     #inactive
+ufw        deny   $port
+ufw        deny   $port/tcp
+
+ufw        deny   from $ip
+ufw        deny   from $ip/24   #子网掩码方式
 ```
 
 #  services/units
