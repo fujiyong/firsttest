@@ -17,6 +17,16 @@ BSD各家族
     solaries                                     pkgutil -i jq
  windows                                         chocolatey install jq
 
+
+init 3  #从界面进入命令行
+startx  #从命令行进入正常界面
+xinit && mozila  startkde gnome-sesssion       #从命令行进入不能变化大小移动的界面
+xinint && twm && mozila startkde gnome-seesion #从命令行进入可以变化大小移动的界面 
+											   #twm terminal window manager
+
+kde     k desktop environment                 类似于winxp桌面
+gnome   gnu network object model environment  类似于ubuntu桌面
+
 col  vs column -t
 
 cat > a.txt
@@ -414,7 +424,53 @@ set -o pipefail #the return value of a pipeline is the status of
 ## date/timedatectl
 
 ```
-date --date='@2147483647'
+设置
+	格式 date -s, --set=STRING #man date参考<http://www.gnu.org/software/coreutils/date>
+	                          #        参考输入格式Date inpute format
+打印
+	格式 date [-d,--date=String] [+FORMAT]
+		-d 默认值now
+    date --date='@2147483647'  
+    date --date='@-1'
+    date -d "$(date -R)" +%s
+    date --date='2012-07-01 00:00:00 +0800' +%s #若不含时区时默认为计算机设置的系统时区
+
+格式
+	预定义格式
+		-I[FMT],--iso-8601[=FMT]        #2006-08-14T02:34:56-06:00
+			date (default)
+			hours/minutes
+			seconds
+			ns
+		-R, --rfc-email #RFC 5322 format #Mon, 14 Aug 2006 02:34:56 -0600
+		--rfc-3339=FMT  #RFC 3339 format #2006-08-14 02:34:56-06:00
+			date
+			seconds
+			ns
+		-u, --utc, --universal #UTC
+	自定义格式
+		Date
+			%[aAbBcCdDeFgGhjmuUVwWxyY]
+			%Y 4位           %y2位
+			%m    
+			%d	             %D==%m/%d/%y
+			%F == %Y-%m-%d
+		Time
+			%[aAbBcCdDeFgGhjmuUVwWxyY]
+			%H 24小时制  %I 12小时制
+			%M 
+			%S               %s seconds since 1970-01-01 00:00:00 UTC
+			%T == %H:%M:%S
+		Zone
+			%z     +hhmm numeric time zone (e.g., -0400)
+			%:z    +hh:mm numeric time zone (e.g., -04:00)
+			%::z   +hh:mm:ss numeric time zone (e.g., -04:00:00)
+			%Z     alphabetic time zone abbreviation (e.g., EDT CST中国标准时间)
+		Literal
+			%[%nt]
+		Padding and other flags
+
+	
 
 时间标准
     观察天体
@@ -1119,10 +1175,10 @@ PS:
 - 手动方式 
 
   ​	 /etc/rc.d/rc[0-6].d  #快捷方式 ln -s /etc/init.d/redisd      /etc/rc.d/rc3.d/S100redis
-                                    \#多个运行级别,需要在多个rc[0-6]建立链接
-                                    \#	以S100为例, 
-                      		  \#		S表示开机启动; 可以替换为K表示开机关闭
-                                   \#		100表示启动顺序
+  ​                                  \#多个运行级别,需要在多个rc[0-6]建立链接
+  ​                                  \#	以S100为例, 
+  ​                    		  \#		S表示开机启动; 可以替换为K表示开机关闭
+  ​                                 \#		100表示启动顺序
 
 - 命令行方式 chkconfig     ubuntu为apt-get install sysv-rc-conf
 
@@ -1135,8 +1191,8 @@ PS:
 - TUI方式redhat之ntsysv
 
   ​	默认情况下，当前运行级别为多少，在ntsysv中设置的启动服务的级别便是多少
-      	比如，我当前的运行级别是3,那么我在伪图形界面中选择启动服务后，它的运行级别也会是3
-      	如果想自定义运行级别可使用ntsysv --level方式
+  ​    	比如，我当前的运行级别是3,那么我在伪图形界面中选择启动服务后，它的运行级别也会是3
+  ​    	如果想自定义运行级别可使用ntsysv --level方式
 
 ###  临时启动
 
