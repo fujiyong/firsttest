@@ -791,8 +791,8 @@ lsof -P -i -n | cut -f 1 -d " "| uniq | tail -n +2 # 显示当前正在使用网
 ##  nc/netcat
 
 ```
-Swiss-army knife for TCP/IP
-Hobbit 1996.3发布1.10版,之后没有再维护
+Swiss-army knife for TCP/IP  瑞士军刀
+由Hobbit于1996.3发布1.10版,之后没有再维护
 
 传输文件  最初目的
 	在192.168.2.34上： nc -l 1234 > test.txt
@@ -822,7 +822,8 @@ Hobbit 1996.3发布1.10版,之后没有再维护
 	 ###本地启动8080端口,然后转发到www.google.com的80端口
 	 
 后门
-	server端: ncat -k -l $port -e /bin/bash #对每个连接后都执行/bin/bash,之后client就可以命令行操作
+	server端: ncat -k -l $port -e /bin/bash #对每个连接后都执行/bin/bash,
+	                                        #之后client就可以命令行操作
 	client端: ncat $ip $port
 ```
 
@@ -1561,6 +1562,21 @@ apt-get check                         检查是否有损坏的依赖
 ##  nm -CA 
 
 ##  tcpdump
+
+```
+tcpdump [-i eth0] port 1234 -w a.cap &   #默认捕获eth0
+kill -15 $!
+
+wireshark
+	以第二行为例
+        第一个按钮 start
+        第二个按钮 stop
+        第三个按钮 restart
+        第四个按钮 捕获选项  选择捕捉的网卡eth0
+    以第三行为例
+    	点击最左边的那个标签的按钮,会弹出一些提示 选择tcp or udp port is 80然后就自动填充了
+charles
+```
 
 ##  pstree -c -p -al
 
