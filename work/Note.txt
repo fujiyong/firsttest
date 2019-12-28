@@ -409,3 +409,96 @@ original-ks.cfg        [anəˈkändə]  水蟒  kickstart 启动
     file -sL /dev/sda3    #标识文件类型 -s标志启用读取块或字符文件， -L启用以下符号链接
 
     fdisk -l 只能列出硬盘的分区表、容量大小以及分区类型，但看不到文件系统类型
+
+
+shutdown -h 5:30  24小时制  +m表示多少分钟后执行
+shutdown -h now
+shutdown -r 5:30
+shutdown -r now
+shutdown -c     #可用这条目录取消前一个shutdown命令 
+
+halt 
+poweroff
+init 0
+
+reboot
+init 6
+
+locate 只能按文件名搜索，而不能更复杂的搜索
+     默认一天更新一次数据库/var/lib/mlocate, 可以通过命令updatedb临时更新 
+    cat /etc/updatedb.conf
+    PRUNE_BIND_MOUNTS="yes" #开启搜索限制
+    PRUNEFS=                #搜索时,不搜索的文件系统
+    PRUNENAMES              #搜索时,不搜索的文件类型
+    PRUNEPATHS=             #搜索时,不搜索的路径
+whereis 只能在特定目录下(whereis -l)查找可执行文件和帮助文件
+    -b 可执行文件
+    -m 帮助文件
+whatis $cmd  #返回man 级别和功能
+
+
+
+ls -i 显示inode节点
+cp 
+    -r   
+    -p 连带文件属性复制 --preserve=mode,ownership,timestamps 否则文件的时间为执行复制的时间
+    -d 连带链接属性复制 --no-dereference --preserve
+    -a ==-rpd   打炮啊
+
+
+find                 
+    -user root 
+    -size +20k -a -size -50k  #+表示多于 -表示少于 -a表示and -o表示or
+    -a #and
+    -o #or
+    -ctime +10 #10天前  file status change
+    -mtime 10  #10天    file data  modify
+    -atime -10 #10天内
+    -exec/ok ls -lh {} \\ #对搜索结果进行处理
+
+
+启动一开始就进入tty1
+终端控制台界面Ctl+Alt+F2-6  tty2-6    #startx不灵啊
+XWindow      Ctl+Alt+F1             
+
+注销 exit logout
+cal [[[day] month] year]
+
+$cmd  --help  曾经使用过的命令
+man           未使用过的命令或文件格式manual
+man man  #可以查看各级别含义
+    -h  for help
+man [] $cmd #默认最低级别  man 5 updatedb.conf  man 5 /etc/updatedb.conf
+man -a $cmd #按照cat /etc/man_db.conf其中定义的顺序依次搜索
+whereis $cmd #查看命令的位置+配置文件的位置+帮助的级别
+man -f $cmd #查看命令的所有级别 == whatis $cmd   使用whatis命令必须先以root身份运行命令老版本makewhatis或新版本mandb建立数据库
+man -k $cmd #查看包含关键字key的所有级别 等价于apropos
+info  文件位于/usr/share/info
+    'q' quits
+    'H' lists all Info commands
+    'mTexinfo RET' visits the Texinfo manual
+info info #
+info $cmd
+    -回车 进入子帮助页面(带有*号)
+    -u    进入上一层
+    -n    进入下一个帮助小节
+    -p    进入上一个帮助小节
+    -q    退出
+
+
+mount     #查询系统中已挂载的设备
+mount -a  #依据配置文件/etc/fstab的内容，自动挂载 光盘/U盘不建议写入自动挂载中,否则开机时没有光盘/U盘的话, 系统会崩溃
+
+mount [-t 文件系统] [-o 特殊选项] [设备文件名] [挂载点]
+    -t 文件系统：加入文件系统类型来指定挂载的类型，ext3,ext4,光盘：iso9660等文件系统
+    -o 特殊选项：可以指定挂载的额外选项
+
+    #挂载光盘
+    mount -t iso9660 /dev/sr0 /mnt/cdrom/
+    ll /mnt/cdrom/
+    umount /mnt/cdrom/ 或umount /dev/sr0
+
+    #挂载U盘
+    fdisk -l //查看系统中已经识别的硬盘  U盘一般为sdb1
+    mount -t vfat /dev/sdb1 /mnt/usb/ #vfat指的是fat32文件系统，单个文件不超过4GB
+                                      #Linux默认不支持NTFS文件系统的 可以下载ntfs-3g软件安装，但是ntfs格式只能是只读的 //一般为移动硬盘

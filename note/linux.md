@@ -427,6 +427,7 @@ set -o pipefail #the return value of a pipeline is the status of
 设置
 	格式 date -s, --set=STRING #man date参考<http://www.gnu.org/software/coreutils/date>
 	                          #        参考输入格式Date inpute format
+	date [-u|--utc|--universal] [MMDDhhmm[[CC]YY][.ss]] #设置系统时间的格式
 打印
 	格式 date [-d,--date=String] [+FORMAT]
 		-d 默认值now
@@ -1437,9 +1438,9 @@ yum makecache
 
 ​	rmp -q          $pkgName   #查询是否安装了包 rpm -qa | grep pkgName
 
-​	yum search  $pkgName 
+​	yum **search**  $pkgName #只匹配名字和summary, use "search all" match everything
 
-​	yum info       $pkgName
+​	yum **info**       $pkgName
 
 ​	yum install    $pkgName
 
@@ -1554,6 +1555,19 @@ apt-get check                         检查是否有损坏的依赖
     apt show     $pkgName  #apt showsrc $pkgName
     apt install  $pkgName
 ```
+
+###  小结
+
+|          | rpm/yum                     | dpkg/apt              |
+| -------- | --------------------------- | --------------------- |
+|          |                             | apt-update            |
+| 已安装   | rpm -qa                     | dpkg -l [$pkgName]    |
+|          | yum list                    | apt list [$pkgName]   |
+| 是否安装 | rpm -q [$pkgName]           |                       |
+| 查询     | yum  search [all] $pkgName  | apt search   $pkgName |
+| pkg信息  | yum **info**       $pkgName | apt show     $pkgName |
+| 正查pkg包含文件 | rpm -ql $pkgName | dpkg -L $pkgName |
+| 反查pkg | rpm -qS $full_path_fileName | dpkg -S $full_path_fileName |
 
 #  Tool
 
@@ -1920,13 +1934,23 @@ man ascii                          # 显示 ascii 表
 ```
 显示以往用户登录情况
     last    [user]   #读取文件/var/log/wtmp,显示用户每次登录
-    lastb            #读取文件/var/log/btmp, 显示用户登录失败
+    lastb            #读取文件/var/log/btmp, 显示用户登录失败bad
     lastlog [user]   #读取文件/var/log/lastlog,显示所有用户最后一次登录
         -u  $user
         -b  $n       #指定天数前
         -t  $n       #指定天数以来
-显示当前用户登录情况
-    w/who/user      #显示在线用户
+显示当前在线用户登录情况
+    w/who/users      
+    users
+    root
+    
+    who
+    root     pts/0        2019-12-28 10:31 (61.140.46.101)
+    
+    w
+    18:14:22 up 74 days,  2:54,  1 user,  load average: 2.11, 2.05, 2.01
+    USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+    root     pts/0    61.140.46.101    10:31    0.00s  0.08s  0.00s w
 
 write {user}    #向某人发送一段话
 
