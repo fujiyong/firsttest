@@ -172,3 +172,42 @@ p2p
 	stream
 	stream close
 	stream ls
+	
+	
+	
+	
+info 中按tab跳转到下一个链接/node节点
+	空格 下一页
+	PageDown 
+	PageUp
+	Enter
+	u  up上一个节点
+	n  next下一个节点
+	p  pre 上一个节点
+	b  begin  第一个节点
+	e  end    最后一个节点
+	s/  reg search 正则搜索
+	h  help  帮助
+	q   quit  退出info
+	
+sync
+shutdown 
+	-k "msg"
+	-h  now       #==0 默认是1 1分钟后关机
+	-h  +10       #10分钟后关机
+	-h  20:35     #20:35关机
+	-r  now       #==0 立即
+	-r  +30 "msg" 
+	
+halt       #屏幕可能会保留系统已停止的信息
+poweroff   #没电了 屏幕空白
+reboot
+
+init 0     #关机
+init 6     #重启
+
+systemctl halt
+systemctl poweroff
+systemctl reboot
+systemctl suspend     #休眠模式
+	
