@@ -373,12 +373,127 @@ Goland正版授权
 
 
 
+ls -i 显示inode节点
+cp 
+    -r   
+    -p 连带文件属性复制 --preserve=mode,ownership,timestamps 否则文件的时间为执行复制的时间
+    -d 连带链接属性复制 --no-dereference --preserve
+    -a ==-rpd   打炮啊
 
 
 
 
 
-/mnt
+
+启动一开始就进入tty1
+终端控制台界面Ctl+Alt+F2-6  tty2-6    #startx不灵啊
+XWindow      Ctl+Alt+F1             
+
+注销 exit logout
+cal [[[day] month] year]
+
+shutdown -h 5:30  24小时制  +m表示多少分钟后执行
+shutdown -h now
+shutdown -r 5:30
+shutdown -r now
+shutdown -c     #可用这条目录取消前一个shutdown命令 
+
+halt 
+poweroff
+init 0
+
+reboot
+init 6
+
+
+find     #按照ls -l的顺序
+	-t TYPE #一般正规文件(f)、设备文件(b、c)、目录（d）、socket(s)等
+	
+	-perm mode    #查找文件权限正好是mode的文件
+	-perm -mode   #小于mode
+	-perm +mode   #大于mode
+		
+    -user root
+	-uid  0
+	-group root
+	-gid  0
+	-nouser: 寻找文件的所有者不在/etc/passwd的文件
+	-nogroup: 寻找文件的用户组不在/etc/group的文件
+	
+    -size +20k -a -size -50k  #+表示多于 -表示少于  c:代表byte k:代表1024byte -a表示and -o表示or
+    -a #and
+    -o #or
+	
+    -ctime +10 #10天前  file status change 列出n天之前(不包含n本身)被更改过的文件名
+    -mtime 0   #今天修改    file data  modify 几天之前的"一天之内"被更改过的文件
+    -atime -10 #10天内  列出n天之内(包含n本身)被更改过的文件名
+	-newer $file #比file更新的文件
+	
+	-name filename:查找文件名为filename的文件
+	
+	-depth N   #深度
+	-prune
+	
+	-fellow  #跟踪符号链接所指向的文件
+	
+	-fstype   #在某一特定的文件系统/etc/fstab中查找
+	
+	-print  #默认动作
+	-cpio   #对匹配的文件执行cpio备份到磁带设备中
+    -exec/ok $cmd {} \; #自定义动作 对搜索结果进行处理 使用\对;进行转义
+	                    #cmd不能用alias只能全称如 ls -l不能 ll
+						#有没有C语言的感觉 -exec ls -l {find / -t f} \;
+	
+locate [opt] $filename #默认一天更新一次数据库/var/lib/mlocate, 可以通过命令updatedb临时更新 只能按文件名搜索，而不能更复杂的搜索
+                 #部分匹配模糊查找
+	-i           #忽略大小写
+	-r           #正则表达式支持* ？
+	-n           #只返回前面n个
+	-q           #安静模式 不会显示任何错误
+    cat /etc/updatedb.conf
+		PRUNE_BIND_MOUNTS="yes" #开启搜索限制
+		PRUNEFS=                #搜索时,不搜索的文件系统
+		PRUNENAMES              #搜索时,不搜索的文件类型
+		PRUNEPATHS=             #搜索时,不搜索的路径
+slocate #security locate locate的升级版
+mlcoate #slocate的升级版 与locate公用一个数据库 根据时间戳更新数据库，而不必重新读取一下文件系统 apt show mlocate
+#whatis $cmd   使用whatis命令必须先sudo makewhatis(老版本)/mandb(新版本)建立数据库
+whereis [opt] filename #只能在特定目录下(whereis -l或数据库/var/lib/slocate/slocate.db)中
+                       #完全匹配查找可执行文件的位置+源文件、配置文件的位置+帮助文件的位置
+					   #当提供的filename包含.后缀时会被截断，只留下.前面的
+    -b  #binary 可执行文件
+	-s  #source 源文件      eg： whereis stdio  whereis nginx  ##/usr/include/stdio.h
+    -m  #manual 帮助文件                                       ##/usr/share/man/man3/stdio.3.gz
+	-l  #output effective lookup paths
+which [-a] $filename  #从环境变量$PATH中完全匹配查找可执行程序的位置 -a表示有多处时返回多处，默认只返回最前一次
+
+
+man           #针对未使用过的命令或文件格式manual 而$cmd --help针对的是曾经使用过的命令
+man man       #从中可以查看各级别含义
+    -h  for help
+man [opt] $cmd
+	-f      #查看命令的所有级别 
+	        #######等价于whatis $cmd
+	-k      #查看包含关键字key的所有级别
+		    ######等价于apropos
+	null    #默认查看最低级别  man 5 updatedb.conf  man 5 /etc/updatedb.conf
+	$number 
+	-a      #查看所有级别 按照cat /etc/man_db.conf其中定义的顺序依次查看
+
+
+info  文件位于/usr/share/info
+    'q' quits
+    'H' lists all Info commands
+    'mTexinfo RET' visits the Texinfo manual
+info info #
+info $cmd
+    -回车 进入子帮助页面(带有*号)
+    -u    进入上一层
+    -n    进入下一个帮助小节
+    -p    进入上一个帮助小节
+    -q    退出
+
+	/mnt
 /media/cdrom
 /dev/vda 
 /dev/sda
@@ -411,81 +526,6 @@ original-ks.cfg        [anəˈkändə]  水蟒  kickstart 启动
     fdisk -l 只能列出硬盘的分区表、容量大小以及分区类型，但看不到文件系统类型
 
 
-shutdown -h 5:30  24小时制  +m表示多少分钟后执行
-shutdown -h now
-shutdown -r 5:30
-shutdown -r now
-shutdown -c     #可用这条目录取消前一个shutdown命令 
-
-halt 
-poweroff
-init 0
-
-reboot
-init 6
-
-locate 只能按文件名搜索，而不能更复杂的搜索
-     默认一天更新一次数据库/var/lib/mlocate, 可以通过命令updatedb临时更新 
-    cat /etc/updatedb.conf
-    PRUNE_BIND_MOUNTS="yes" #开启搜索限制
-    PRUNEFS=                #搜索时,不搜索的文件系统
-    PRUNENAMES              #搜索时,不搜索的文件类型
-    PRUNEPATHS=             #搜索时,不搜索的路径
-whereis 只能在特定目录下(whereis -l)查找可执行文件和帮助文件
-    -b 可执行文件
-    -m 帮助文件
-whatis $cmd  #返回man 级别和功能
-
-
-
-ls -i 显示inode节点
-cp 
-    -r   
-    -p 连带文件属性复制 --preserve=mode,ownership,timestamps 否则文件的时间为执行复制的时间
-    -d 连带链接属性复制 --no-dereference --preserve
-    -a ==-rpd   打炮啊
-
-
-find                 
-    -user root 
-    -size +20k -a -size -50k  #+表示多于 -表示少于 -a表示and -o表示or
-    -a #and
-    -o #or
-    -ctime +10 #10天前  file status change
-    -mtime 10  #10天    file data  modify
-    -atime -10 #10天内
-    -exec/ok ls -lh {} \\ #对搜索结果进行处理
-
-
-启动一开始就进入tty1
-终端控制台界面Ctl+Alt+F2-6  tty2-6    #startx不灵啊
-XWindow      Ctl+Alt+F1             
-
-注销 exit logout
-cal [[[day] month] year]
-
-$cmd  --help  曾经使用过的命令
-man           未使用过的命令或文件格式manual
-man man  #可以查看各级别含义
-    -h  for help
-man [] $cmd #默认最低级别  man 5 updatedb.conf  man 5 /etc/updatedb.conf
-man -a $cmd #按照cat /etc/man_db.conf其中定义的顺序依次搜索
-whereis $cmd #查看命令的位置+配置文件的位置+帮助的级别
-man -f $cmd #查看命令的所有级别 == whatis $cmd   使用whatis命令必须先以root身份运行命令老版本makewhatis或新版本mandb建立数据库
-man -k $cmd #查看包含关键字key的所有级别 等价于apropos
-info  文件位于/usr/share/info
-    'q' quits
-    'H' lists all Info commands
-    'mTexinfo RET' visits the Texinfo manual
-info info #
-info $cmd
-    -回车 进入子帮助页面(带有*号)
-    -u    进入上一层
-    -n    进入下一个帮助小节
-    -p    进入上一个帮助小节
-    -q    退出
-
-
 mount     #查询系统中已挂载的设备
 mount -a  #依据配置文件/etc/fstab的内容，自动挂载 光盘/U盘不建议写入自动挂载中,否则开机时没有光盘/U盘的话, 系统会崩溃
 
@@ -505,7 +545,7 @@ mount [-t 文件系统] [-o 特殊选项] [设备文件名] [挂载点]
 
 
 
-
+https://blog.csdn.net/u010625000/article/details/44455023
 
 ################################# Repo.sh ###############################
 #存放IPFS.arm IPFS.linux IPFS.windows ipfs-swarm-key-gen swarm文件
