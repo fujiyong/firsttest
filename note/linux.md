@@ -17,13 +17,11 @@ BSD各家族
     solaries                                     pkgutil -i jq
  windows                                         chocolatey install jq
 
-
 init 3  #从界面进入命令行
 startx  #从命令行进入正常界面
 xinit && mozila  startkde gnome-sesssion       #从命令行进入不能变化大小移动的界面
 xinint && twm && mozila startkde gnome-seesion #从命令行进入可以变化大小移动的界面 
 											   #twm terminal window manager
-
 kde     k desktop environment                 类似于winxp桌面
 gnome   gnu network object model environment  类似于ubuntu桌面
 
@@ -39,8 +37,6 @@ cat > a.txt << -'EOF'
 aa
 bb
 EOF
-
-
 
 命令自动完成
     compgen 
@@ -70,13 +66,13 @@ cat /etc/shells   #查看系统支持的shell
 chsh -l           #等价cat /etc/shells
 echo $SHELL       #查看使用哪种shell  env | grep SHELL
 chsh -s /bin/bash #更改默认shell
-export PS1="[\u@\h \W $(getGitBranchFuncName) ]$\n$"    #man bash 搜索PS1,根据提示搜索PROMPTING
+export PS1="[\u@\h \W $(getGitBranchFuncName) ]$\n$" #man bash 搜索PS1,根据提示搜索PROMPTING
 
 主要就是为了设置PS1这个环境变量,也就是shell输入命令的前缀
-/etc/profile                                 #system-wide .profile file for the Bourne shell
+/etc/profile                           #system-wide .profile file for the Bourne shell
 (~/.bash_profile|~/.bash_login|~/.profile)   #executed by Bourne-compatible login shells.
 ~/.bashrc                                    #executed by bash(1) for non-login shells
-/etc/bashrc                          # System-wide .bashrc file for interactive bash(1) shells.
+/etc/bashrc                   # System-wide .bashrc file for interactive bash(1) shells.
 ~/.bash_logout
 ```
 
@@ -123,6 +119,12 @@ stty -a                            # 查看发送信号的快捷键
     C^Q  start   //查看日志tail -f时重新滚屏
 ```
 
+###  空命令
+
+```
+:        #冒号
+```
+
 ## 变量
 
 ```
@@ -147,25 +149,23 @@ stty -a                            # 查看发送信号的快捷键
  	echo $var
 ```
 
-##  数值
+##  数值(( ))
 
 ```
-if (( ))
 计算
-    number=(( number_var + 1))  #双括号内的 $ 可以省略
-    [ number_var + 1 ]
-    let number_var = $number_var + 1 
-    number_var = expr $number + 1   # 兼容 posix sh 的计算，使用 expr 命令计算结果
-比较
-    num1 -eq num2             # 数字判断：num1 == num2
-    num1 -ne num2             # 数字判断：num1 != num2
-    num1 -lt num2             # 数字判断：num1 < num2
-    num1 -le num2             # 数字判断：num1 <= num2
-    num1 -gt num2             # 数字判断：num1 > num2
-    num1 -ge num2             # 数字判断：num1 >= num2
+    let number_var=$number_var+1 
+    number_var=`expr $number + 1`   # 兼容 posix sh 的计算，需要转义
+整数比较
+    [ num1 -eq num2 ]            # 等价于 if (( num1 == num2 ))
+    [ num1 -ne num2 ]            # 等价于 if (( num1 != num2 ))
+    [ num1 -lt num2 ]            # 等价于 if (( num1 <  num2 ))
+    [ num1 -le num2 ]            # 等价于 if (( num1 <= num2 ))
+    [ num1 -gt num2 ]            # 等价于 if (( num1 >  num2 ))
+    [ num1 -ge num2 ]            # 等价于 if (( num1 >= num2 ))
+小数比较使用awk
 ```
 
-##  字符串
+##  字符串[[ ]]
 
 ```
 长度  #获取之后就可以有边界的切割了 sed cut awk
@@ -179,12 +179,42 @@ if (( ))
     ${variable/pattern/str}   # 将变量中第一个匹配 pattern 的替换成 str，并返回
     ${variable//pattern/str}  # 将变量中所有匹配 pattern 的地方替换成 str 并返回
 比较
-    str1 = str2               # 判断字符串相等，如 [ "$x" = "$y" ] && echo yes
-    str1 != str2              # 判断字符串不等，如 [ "$x" != "$y" ] && echo yes
-    str1 < str2               # 字符串小于，如 [ "$x" \< "$y" ] && echo yes
-    str2 > str2               # 字符串大于，注意 < 或 > 是字面量，输入时要加反斜杆
-    -n str1                   # 判断字符串不为空（长度大于零）
-    -z str1                   # 判断字符串为空（长度等于零）
+	不管是在[]还是在[[]]中,=都与==等价
+	#注意使用[]时,< 或 > 是字面量，shell会误认为重定向, 要加反斜杆以便转义; 所以最好是使用[[]]
+	
+	[]
+		[ str1 = str2 ]              # 判断字符串相等，如 [ "$x" = "$y" ] && echo yes
+    	[ str1 != str2 ]             # 判断字符串不等，如 [ "$x" != "$y" ] && echo yes
+    	[ str1 \< str2 ]             # 字符串小于，如 [ "$x" \< "$y" ] && echo yes
+    	[ str2 \> str2 ]             # 字符串大于
+    	
+    	等号==
+    	[ $v == "z*" ]              #字面比较 如果$v是字面字符串z*
+    	[ $v == z*   ]              #File globbing 和word splitting将会发生
+	
+	[[]]
+        [[ str1 < str2 ]] 
+        [[ str1 > str2 ]] 
+        
+        等号==
+        [[ $v == "z*" ]]           #字面比较 如果$v是字面字符串z*
+        [[ $v ==  z*  ]]           #如果$v符合正则表达式z*
+        
+在bash3.2之后,加""就是字面比较.
+如若需要通配或正则比较,则不能使用"";如果通配或正则中含有空格,则需定义变量,如t="abc123"
+[[ $t ==  abc*         ]] #true 通配符globbing比较
+[[ $t =~  [abc]+[123]+ ]] #true 正则比较
+[[ $t == "abc*" ]]        #false 字面比较
+
+    # 判断字符串为空（长度等于零）
+    if [ -z str1 ]     
+    if [[ -z str1 ]]                 
+    if [ "$v" ] 
+    if [ "$v" = "" ] 
+    if [ x$v = "x" ]
+    # 判断字符串不为空（长度大于零）
+    if [ -n str1 ]
+    if [[ -n str1 ]]
 
     ${varname:-word}          # 如果变量不为空则返回变量，否则返回 word
     ${varname:=word}          # 如果变量不为空则返回变量，否则赋值成 word 并返回
@@ -211,16 +241,15 @@ if (( ))
 ```
 遍历
 	for ((i=1; i<=j; i++)); do  done
-    for i in "a" "b"
     for i in {1..10}
     for i in 192.168.1.{1..254}
-    for i in “file1” “file2” “file3”
-    for i in /boot/*
-    for i in /etc/*.conf
-    for i in $(seq 10)     #man seq   $(seq 5 -1 1)  start=5 step=-1 end=1
-    for i in $(ls)
-    for I in $(<file)
-    for i in "$@"   #$#变量个数 $@ $*变量内容 $0文件名 $9 ${10} ${11}当变量个数大约9时,需要{},也就是要明确边界
+    for i in "a" "b"              #枚举
+    for i in /etc/*.conf          
+    for i in $(seq 10)     #执行命令`` man seq   $(seq 5 -1 1)  start=5 step=-1 end=1
+    for i in $(<file)
+    IFS=$'\n'; for line in `cat $file`; do done
+    for i in "$@"   #$#变量个数 $@ $*变量内容 $0文件名 $9 ${10} ${11}
+                    #当变量个数大约9时,需要{},也就是要明确边界
 
 定义数组
     array=([0]=valA [1]=valB [2]=valC)   
@@ -247,20 +276,9 @@ if (( ))
 
 ##  map
 
-## 逻辑运算
+##  文件属性
 
 ```
-test {expression}         # 判断条件为真的话 test 程序返回0 否则非零
-[ expression ]            # 判断条件为真的话返回0 否则非零
-[ \( $x -gt 10 \) ]
-
-statement1 && statement2  # and 操作符
-statement1 || statement2  # or 操作符
-! expression              # 如果 expression 为假那返回真
-
-exp1 -a exp2              # exp1 和 exp2 同时为真时返回真（POSIX XSI扩展）
-exp1 -o exp2              # exp1 和 exp2 有一个为真就返回真（POSIX XSI扩展）
-
 -a file                   # 判断文件存在，如 [ -a /tmp/abc ] && echo "exists"
 -d file                   # 判断文件存在，且该文件是一个目录
 -e file                   # 判断文件存在，和 -a 等价
@@ -274,15 +292,21 @@ exp1 -o exp2              # exp1 和 exp2 有一个为真就返回真（POSIX XS
 -G file                   # 文件存在且匹配你的用户组
 file1 -nt file2           # 文件1 比 文件2 新
 file1 -ot file2           # 文件1 比 文件2 旧
+```
 
-建议使用[[]]代替[],理由如下 避免转义
-[ "$x" \< "$y" ]    [[ $x < $y ]]
+## 逻辑运算
 
-在bash3.2之后,加""就是字面比较;如若需要通配或正则比较,则不能使用"",如果通配或正则中含有空格,则需定义变量
-t="abc123"
-[[ $t ==  abc*         ]] #true 通配符globbing比较
-[[ $t =~  [abc]+[123]+ ]] #true 正则比较
-[[ $t == "abc*" ]]        #false 字面比较
+```
+buildin关键字 true false
+
+test {expression}         # 判断条件为真的话 test 程序返回0 否则非零
+[ expression ]            # 判断条件为真的话返回0 否则非零
+! [ expression ]          # 如果 expression 为假那返回真
+
+statement1 && statement2  # and 操作符
+statement1 || statement2  # or 操作符
+exp1 -a exp2              # exp1 和 exp2 同时为真时返回真（POSIX XSI扩展）
+exp1 -o exp2              # exp1 和 exp2 有一个为真就返回真（POSIX XSI扩展）
 ```
 
 ##  流程控制
@@ -293,15 +317,9 @@ elif [condition]; then
 else
 fi
 
-for ;do 
-done
-
-while [condition]; do
-done
-
-until condition; do
-statements
-done
+for ;do done
+while [ condition ]; do done
+until [ condition ]; do done
 
 #菜单选择
 select name [in list]; do 
@@ -320,11 +338,13 @@ done
 
 ```
 function myfunc() {
+	# $# 代表参数个数
+	# $0 代表被调用者自身的名字
     # $1 代表第一个参数，$N 代表第 N 个参数
-    # $# 代表参数个数
-    # $0 代表被调用者自身的名字
+    # $* 空格链接起来的所有参数，类型是字符串 
+    #	for i in "$*";do echo $i; done
     # $@ 代表所有参数，类型是个数组，想传递所有参数给其他命令用 cmd "$@" 
-    # $* 空格链接起来的所有参数，类型是字符串
+    #	for i in "$@";do echo $i; done
     {shell commands ...}
     
     //readonly local
@@ -351,6 +371,12 @@ log() {
 ```
 read [-p "prompt"] $line # 读取一行
 read [-p "prompt"] $v1 $v2 $n #将一行按照IFS分割赋值给各变量 若变量数小于切片数,则最后一个变量再获取其余值; 若变量数大于切片数,则多余变量值为空
+while IFS= read -r -u13 line; do
+done 13 < "$(cmd)"
+
+while IFS= read -r  line; do  #The -r option passed to read command prevents backslash 								  #		escapes from being interpreted
+							  #Add IFS= option before read command to prevent                                           #     leading/trailing whitespace from being trimmed 
+done < $file
 
 cmd1 | cmd2                        # 管道，cmd1 的标准输出接到 cmd2 的标准输入
 < file                             # 将文件内容重定向为命令的标准输入
@@ -380,37 +406,47 @@ diff <(cmd1) <(cmd2)               # 比较两个命令的输出
 $help set
 Set or unset values of shell options and positional parameters
 
-set +x    #扩展shell中变量并打印   在shell脚本中或在命令行都可以使用
+set +x    #扩展shell中变量并打印
           #Using + rather than - causes these flags to be turned off.  
-    	  #The flags can also be used upon invocation of the shell. eg bash -euo pipefail x.sh
+          
+    	  #The flags can also be used upon invocation of the shell. 
+    	  #		eg bash -euo pipefail x.sh
+    	  
     	  #The current set of flags may be found in $-   eg  echo $-
-    	  #The remaining n ARGs are positional parameters and are assigned,in order,to $1,.. $n
+    	  
+    	  #The remaining n ARGs are positional parameters 
+    	  #		and are assigned,in order,to $1,.. $n
+    	  
     	  #If no ARGs are given, all shell variables are printed
 
+shell文件外在命令行2种设置方式
+	$ set  -exuvno pipefail && cmd  #前任uv + yes/no中的no
+	$ bash -exuvno pipefail a.sh
+
+shell文件内设置
 #!/bin/bash
-bash -n        #语法检查Read commands but do not execute them
-set -o noexec
-set -n
+set  -exuvno pipefail #一次性设置
 
-bash -e
-set -o errexit #默认情况下 遇到错误仍然会继续往下执行
-set -e         #Exit immediately if a command exits with a non-zero status
-
-bash -u
-set -o nounset #默认情况下 遇到未定义的变量仍然会继续往下执行
-set -u         #Treat unset variables as an error when substituting
-
-bash -v        #Print shell input lines as they are read
-set -o verbose #跟踪每个命令的执行
-set -v
-
-bash -x
-set -o xtrace  # Print commands and their arguments as they are executed
-set -x
+set -n			#语法检查Read commands but do not execute them
+			    #等价于set -o noexec
 
 set -o pipefail #the return value of a pipeline is the status of
                 #the last command to exit with a non-zero status,
                 #or zero if no command exited with a non-zero status
+
+set -e         #Exit immediately if a command exits with a non-zero status
+		       #默认情况下 遇到错误仍然会继续往下执行
+		       #等价于set -o errexit
+
+set -x         # Print commands and their arguments as they are executed
+			   # 等价于set -o xtrace
+
+set -u         #Treat unset variables as an error when substituting
+			   #默认情况下 遇到未定义的变量仍然会继续往下执行
+			   #等价于 set -o nounset
+
+set -v		   #Print shell input lines as they are read
+               #等价于set -o verbose  跟踪每个命令的执行 
 ```
 
 #  命令
@@ -1514,7 +1550,34 @@ dpkg -P pkgName                                         彻底卸载Purge 包括
 
 下载保存位置       /var/cache/apt/archives 
 
+更新源
+
 ```
+ubuntu默认使用国外的源,下载速度比较慢,不像centos yum时会自动选择站点, 所以需要更换源
+mv /etc/apt/sources.list /etc/apt/sourses.list.backup
+
+deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse
+
+apt update
+```
+
+
+
+```
+
+
+
+
+
 apt-get update     #更新源   可以频繁操作,类似于保存文件Ctl-s的频率
                    #依据/etc/apt/sources.list从镜像站点更新本地文件索引/var/lib/apt/lists
 

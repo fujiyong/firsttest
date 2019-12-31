@@ -502,3 +502,48 @@ mount [-t 文件系统] [-o 特殊选项] [设备文件名] [挂载点]
     fdisk -l //查看系统中已经识别的硬盘  U盘一般为sdb1
     mount -t vfat /dev/sdb1 /mnt/usb/ #vfat指的是fat32文件系统，单个文件不超过4GB
                                       #Linux默认不支持NTFS文件系统的 可以下载ntfs-3g软件安装，但是ntfs格式只能是只读的 //一般为移动硬盘
+
+
+
+
+
+################################# Repo.sh ###############################
+#存放IPFS.arm IPFS.linux IPFS.windows ipfs-swarm-key-gen swarm文件
+MyIPFSRepoPath=""
+
+# 获取共享秘钥ipfs-swarm-key-gen
+ipfs-swarm-key-gen > $MyIPFSRepoPath/swarm.key
+
+
+################################## Master.sh #############################
+
+
+
+
+################################## Slave.sh ##############################
+ipfs init
+ipfs bootstrap rm -all
+ipfs bootstrap add /ip4/192.168.0.120/tcp/4001/ipfs/
+ipfs daemon
+
+
+1.设置环境变量IPFS_PATH, 以便存储IPFS数据根目录. 如未设置,则产生的数据在当前用户的根目录(.ipfs)下
+    windows     
+             set    IPFS_PATH                     #查看
+             set    IPFS_PATH="xx"                #设置用户环境变量
+             set    IPFS_PATH="%IPFS_PATH;xx"     #追加
+             set    IPFS_PATH=                    #清空
+
+             rd     /s /q     "D:\IPFSROOT"
+             md               "D:\IPFSROOT"
+             SETX   IPFS_PATH "D:\IPFSROOT"                #设置用户环境变量
+             SETX   IPFS_PATH "D:\IPFSROOT"   /M           #设置用户环境变量
+    Linxu:   export IPFS_PATH=
+2. 拷贝文件
+    拷贝文件swarm.key到IPFS根目录下
+
+
+
+
+
+拷贝IPFS到PATH路径下
