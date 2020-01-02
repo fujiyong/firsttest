@@ -367,6 +367,8 @@ Goland正版授权
 
 
 
+	
+
 
 
 
@@ -381,65 +383,40 @@ cp
     -a ==-rpd   打炮啊
 
 
-
-
-
-
-启动一开始就进入tty1
-终端控制台界面Ctl+Alt+F2-6  tty2-6    #startx不灵啊
-XWindow      Ctl+Alt+F1             
-
-注销 exit logout
-cal [[[day] month] year]
-
-shutdown -h 5:30  24小时制  +m表示多少分钟后执行
-shutdown -h now
-shutdown -r 5:30
-shutdown -r now
-shutdown -c     #可用这条目录取消前一个shutdown命令 
-
-halt 
-poweroff
-init 0
-
-reboot
-init 6
-
-
 find     #按照ls -l的顺序
-	-t TYPE #一般正规文件(f)、设备文件(b、c)、目录（d）、socket(s)等
+	-t TYPE         #一般正规文件(f)、设备文件(b、c)、目录（d）、socket(s)等
 	
-	-perm mode    #查找文件权限正好是mode的文件
-	-perm -mode   #小于mode
-	-perm +mode   #大于mode
+	-perm mode      #查找文件权限正好是mode的文件
+	-perm -mode     #小于mode
+	-perm +mode     #大于mode
 		
     -user root
 	-uid  0
 	-group root
 	-gid  0
-	-nouser: 寻找文件的所有者不在/etc/passwd的文件
-	-nogroup: 寻找文件的用户组不在/etc/group的文件
+	-nouser:        #寻找文件的所有者不在/etc/passwd的文件
+	-nogroup:       #寻找文件的用户组不在/etc/group的文件
 	
     -size +20k -a -size -50k  #+表示多于 -表示少于  c:代表byte k:代表1024byte -a表示and -o表示or
     -a #and
     -o #or
 	
-    -ctime +10 #10天前  file status change 列出n天之前(不包含n本身)被更改过的文件名
-    -mtime 0   #今天修改    file data  modify 几天之前的"一天之内"被更改过的文件
-    -atime -10 #10天内  列出n天之内(包含n本身)被更改过的文件名
-	-newer $file #比file更新的文件
+    -ctime +10      #10天前  file status change 列出n天之前(不包含n本身)被更改过的文件名
+    -mtime 0        #今天修改    file data  modify 几天之前的"一天之内"被更改过的文件
+    -atime -10      #10天内  列出n天之内(包含n本身)被更改过的文件名
+	-newer $file    #比file更新的文件
 	
-	-name filename:查找文件名为filename的文件
+	-name filename  #查找文件名为filename的文件
 	
-	-depth N   #深度
+	-depth N        #深度
 	-prune
 	
-	-fellow  #跟踪符号链接所指向的文件
+	-fellow         #跟踪符号链接所指向的文件
 	
-	-fstype   #在某一特定的文件系统/etc/fstab中查找
+	-fstype         #在某一特定的文件系统/etc/fstab中查找
 	
-	-print  #默认动作
-	-cpio   #对匹配的文件执行cpio备份到磁带设备中
+	-print          #默认动作
+	-cpio           #对匹配的文件执行cpio备份到磁带设备中
     -exec/ok $cmd {} \; #自定义动作 对搜索结果进行处理 使用\对;进行转义
 	                    #cmd不能用alias只能全称如 ls -l不能 ll
 						#有没有C语言的感觉 -exec ls -l {find / -t f} \;
@@ -487,13 +464,23 @@ info  文件位于/usr/share/info
     'mTexinfo RET' visits the Texinfo manual
 info info #
 info $cmd
-    -回车 进入子帮助页面(带有*号)
-    -u    进入上一层
-    -n    进入下一个帮助小节
-    -p    进入上一个帮助小节
-    -q    退出
+    Enter 进入子帮助页面(带有*号)
+    tab   跳转到下一个链接/node节点
+    b     begin  第一个节点
+	e     end    最后一个节点
+    u     up    进入上一层
+    n     next  进入下一个帮助小节
+    p     pre   进入上一个帮助小节
 
-	/mnt
+    空格  下一页
+	PageDown 
+	PageUp
+	s|/  reg search 按s或/进行正则搜索
+    h    help  帮助
+    q    quit  退出
+
+
+/mnt
 /media/cdrom
 /dev/vda 
 /dev/sda
@@ -542,6 +529,39 @@ mount [-t 文件系统] [-o 特殊选项] [设备文件名] [挂载点]
     fdisk -l //查看系统中已经识别的硬盘  U盘一般为sdb1
     mount -t vfat /dev/sdb1 /mnt/usb/ #vfat指的是fat32文件系统，单个文件不超过4GB
                                       #Linux默认不支持NTFS文件系统的 可以下载ntfs-3g软件安装，但是ntfs格式只能是只读的 //一般为移动硬盘
+
+
+
+启动一开始就进入tty1
+终端控制台界面Ctl+Alt+F2-6  tty2-6    #startx不灵啊
+XWindow      Ctl+Alt+F1             
+
+注销 exit logout
+cal [[[day] month] year]
+
+sync
+shutdown 
+	-k "msg"
+	-h  now       #==0 默认是1 1分钟后关机
+	-h  +10       #10分钟后关机
+	-h  20:35     #24小时制20:35关机
+	-r  now       #==0 立即
+	-r  +30 "msg" 
+    -c            #可用这条目录取消前一个shutdown命令 
+	
+halt       #屏幕可能会保留系统已停止的信息
+poweroff   #没电了 屏幕空白
+reboot
+
+init 0     #关机
+init 6     #重启
+
+systemctl halt
+systemctl poweroff
+systemctl reboot
+systemctl suspend     #休眠模式
+
+
 
 
 
