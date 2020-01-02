@@ -79,11 +79,13 @@ export PS1="[\u@\h \W $(getGitBranchFuncName) ]$\n$" #man bash 搜索PS1,根据�
 ###  内置命令
 
 ```
-enable                   #查看bash的所有内置命令, 或禁止某命令
+help                     #查看bash的语法, 比enable功能更强大
 help    ${builtin_cmd}   #查看bash的内置命令的帮助,类似于查看用户命令的帮助man {user_cmd}
+					     #help \(\(
+					     
+enable                   #查看bash的所有内置命令, 或禁止某命令
 builtin ${builtin-cmd}   #忽略alias, 直接运行内置命令
 command ${buildin_cmd}   #忽略alias, 直接运行内置命令或执行程序
-
 bind -P                       # 列出所有 bash 的快捷键
 declare
     declare -a                # 查看所有数组
@@ -93,7 +95,7 @@ declare
     declare -r                # 查看所有只读变量
     declare -x                # 查看所有被导出成环境变量的东西
     declare -p varname        # 输出变量是怎么定义的（类型+值）
-eval $script                       # 对 script 变量中的字符串求值（执行）
+eval $script                  # 对script 变量中的字符串求值（执行）
 source a.sh   #source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
 set -o vi     #设置在命令行的操作方式  默认是emacs
 type function  user_cmd builtin_cmd 
@@ -321,17 +323,69 @@ for ;do done
 while [ condition ]; do done
 until [ condition ]; do done
 
+
+#命令行处理
+##位置变量
+	只能处理简单固定位置的变量
+
+##bash内置的getopts
+optstrinng的格式
+	若第一个字符为":",表示不报任何错误,优先级低于OPTERR
+	字母后面的":"表示该选项需要参数, 参数存储在变量OPTARG中
+优点
+	允许选项叠加如-fs 需要表示选项值中间必须要有空格
+弱点
+	不支持长选项如--debug
+	选项名与选项值中间必须要有空格 格式必须是-d val,
+	遇到非"-"开始的选项或选项参数结束标记--就停止处理参数, 选项参数必须在非选项参数前面
+报错
+	环境变量OPTERR为0时,表示不报任何错误,优先级最高
+$sh getopts.sh -b -c "cc" -a "aa" -e -f -g -h -i
+$cat getopts.sh
+while getopts "a:bc:h" opt; do
+	case $opt in
+		a) 
+			echo "a $OPTARG $OPTIND $6" # 输出a aa 6
+			;;
+		b)                              #-b后面不要跟参数，否则遇到非选项命令行参数，会结束
+			echo "b         $OPTIND $2" # 输出 b  2 -c
+			;;                         
+		c) 
+			echo "c $OPTARG $OPTIND $4" # 输出c cc 4 -a
+			;;
+		m | n)
+			;;
+		?)                          #当命令行中出现了optstring中没有的参数时匹配"?"
+			echo "error"            #依然会改变OPTIND的值
+			;;    
+	esac
+done
+echo $OPTIND            #下一个要处理的参数的位置号 输出11
+shift $(( $OPTIND-2 ))  #移除前4个即-b -c "cc" -a 只会改变$# $@ $0 $1 ... $N参数值
+						#shift使用场景
+				        #1.参数很长,只想使用$0 $1这前几个变量处理,而不想使用${11}因为书写麻烦
+					    #2.参数很长,可以分组处理参数,在这个组里只处理一部分参数,其余参数留给其他组处理
+echo $OPTIND            #下一个要处理的参数的位置号 输出11
+echo $0 $#              #脚本名                 输出getopts.sh aa
+echo $*                 #参数列表                输出aa
+
+##getopt功能更强大
+
 #菜单选择
 select name [in list]; do 
 	case $name in 
-    pattern1 )
-    	statements ;;
-    pattern2 )
-    	statements ;;
-    * )
-    	otherwise ;;
+        pattern1 )
+            statements ;;
+        pattern2 )
+            statements ;;
+        * )
+            otherwise ;;
 	esac
 done
+
+https://www.cnblogs.com/yxzfscg/p/5338775.html
+
+
 ```
 
 ##  函数 

@@ -462,15 +462,22 @@ info  文件位于/usr/share/info
     'q' quits
     'H' lists all Info commands
     'mTexinfo RET' visits the Texinfo manual
+
+    定位Coreutils按回车就进入了子页面,可以浏览基本的命令并其概述  
 info info #
 info $cmd
-    Enter 进入子帮助页面(带有*号)
+    ### 上一级
+        u     up    进入上一层
+    ### 下一级
+        Enter 进入子帮助页面(带有*号)
+    ### 同级不同页面
+        n     next  进入下一个帮助小节
+        p     pre   进入上一个帮助小节
+
+    ### 当前页面
     tab   跳转到下一个链接/node节点
     b     begin  第一个节点
 	e     end    最后一个节点
-    u     up    进入上一层
-    n     next  进入下一个帮助小节
-    p     pre   进入上一个帮助小节
 
     空格  下一页
 	PageDown 
