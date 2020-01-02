@@ -355,7 +355,7 @@ while getopts "a:bc:h" opt; do
 			;;
 		m | n)
 			;;
-		?)                          #当命令行中出现了optstring中没有的参数时匹配"?"
+		?)                          #不明选项时  当命令行中出现了optstring中没有的参数时匹配"?"
 			echo "error"            #依然会改变OPTIND的值
 			;;    
 	esac
@@ -370,6 +370,76 @@ echo $0 $#              #脚本名                 输出getopts.sh aa
 echo $*                 #参数列表                输出aa
 
 ##getopt功能更强大
+老版本有bug，新版本/增强版修正了 若getopt -T && echo $? 返回4则表示增强版
+getopt --help
+-o      短选项
+--long  长选项
+-n
+#-a没冒号表示一定不能带参数
+#-b有冒号表示一定需要带参数
+#-c有双冒号表示可带可不带参数
+#-n 
+#--  用于分割选项与参数 这个符号之前的是选项options，之后的是参数paramter
+#    
+#./mygetopt.sh -b 123 -a file2 -c456 file1 
+#./mygetopt.sh --blong 123 -a --clong=456 file1 file2  
+ARGS=`getopt -o ab:c:: --long along,blong:,clong:: -n 'mygetopt.sh' -- "$@"`
+if [ $? != 0 ]; then
+    echo "Terminating..."
+    exit 1
+fi
+
+#echo $ARGS  ##./mygetopt.sh -b 123 -a file2 -c456 file1
+#将规范化后的命令行参数分配至位置参数（$1,$2,...)
+#set --	Assign any remaining arguments to the positional parameters.
+#		If there are no remaining arguments, the positional parameters
+#		are unset
+eval set -- "${ARGS}"
+#echo $ARGS  ##./mygetopt.sh -a -b 123 -c456 file1 file2
+ 
+while true
+do
+    case "$1" in
+        -a|--along) 
+            echo "Option a";
+            shift
+            ;;
+        -b|--blong)
+            echo "Option b, argument $2";
+            shift 2
+            ;;
+        -c|--clong)
+            case "$2" in
+				# c has an optional argument. As we are in quoted mode,
+                # an empty parameter will be generated if its optional
+                # argument is not found.
+                "")
+                    echo "Option c, no argument";
+                    shift 2  
+                    ;;
+                *)
+                    echo "Option c, argument $2";
+                    shift 2;
+                    ;;
+            esac
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)   #不明选项时
+            echo "Internal error!"
+            exit 1
+            ;;
+    esac
+done
+ 
+#处理剩余的参数
+for arg in $@
+do
+    echo "processing $arg"
+done
+
 
 #菜单选择
 select name [in list]; do 
