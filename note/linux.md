@@ -572,8 +572,16 @@ set -u         #Treat unset variables as an error when substituting
 set -v		   #Print shell input lines as they are read
                #等价于set -o verbose  跟踪每个命令的执行 
 ```
+##  经验
+
+```
+在shell脚本中,不能使用~代替用户根目录,而应该使用$HOME 例如 mkdir {HOME}/ipfs, 而不能是mkdir ~/ipfs
+if [ $environment_variable ]; #判断环境变量是否设置
+若写入到~/.bash_profile的环境变量未生效, 则在shell脚本中先source ${HOME}/.bash_profile
+```
 
 #  命令
+
 ##  echo
 
 ```
