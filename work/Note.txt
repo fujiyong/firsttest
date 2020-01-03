@@ -367,15 +367,35 @@ Goland正版授权
 
 
 
-	
+有哪些人 
+有哪些组
+一个人属于哪些组
+一个组有哪些人
 
+文件的rwx都是相对内容来说，不能修改文件名/删除文件本身
+目录的内容指的是下面的文件名列表
+所以目录的读指的是只读取目录下面的文件名，不能读取文件的除文件名的其他属性（ls -l除了知道是文件和文件名之外，其他都不知道，用？表示）
+    目录的写指的是+(新建子文件和子目录)-（删除子文件和子目录) 改(修改子文件名和子目录名)
+    目录的执行指的是进入该目录 cd $dir 
+	所以目录为了安全与方便， 一般给rx权限
 
+/etc/passwd 账户
+/etc/shadow 密码
+/etc/group  组
 
+chmod -R u=rwx,go=rx $dir 
+chown -R $newUser:$newGroup $dir  
+chown -R $newUser.$newGroup $dir 
+chown -R $newUser $dir 
+chown -R .$newGroup $dir
+chgrp -R $newGroup $dir
 
 
 
 
 ls -i 显示inode节点
+   -lt --time-style=long-iso
+   -lS 
 cp 
     -r   
     -p 连带文件属性复制 --preserve=mode,ownership,timestamps 否则文件的时间为执行复制的时间
@@ -573,44 +593,3 @@ systemctl suspend     #休眠模式
 
 
 https://blog.csdn.net/u010625000/article/details/44455023
-
-################################# Repo.sh ###############################
-#存放IPFS.arm IPFS.linux IPFS.windows ipfs-swarm-key-gen swarm文件
-MyIPFSRepoPath=""
-
-# 获取共享秘钥ipfs-swarm-key-gen
-ipfs-swarm-key-gen > $MyIPFSRepoPath/swarm.key
-
-
-################################## Master.sh #############################
-
-
-
-
-################################## Slave.sh ##############################
-ipfs init
-ipfs bootstrap rm -all
-ipfs bootstrap add /ip4/192.168.0.120/tcp/4001/ipfs/
-ipfs daemon
-
-
-1.设置环境变量IPFS_PATH, 以便存储IPFS数据根目录. 如未设置,则产生的数据在当前用户的根目录(.ipfs)下
-    windows     
-             set    IPFS_PATH                     #查看
-             set    IPFS_PATH="xx"                #设置用户环境变量
-             set    IPFS_PATH="%IPFS_PATH;xx"     #追加
-             set    IPFS_PATH=                    #清空
-
-             rd     /s /q     "D:\IPFSROOT"
-             md               "D:\IPFSROOT"
-             SETX   IPFS_PATH "D:\IPFSROOT"                #设置用户环境变量
-             SETX   IPFS_PATH "D:\IPFSROOT"   /M           #设置用户环境变量
-    Linxu:   export IPFS_PATH=
-2. 拷贝文件
-    拷贝文件swarm.key到IPFS根目录下
-
-
-
-
-
-拷贝IPFS到PATH路径下
