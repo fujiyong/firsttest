@@ -1248,3 +1248,273 @@ When a signal stops your program, the signal is not visible to the program until
 The default is set to nostop, noprint, pass for non-erroneous signals such as SIGALRM, SIGWINCH and SIGCHLD, and to stop, print, pass for the erroneous signals. 
 
 You can also use the signal command to prevent your program from seeing a signal, or cause it to see a signal it normally would not see, or to give it any signal at any time. For example, if your program stopped due to some sort of memory reference error, you might store correct values into the erroneous variables and continue, hoping to see more execution; but your program would probably terminate immediately as a result of the fatal signal once it saw the signal. To prevent this, you can continue with `signal 0'. See section Giving your program a signal.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ln -s $sym_link  $entity  # sym_link --> $entity
+
+
+cp    $sym_link $v        # cp $entity $v       拷贝链接指向的对象
+cp -d $sym_link $v        # $v ---> $entity   d 单纯拷贝链接
+
+
+a   ==dpR                       复制属性
+d   拷贝时保存链接
+p   将修改时间和访问权限也复制
+R   递归
+l   链接文件，不作拷贝
+i   若存在则提示
+f   若存在，先删除，再复制
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+strace –tt –p –e –o a.txt
+strace -f -s 100 ./test
+strace -f -p $pid -s 600
+strace -e rt_sigaction -f -s 100 ./test
+
+
+-f/-F  跟踪fork/vfork
+-p $pd 跟踪进程$pid
+-e     
+-s
+-tt 
+-o    输出文件
+
+
+
+
+
+ 1.挂死程序源码
+//hang.c
+#include
+#include
+#include
+#include
+
+int main(int argc, char** argv)
+{
+    getpid(); //该系统调用起到标识作用
+    if(argc < 2)
+    {
+        printf("hang (user|system)\n");
+        return 1;
+    }
+    if(!strcmp(argv[1], "user"))
+        while(1);
+    else if(!strcmp(argv[1], "system"))
+        sleep(500);
+    return 0;
+}
+
+可向该程序传送user和system参数，以上代码使用死循环模拟用户态挂死，调用sleep模拟内核态程序挂死。
+
+
+2.strace跟踪输出
+
+用户态挂死跟踪输出：
+
+lx@LX:~$ gcc hang.c -o hang
+
+lx@LX:~$ strace ./hang user
+
+……
+
+mprotect(0x8049000, 4096, PROT_READ)    = 0
+
+mprotect(0xb59000, 4096, PROT_READ)     = 0
+
+munmap(0xb77bf000, 80682)               = 0
+
+getpid()                                = 14539
+
+内核态挂死跟踪输出：
+
+lx@LX:~$ strace ./hang system
+
+……
+
+mprotect(0x8049000, 4096, PROT_READ)    = 0
+
+mprotect(0xddf000, 4096, PROT_READ)     = 0
+
+munmap(0xb7855000, 80682)               = 0
+
+getpid()                                = 14543
+
+rt_sigprocmask(SIG_BLOCK, [CHLD], [], 8) = 0
+
+rt_sigaction(SIGCHLD, NULL, {SIG_DFL, [], 0}, 8) = 0
+
+rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+
+ 
+
+nanosleep({500, 0},
+
+3.输出分析
+
+用户态挂死情况下，strace在getpid()一行输出之后没有其他系统调用输出；进程在内核态挂死，最后一行的系统调用nanosleep不能完整显示，这里nanosleep没有返回值表示该调用尚未完成。
+
+ 
+
+因而我们可以得出以下结论：使用strace跟踪挂死程序，如果最后一行系统调用显示完整，程序在逻辑代码处挂死；如果最后一行系统调用显示不完整，程序在该系统调用处挂死。
+
+ 
+
+当程序挂死在系统调用处，我们可以查看相应系统调用的man手册，了解在什么情况下该系统调用会出现挂死情况。
+
+下次再遇到程序挂死、命令执行报错的问题，如果从程序日志和系统日志中看不出问题出现的原因，先别急着google或找高手帮忙，别忘了一个强大的工具它就在那里，不离不弃，strace一下吧！
+
+
+
+
+ starce 的另一个用处是解决和动态库相关的问题。当对一个可执行文件运行ldd时，它会告诉你程序使用的动态库和找到动态库的位置。但是如果你正在使用一个比较老 的glibc版本（2.2或更早），你可能会有一个有bug的ldd程序，它可能会报告在一个目录下发现一个动态库，但是真正运行程序时动态连接程序 （/lib/ld-linux.so.2）却可能到另外一个目录去找动态连接库。这通常因为/etc/ld.so.conf和 /etc/ld.so.cache文件不一致，或者/etc/ld.so.cache被破坏。在glibc 2.3.2版本上这个错误不会出现，可能ld-linux的这个bug已经被解决了。
+尽管这样，ldd并不能把所有程序 依赖的动态库列出来，系统调用dlopen可以在需要的时候自动调入需要的动态库，而这些库可能不会被ldd列出来。作为glibc的一部分的NSS （Name Server Switch）库就是一个典型的例子，NSS的一个作用就是告诉应用程序到哪里去寻找系统帐号数据库。应用程序不会直接连接到NSS库，glibc则会通 过dlopen自动调入NSS库。如果这样的库偶然丢失，你不会被告知存在库依赖问题，但这样的程序就无法通过用户名解析得到用户ID了。让我们看一个例 子：
+whoami程序会给出你自己的用户名，这个程序在一些需要知道运行程序的真正用户的脚本程序里面非常有用，whoami的一个示例输出如下： 
+代码：
+# whoami 
+root
+ 
+假设因为某种原因在升级glibc的过程中负责用户名和用户ID转换的库NSS丢失，我们可以通过把nss库改名来模拟这个环境： 
+代码：
+# mv /lib/libnss_files.so.2 /lib/libnss_files.so.2.backup 
+# whoami 
+whoami: cannot find username for UID 0
+ 
+这里你可以看到，运行whoami时出现了错误，ldd程序的输出不会提供有用的帮助： 
+代码：
+# ldd /usr/bin/whoami 
+libc.so.6 => /lib/libc.so.6 (0x4001f000) 
+/lib/ld-linux.so.2 => /lib/ld-linux.so.2 (0x40000000)
+你只会看到whoami依赖Libc.so.6和ld-linux.so.2，它没有给出运行whoami所必须的其他库。这里时用strace跟踪whoami时的输出： 
+代码：
+strace -o whoami-strace.txt whoami
+open("/lib/libnss_files.so.2", O_RDONLY) = -1 ENOENT (No such file or directory) 
+open("/lib/i686/mmx/libnss_files.so.2", O_RDONLY) = -1 ENOENT (No such file or directory) 
+stat64("/lib/i686/mmx", 0xbffff190) = -1 ENOENT (No such file or directory) 
+open("/lib/i686/libnss_files.so.2", O_RDONLY) = -1 ENOENT (No such file or directory) 
+stat64("/lib/i686", 0xbffff190) = -1 ENOENT (No such file or directory) 
+open("/lib/mmx/libnss_files.so.2", O_RDONLY) = -1 ENOENT (No such file or directory) 
+stat64("/lib/mmx", 0xbffff190) = -1 ENOENT (No such file or directory) 
+open("/lib/libnss_files.so.2", O_RDONLY) = -1 ENOENT (No such file or directory) 
+stat64("/lib", {st_mode=S_IFDIR|0755, st_size=2352, ...}) = 0 
+open("/usr/lib/i686/mmx/libnss_files.so.2", O_RDONLY) = -1 ENOENT (No such file or directory) 
+stat64("/usr/lib/i686/mmx", 0xbffff190) = -1 ENOENT (No such file or directory) 
+open("/usr/lib/i686/libnss_files.so.2", O_RDONLY) = -1 ENOENT (No such file or directory)
+ 
+你可以发现在不同目录下面查找libnss.so.2的尝试，但是都失败了。如果没有strace这样的工具，很难发现这个错误是由于缺少动态库造成的。现在只需要找到libnss.so.2并把它放回到正确的位置就可以了。
+
+
+
+
+
+
+
+
+
+
+
+sudo -h
+sudo -l
+sudo -v
+sudo -k
+sudo -s
+sudo -H
+sudo [ -b ] [ -p prompt ] [ -u username/#uid] -s
+
+
+
+配置文件 /etc/sudoers
+
+
+
+
+
+
+
+
+
+
+
+
+
