@@ -22,7 +22,6 @@ ipfs3	192.168.1.120	22	root	13622228504
 git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
 
 
-zcat *.tar.gz
 
 alias | grep -E "b\."
 echo $DIFOSS_ENV_BASE/.privacy/__init__.sh
@@ -357,312 +356,895 @@ Goland正版授权
 812LFWMRSH-eyJsaWNlbnNlSWQiOiI4MTJMRldNUlNIIiwibGljZW5zZWVOYW1lIjoi5q2j54mIIOaOiOadgyIsImFzc2lnbmVlTmFtZSI6IiIsImFzc2lnbmVlRW1haWwiOiIiLCJsaWNlbnNlUmVzdHJpY3Rpb24iOiIiLCJjaGVja0NvbmN1cnJlbnRVc2UiOmZhbHNlLCJwcm9kdWN0cyI6W3siY29kZSI6IklJIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9LHsiY29kZSI6IkFDIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9LHsiY29kZSI6IkRQTiIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJQUyIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJHTyIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJETSIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJDTCIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJSUzAiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUkMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUkQiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUEMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUk0iLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiV1MiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiREIiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiREMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUlNVIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9XSwiaGFzaCI6IjEyNzk2ODc3LzAiLCJncmFjZVBlcmlvZERheXMiOjcsImF1dG9Qcm9sb25nYXRlZCI6ZmFsc2UsImlzQXV0b1Byb2xvbmdhdGVkIjpmYWxzZX0=-ti4tUsQISyJF/zfWxSHCr+IcYrX2w24JO5bUZCPIGKSi+IrgQ0RT2uum9n96o+Eob9Z1iQ9nUZ6FJdpEW5g0Exe6sw8fLrWMoLFhtCIvVgQxEEt+M7Z2xD0esmjP1kPKXZyc/i+NCxA2EO2Sec9uifqklBGP1L3xoENAw2QsIWBfttIe6EPWhbS8TIMMr2vF/S3HrN8To5Hj5lwD/t1GHgFK1uWrhsuifAiKcVzqogybzGiR1h2+yNYTMbKxP7uPCcdYMsIyrBNVRGA3IuEJgyGQTQlFbnVQoVUTGPW2tQxprmC464wMjKi40JHh27WzjOHPwgzxDaigwn4Z0EbSpA==-MIIElTCCAn2gAwIBAgIBCTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBMB4XDTE4MTEwMTEyMjk0NloXDTIwMTEwMjEyMjk0NlowaDELMAkGA1UEBhMCQ1oxDjAMBgNVBAgMBU51c2xlMQ8wDQYDVQQHDAZQcmFndWUxGTAXBgNVBAoMEEpldEJyYWlucyBzLnIuby4xHTAbBgNVBAMMFHByb2QzeS1mcm9tLTIwMTgxMTAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxcQkq+zdxlR2mmRYBPzGbUNdMN6OaXiXzxIWtMEkrJMO/5oUfQJbLLuMSMK0QHFmaI37WShyxZcfRCidwXjot4zmNBKnlyHodDij/78TmVqFl8nOeD5+07B8VEaIu7c3E1N+e1doC6wht4I4+IEmtsPAdoaj5WCQVQbrI8KeT8M9VcBIWX7fD0fhexfg3ZRt0xqwMcXGNp3DdJHiO0rCdU+Itv7EmtnSVq9jBG1usMSFvMowR25mju2JcPFp1+I4ZI+FqgR8gyG8oiNDyNEoAbsR3lOpI7grUYSvkB/xVy/VoklPCK2h0f0GJxFjnye8NT1PAywoyl7RmiAVRE/EKwIDAQABo4GZMIGWMAkGA1UdEwQCMAAwHQYDVR0OBBYEFGEpG9oZGcfLMGNBkY7SgHiMGgTcMEgGA1UdIwRBMD+AFKOetkhnQhI2Qb1t4Lm0oFKLl/GzoRykGjAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBggkA0myxg7KDeeEwEwYDVR0lBAwwCgYIKwYBBQUHAwEwCwYDVR0PBAQDAgWgMA0GCSqGSIb3DQEBCwUAA4ICAQAF8uc+YJOHHwOFcPzmbjcxNDuGoOUIP+2h1R75Lecswb7ru2LWWSUMtXVKQzChLNPn/72W0k+oI056tgiwuG7M49LXp4zQVlQnFmWU1wwGvVhq5R63Rpjx1zjGUhcXgayu7+9zMUW596Lbomsg8qVve6euqsrFicYkIIuUu4zYPndJwfe0YkS5nY72SHnNdbPhEnN8wcB2Kz+OIG0lih3yz5EqFhld03bGp222ZQCIghCTVL6QBNadGsiN/lWLl4JdR3lJkZzlpFdiHijoVRdWeSWqM4y0t23c92HXKrgppoSV18XMxrWVdoSM3nuMHwxGhFyde05OdDtLpCv+jlWf5REAHHA201pAU6bJSZINyHDUTB+Beo28rRXSwSh3OUIvYwKNVeoBY+KwOJ7WnuTCUq1meE6GkKc4D/cXmgpOyW/1SmBz3XjVIi/zprZ0zf3qH5mkphtg6ksjKgKjmx1cXfZAAX6wcDBNaCL+Ortep1Dh8xDUbqbBVNBL4jbiL3i3xsfNiyJgaZ5sX7i8tmStEpLbPwvHcByuf59qJhV/bZOl8KqJBETCDJcY6O2aqhTUy+9x93ThKs1GKrRPePrWPluud7ttlgtRveit/pcBrnQcXOl1rHq7ByB8CFAxNotRUYL9IF5n3wJOgkPojMy6jetQA5Ogc8Sm7RG6vg1yow==
 
 
+/dev   这个是真正的外部数据，系统会自动将cdrom安装到/dev
+/mnt   用户手动或系统自动挂载/dev到/mnt目录    固定存储        以前
+/media 用户手动或系统自动挂载/dev到/media目录  移动存储 如USB  后来   有桌面图标
+
+
+
+
+
+
+
+
+
+有哪些人    /etc/passwd 账户
+有哪些组    /etc/group  组
+一个人属于哪些组  #id $user 中的groups字段
+一个组有哪些人    #groupmems -l -g $group
+#groupmems -g $group #默认是root组
+	-a $user  #add 添加 
+	-d $user  #delete 减少
+	-p        #purge
+	-l        #list 
+
+文件的rwx都是相对内容来说，不能修改文件名/删除文件本身
+目录的内容指的是下面的文件名列表
+所以目录的读指的是只读取目录下面的文件名，不能读取文件的除文件名的其他属性（ls -l除了知道是文件和文件名之外，其他都不知道，用？表示）
+    目录的写指的是+(新建子文件和子目录)-（删除子文件和子目录) 改(修改子文件名和子目录名)
+    目录的执行指的是进入该目录 cd $dir 
+	所以目录为了安全与方便， 一般给rx权限
+
+
+/etc/shadow 密码
+
+
+chmod -R u=rwx,go=rx $dir 
+chown -R $newUser:$newGroup $dir  
+chown -R $newUser.$newGroup $dir 
+chown -R $newUser $dir 
+chown -R .$newGroup $dir
+chgrp -R $newGroup $dir
+
+
+pwd  -L #尽量使用link路径    loginc path
+      -P #尽量不使用链接路径 Phsics path\
+mkdir -m 711 $dir
+
+ls   默认按名称排序
+   -d       显示目录，而不是目录下的内容
+   -lS size  按大小排序
+   -lt  按时间排序  
+		--time-style=long-iso  等价于 --full-time
+		--time={atime,ctime} 
+				mtime 默认是modification time  如果之后未修改文件内容，这就是文件的建立时间
+				atime访问文件内容 
+				ctime改变文件属性(权限 用户 时间)
+   -h  大小以人类可读形式
+   -i 显示inode节点编号 
+   -R 递归
+lsattr  $file/dir  #列举mod10位之外的特殊属性  ls只会列举一些普通的mod10位的属性
+chattr  $file/dir  #改变特殊属性  ex2~4全支持 xfs只支持aiAds
+	+-=            #类似于chmod的action，但没有uog这些参数
+	a  只能增加数据，不能删除和修改数据   只有root才有此权限
+	i  root也不能直接增加删除数据 不能改名 不能删除 不能建立连接 只能读取属性和数据，简直固如磐石 
+	   只有root才有此权限设置该属性 root也只能先通过去掉该属性后(chattr -i)才可以删除
+	
+	A 不会更改文件的accestime属性
+	S  修改文件时，没有系统缓冲区，直接更改到文件 所以不需要执行sync命令
+	c  读取和写入的时候会经过解压/压缩的步骤 一般针对大文件而言
+	d  当dump程序执行时，该文件/目录不可dump
+	s  当删除后， 数据就真删除了 神仙也无法恢复
+	u  当删除后， 数据还是硬盘， 还是可以修复的
+	man ls 在最后 info '(coreutils) ls invocation' 执行它然后进入*What information is listed
+SUID 
+	chmod u+s  针对owner而言 所以ls -l中owner中的执行位为可能表现为S或s(S+x)  例如ls -l /usr/bin/passwd
+	只针对二进制可执行程序而言
+	该标志位可以使执行者仅在执行过程中具有owner权限
+	如执行者other使用命令passwd可通过owner为root更新other没任何权限的/etc/passwd文件
+SGID
+	chmod g+s  针对group而言 所以ls -l中group中的执行位为可能表现为S或s(S+x)  例如ls -l /usr/bin/locate 或 ls -l /usr/bin/mlocate
+	可针对二进制可执行程序而言，该标志位可以使执行者在执行过程中具有group权限
+	执行者other使用命令locate可通过group为slocate查询执行者没有任何权限的mlocate.db
+	可针对文件夹，用户对该目录具有rx权限
+SBIT 
+	chmod o+t  针对other而言 所以ls -l中other中的执行位为可能表现为T或t(T+x) 例如 ls -ld /tmp
+	只针对目录而言 group或other用户对该目录具有wx权限
+	在该目录下谁创建的文件、文件夹，这个新创建的文件或文件夹只有自己和root能够删除
+	chmod (SUID+SGID+SBIT)xxx 以前C语言api中参数mode一般设置0777，现在这个0要设置值了
+		                      SUID为4 SGID为2 SBIT为1
+	S+x == s
+	T+x == t
+	
+	
+     ‘s’
+          If the set-user-ID or set-group-ID bit and the corresponding
+          executable bit are both set.
+
+     ‘S’
+          If the set-user-ID or set-group-ID bit is set but the
+          corresponding executable bit is not set.
+
+     ‘t’
+          If the restricted deletion flag or sticky bit, and the
+          other-executable bit, are both set.  The restricted deletion
+          flag is another name for the sticky bit.  *Note Mode
+          Structure::.
+
+     ‘T’
+          If the restricted deletion flag or sticky bit is set but the
+          other-executable bit is not set.
+
+     ‘x’
+          If the executable bit is set and none of the above apply.
+
+
+	
+cp 
+    -r   
+    -p 连带文件属性复制 --preserve=mode,ownership,timestamps 否则文件的时间为执行复制的时间
+    -d 连带链接属性复制 --no-dereference --preserve
+    -a ==-rpd   打炮啊  #无法复制ctime这个属性
+	
+	-l 复制为一个软连接
+	-l 复制为一个硬链接
+touch 
+	-a  修改accesstime
+	-c  修改状态改变时间
+	-m  修改文件modifytime
+	-d  后接date，默认为today
+	-t  后接时间，默认为now   格式为YYYYMMDHHmm
+rename  批量更名
+head -n -100  #倒数100行不显示
+tail -n +100  #前100行不显示
+
+umask     #显示用户掩码  数字表示  mask是表示需要去掉的权限 
+          #文件的默认权限是rw-rw-rw-(666) 文件夹的默认权限是rwxrwxrwx(777)
+		  #所以当umask是0022时，关注后三位，说明owner不用去掉权限，group要去掉权限2/w，other要去掉权限2/w
+		  #不是简单去掉（做减法去借位),而是有这个权限的前提下，即同位相减，不能借位
+		  #所以拥有mask为022创建文件权限rw-r--r--(666-022=644) 文件夹rwxr-xr-x(777-022=755)
+umask 002 #临时修改用户掩码
+umask -S  #symbol表示
+		  #默认root的umask为022，一般用户为002，即普通用户同组可以有写权限
+
+
+find     #按照ls -l的顺序
+	-t TYPE         #一般正规文件(f)、设备文件(b、c)、目录（d）、socket(s)等
+	
+	-perm mode      #查找文件权限正好是mode的文件
+	-perm -mode     #小于mode
+	-perm +mode     #大于mode
+		
+    -user root
+	-uid  0
+	-group root
+	-gid  0
+	-nouser:        #寻找文件的所有者不在/etc/passwd的文件
+	-nogroup:       #寻找文件的用户组不在/etc/group的文件
+	
+    -size +20k -a -size -50k  #+表示多于 -表示少于  c:代表byte k:代表1024byte -a表示and -o表示or
+    -a #and
+    -o #or
+	
+    -ctime +10      #10天前  file status change 列出n天之前(不包含n本身)被更改过的文件名
+    -mtime 0        #今天修改    file data  modify 几天之前的"一天之内"被更改过的文件
+    -atime -10      #10天内  列出n天之内(包含n本身)被更改过的文件名
+	-newer $file    #比file更新的文件
+	
+	-name filename  #查找文件名为filename的文件
+	
+	-depth N        #深度
+	-prune
+	
+	-fellow         #跟踪符号链接所指向的文件
+	
+	-fstype         #在某一特定的文件系统/etc/fstab中查找
+	
+	-print          #默认动作
+	-cpio           #对匹配的文件执行cpio备份到磁带设备中
+    -exec/ok $cmd {} \; #自定义动作 对搜索结果进行处理 使用\对;进行转义
+	                    #cmd不能用alias只能全称如 ls -l不能 ll
+						#有没有C语言的感觉 -exec ls -l {find / -t f} \;
+	
+locate [opt] $filename #默认一天更新一次数据库/var/lib/mlocate, 可以通过命令updatedb临时更新 只能按文件名搜索，而不能更复杂的搜索
+                 #部分匹配模糊查找
+	-i           #忽略大小写
+	-r           #正则表达式支持* ？
+	-n           #只返回前面n个
+	-q           #安静模式 不会显示任何错误
+    cat /etc/updatedb.conf
+		PRUNE_BIND_MOUNTS="yes" #开启搜索限制
+		PRUNEFS=                #搜索时,不搜索的文件系统
+		PRUNENAMES              #搜索时,不搜索的文件类型
+		PRUNEPATHS=             #搜索时,不搜索的路径
+slocate #security locate locate的升级版
+mlcoate #slocate的升级版 与locate公用一个数据库 根据时间戳更新数据库，而不必重新读取一下文件系统 apt show mlocate
+#whatis $cmd   使用whatis命令必须先sudo makewhatis(老版本)/mandb(新版本)建立数据库
+whereis [opt] filename #只能在特定目录下(whereis -l或数据库/var/lib/slocate/slocate.db)中
+                       #完全匹配查找可执行文件的位置+源文件、配置文件的位置+帮助文件的位置
+					   #当提供的filename包含.后缀时会被截断，只留下.前面的
+    -b  #binary 可执行文件
+	-s  #source 源文件      eg： whereis stdio  whereis nginx  ##/usr/include/stdio.h
+    -m  #manual 帮助文件                                       ##/usr/share/man/man3/stdio.3.gz
+	-l  #output effective lookup paths
+which [-a] $filename  #从环境变量$PATH中完全匹配查找可执行程序的位置 -a表示有多处时返回多处，默认只返回最前一次
+
+
+man           #针对未使用过的命令或文件格式manual 而$cmd --help针对的是曾经使用过的命令
+man man       #从中可以查看各级别含义
+    -h  for help
+man [opt] $cmd
+	-f      #查看命令的所有级别 
+	        #######等价于whatis $cmd
+	-k      #查看包含关键字key的所有级别
+		    ######等价于apropos
+	null    #默认查看最低级别  man 5 updatedb.conf  man 5 /etc/updatedb.conf
+	$number 
+	-a      #查看所有级别 按照cat /etc/man_db.conf其中定义的顺序依次查看
+
+
+info  文件位于/usr/share/info
+    'q' quits
+    'H' lists all Info commands
+    'mTexinfo RET' visits the Texinfo manual
+
+    定位Coreutils按回车就进入了子页面,可以浏览基本的命令并其概述  
+info info #
+info $cmd
+    ### 上一级
+        u     up    进入上一层
+    ### 下一级
+        Enter 进入子帮助页面(带有*号)
+    ### 同级不同页面
+        n     next  进入下一个帮助小节
+        p     pre   进入上一个帮助小节
+
+    ### 当前页面
+    tab   跳转到下一个链接/node节点
+    b     begin  第一个节点
+	e     end    最后一个节点
+
+    空格  下一页
+	PageDown 
+	PageUp
+	s|/  reg search 按s或/进行正则搜索
+    h    help  帮助
+    q    quit  退出
+
+
+/mnt
+/media/cdrom
+/dev/vda 
+/dev/sda
+
+lvm 一种可以增加/减少文件系统容量的装置设定
+
+文件系统类型
+    ext2/3/4 由于ext3 ext4多了日志的记录,所以系统复原会比较快  已过时
+    swap     并不会使用到目录树的挂载, 所以并不需要指定挂载点
+    xfs      centos预设的, 格式化好几T的空间速度快
+    vfat     linux/windows都支持  如果windows和linux在硬盘中共存,为了数据交换,可以设置为这个
 
 /root/anaconda-ks.cfg
 initial-setup-ks.cfg
 original-ks.cfg        [anəˈkändə]  水蟒  kickstart 启动
 
-
+文件系统类型
+    cat /proc/filessystem                     内存已加载的文件系统
+    ls -l /lib/modules/$(uname -r)/kernel/fs  这个版本系统可支持的
 查看文件系统类型
-    cat /etc/fstab
-
     lsblk -f               #显示块设备
-    blkid /dev/sda3        #打印查找块设备属性
-    
+    cat /etc/fstab
     df -T -h               #只显示已挂载的,不显示未挂载的
-    file -sL /dev/sda3    #标识文件类型 -s标志启用读取块或字符文件， -L启用以下符号链接
-
     parted && print list   #parted分区软件
     fsck -N /dev/sdb1      #打印和检查fs
+    blkid /dev/sda3        #打印查找块设备属性
     mount  | grep ^/dev
+    file -sL /dev/sda3    #标识文件类型 -s标志启用读取块或字符文件， -L启用以下符号链接
 
-resize2fs更改文件系统的大小
+    fdisk -l 只能列出硬盘的分区表、容量大小以及分区类型，但看不到文件系统类型
+
+
+mount     #查询系统中已挂载的设备
+mount -a  #依据配置文件/etc/fstab的内容，自动挂载 光盘/U盘不建议写入自动挂载中,否则开机时没有光盘/U盘的话, 系统会崩溃
+
+mount [-t 文件系统] [-o 特殊选项] [设备文件名] [挂载点]
+    -t 文件系统：加入文件系统类型来指定挂载的类型，ext3,ext4,光盘：iso9660等文件系统
+    -o 特殊选项：可以指定挂载的额外选项
+
+    #挂载光盘
+    mount -t iso9660 /dev/sr0 /mnt/cdrom/
+    ll /mnt/cdrom/
+    umount /mnt/cdrom/ 或umount /dev/sr0
+
+    #挂载U盘
+    fdisk -l //查看系统中已经识别的硬盘  U盘一般为sdb1
+    mount -t vfat /dev/sdb1 /mnt/usb/ #vfat指的是fat32文件系统，单个文件不超过4GB
+                                      #Linux默认不支持NTFS文件系统的 可以下载ntfs-3g软件安装，但是ntfs格式只能是只读的 //一般为移动硬盘
+
+
+
+启动一开始就进入tty1
+终端控制台界面Ctl+Alt+F2-6  tty2-6    #startx不灵啊
+XWindow      Ctl+Alt+F1             
+
+注销 exit logout
+cal [[[day] month] year]
+
+sync
+shutdown 
+	-k "msg"
+	-h  now       #==0 默认是1 1分钟后关机
+	-h  +10       #10分钟后关机
+	-h  20:35     #24小时制20:35关机
+	-r  now       #==0 立即
+	-r  +30 "msg" 
+    -c            #可用这条目录取消前一个shutdown命令 
+	
+halt       #屏幕可能会保留系统已停止的信息
+poweroff   #没电了 屏幕空白
+reboot
+
+init 0     #关机
+init 6     #重启
+
+systemctl halt
+systemctl poweroff
+systemctl reboot
+systemctl suspend     #休眠模式
+
+
 
 
 ag advanced grep
-fzf  
-mycli             #mysql彩色客户端
-shellchekc  a.sh  #检查shell语法
-
+fzf  vim $(fzf)        fuzzy finder
+	 cd $(find * -type d | fzf) 
+	 git checkout $(git branch -r | fzf)
+shellchekc  a.sh  检查shell语法
+mycli mysql彩色客户端
 axel -n 20 $addr    多线程下载
-lynx  --dump http://www.baidu.com  终端浏览器
 tig git https://www.jianshu.com/p/e4ca3030a9d5
 multitail
 script/scriptreplay  终端会话录制并回放
 top htop glances
+lynx  终端浏览器
 
-zeal  dash
-everything listary
-Mockoon
-chocolatey homebrew  
+
+block 1K 2K 4K
+blockgrooup1
+	superblock
+	filesystemdescription
+	inodeblockbitmap
+	datablockbitmap
+	inodeblock                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+	datablock
+
+
+resize2fs更改文件系统的大小
+fsck  检验磁盘
+
+du
+	 默认不会列出当前目录下单个文件的大小，尽管最后表示当前目录的.会统计
+	 -a 会列出当前目录下单个文件的大小
+	 -Sh 不包括子目录的统计， 更准备 因为目录已经统计过一次了
+	 -sh 
+	
+
+df  /   #重点找到磁盘名而已 例如/dev/hdc2中的磁盘名是/dev/hdc 是不含数字的， 数字是3 分区                    
+	-T  增加文件类型列
+	-h   
+	-a  列出所有的文件系统  包括特殊的/proc  基本特殊的文件系统都不会占用硬盘空间
+	-i  查看inode，默认为data
+dumpe2fs /dev/hda1   #dump ext2 file sysem 查看superblock信息和每个blockgroup信息
+	-h  只查看superblock信息  
+
+
+
+
 
 
 https://blog.csdn.net/u010625000/article/details/44455023
 
 
-ag
-    安装
-        apt search silver
-        apt search silver | grep search
-        apt insall silversearcher-ag
+全部摘抄 http://www.berlinix.com/gdb.html
+http://www.docin.com/p-245963860.html
+https://developer.apple.com/library/mac/#documentation/DeveloperTools/gdb/gdb/gdb_9.html  
+http://www.douban.com/note/65837435/
+
+gdb的配置文件是.gdbinit.就如vi的.vimrc.
+
+break       b
+delete      d
+disassemble disas
+info        i
+registers   r
+只有break和watch命令支持if，catch目前暂不支持if.
 
 
-fzf  fuzzy find 模糊查询 媲美vim的CtrlP插件
-    安装
-        apt install fzf 
+0、写在前头
+产生core：              
+                            limit -c                             #查看
+                            limit -c unlimited/1024*1024*1024    #设置，防止消耗内存大的进程产生过大的coredump
+配置     
+                            kernel.core_pattern=/var/core/%t-%e-%p-%c.core   #cat /etc/sysctl.conf
+                            kernel.core_uses_pid=0                           #若为1，即在core文件后加上pid，但上面我们已经加上了pid了
+                            sysctl -p
+编译                    <Esc>:make {arguments}  #编译代码
+                           <Esc>:gr[ep] main *.c     #
+遍历编译错误             http://man.chinaunix.net/newsoft/vi/doc/help.html 查找    quickfix.txt文档    
+                            http://man.chinaunix.net/newsoft/vi/doc/usr_30.html#usr_30.txt
+                           <Esc>:cl[ist]                          #只有那些含有文件名或行数的错误信息才会被显示。vim假定你对其他信息不感兴趣
+                           <Esc>:c[list]! [from][,[to]]           #查看所有的make的信息,只需在上述命令上加！
+                           <Esc>:cfir[st]                         #将光标移动到第一个错误
+                           <Esc>:cl[ast]                          #将光标移动到最后一个错误
+                           <Esc>:cp[revious]                      #将光标移动到上一个错误
+                           <Esc>:cN[ext]                          #将光标移动到下一个错误所在的行
+			       <Esc>:cc                              #有时空间不够，vim会缩短出错信息。如果想查看详细信息
+                           <Esc>:cc 3                             #将光标移动到第三个错误
+                           <Esc>:cope[n] [height]                 #打开一个窗口显示当前的错误列表.默认为10行高。一般位于底端。如果有垂直分割，会位于最右边窗口的最下边。
+                           <Esc>:ccl[ose]                         #关闭quickfix窗口
+                           <Esc>:cw[indow] [height]               #当存在可以识别的错误时，打开此窗口。如果该窗口已经打开且没有可以识别的错误，则将此窗口关闭
 
-        git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-        cd ~/.fzf && git pull && ./install
+1、启动调试
+gdb ./prog                                  #debug from start
+gdb ./prog pid                              #debug running prog
+gdb ./prog core                             #debug core file
 
-    使用
-        keybinding bash zsh fish
-            Ctrl-T  查找粘贴目录下的文件名或目录名到命令行
-                vi Ctrl-T
-                cd Ctrl-T
-            Ctrl-R  查找粘贴选中的历史命令到命令行
-                Ctrl-R  再按一次则在时间和相关性之间排序历史命令
-            Ctrl-c  切换目录 == cd  + Ctrl-T
-        autocomplete bash zsh
-            kill -9/15 <tab>  然后tab或shift-Table选中
+server：gdbserver host:port --attatch PID
+        gdbserver clientIP:serverPort Prog
+client：gdb Prog
+        (gdb)target remote serverIP:serverport
+        (gdb)list/break
+        (gdb)continue/c                    #不能run因为Prog已经在server上run了
+        (gdb)以后如常
 
-            vi $path/**<Tab>   vim $(fzf)
-            cd $path/**<Tab>   cd $(find * -type d | fzf) 
+2、gdb shell 命令
+宏
+(gdb)info macro macro-name
+(gdb)macro expand macro-name                #展开宏         http://blog.chinaunix.net/space.php?uid=23629988&do=blog&id=3053595
+                                                            默认级别是-g2，简称-g,此时不能expand macro，需要-g3,产生更多的调试信息
+                                                            对于单个文件，可以采取预编译 g++ -E test.c > test.e，查看宏定义，include文件
+加载
+(gdb)file [/path/to/]$(prog)                #加载prog符号文件即加载应用程序
+(gdb)info files
+(gdb)set args $(argv[1]) $(argv[2])         #设置应用程序参数    
+(gdb)show args
+(gdb)info args
+(gdb)path <dir>                             #程序的运行路径
+(gdb)show path                              #查看程序的运行路径
+(gdb)set environment varname[=value]        #设置环境变量
+(gdb)show environment [varname]             #查看环境变量
 
-            ssh **<tab>
-            telnet **<tab>
+源代码   
+编译的时候一定要加上-g参数，表示将源代码编译到执行文件，否则看不到路径和源代码
+编译-g的时候，只包括了源代码的文件名，没有提供源代码的路径
+总结：-g 表示将源代码编译到可执行文件，但看不了源代码，只能看到文件名，所以这时必须提供源代码路径
+     但由于一般在调试的情况下有2个预制变量$cdir:$cwd，其中cwd表示当前路径，cdir表示compilation dir
+       而由于一般调试在源码目录下，此时cwd就表示源码目录
+       当将即使以-g编译的exe拷贝到别的机器，由于cwd没有源码，所以必须拷贝源码过去，且设置directory
+Add directory DIR to beginning of search path for source files.  
+Forget cached info on source file locations and line positions.  
+DIR can also be $cwd for the current working directory, or $cdir for the  
+directory in which the source file was compiled into object code.  
+With no argument, reset the search path to $cdir:$cwd, the default.
+(gdb)show directories                        #源代码搜索路径
+(gdb)directory /path/to/src_dir1:/path/to/src_dir2 # http://coolshell.cn/articles/3643.html
+     或分成多步directory /path/to/src_dir1          # https://sourceware.org/gdb/onlinedocs/gdb/Source-Path.html
+       directory /path/to/src_dir2
+                                             #添加源代码搜索路径在当前路径的前面.默认搜索路径是环境变量PATH中定义的路径。
+                                             #如果需要指定多个路径，unix可以使用":"或whitespace,windows使用"；"
+(gdb)director                                #清除所有自定义的原文件搜索路径
+(gdb)set listsize <count>
+(gdb)show listsize
+(gdb)list <linenum>                          #显示程序第linenum行周围的代码
+(gdb)list <function>                         #显示函数名function的源代码
+(gdb)list                                    #显示当前行后的代码，默认是10行，当前行的前5和后5，函数则为前2下8
+(gdb)list +                                  #显示当前行后的代码
+(gdb)list -                                  #显示当前行前的代码
+(gdb)list <first>,<last>                     #显示first行到last行的代码
+(gdb)list <last>                             #显示当前行到last行之间的代码
+(gdb)search/forward-search <reg>
+(gdb)reverser-search <reg>
+断点
+在gdb中有以下几种暂停方法：
+断点（BreakPoint）、观察点（WatchPoint）、捕捉点（CatchPoint）、信号（Signals）、线程停止（Thread Stops）
+(gdb)b/break <fileName:linenum> [if  ]       #b x.cpp:15 在文件x.cpp的15行处设置断点
+(gdb)break/b <fileName:function>
+(gdb)break/b <linenum>                       #在当前文件的linenum停住
+(gdb>break/b +<offset>                       #在当前行的后面offset行停住
+(gdb)break/b -<offset>                       #在当前行的前offset行停住
+(gdb)b <class::function|function(type,type>  #b main
+(gdb)b *function-name                        #b *main
+(gdb)b *address                              #在地址address处设置断点 b *0x804835C
+(gdb)rb                                      #对符合正则表达式的位置处设置断点
+                                             #若不带参数，则在所有位置处设置断点
+(gdb)info b                                  #查询所有断点
+(gdb)disable                                 #默认所有断点失效
+(gdb)disable/enable $(id1) $(id2)            #enable/disable breakpoint
+(gdb)condition $(breakpoint1) $(expression)  #修改breakpoint的停止条件为expression
+(gdb)condition $(breakpoint1)                #清除断点号breakpoint1的停止条件
+(gdb)ignore $(breakpoint1) $(number)         #从现在起忽略breakpoint$(number)次
+(gdb)delete/d [$(id1)]                       #删除断点
+(gdb)                                        #为断点设置运行命令command
+(gdb)break string::after                     #断点菜单。当有函数重载时，break <function>不能告诉gdb停止在哪儿(当然，详细的函数原型可以定位).
+                                             #此时，gdb会为你弹出一个菜单，提示在哪儿可以设置断点。
+                                             #选择0表示取消设置断点，
+                                             #亦可以同时选择多项数字，中间用空格间隔
+(gdb)break <linespec> thread <threadno> if …#注意，这个threadno是GDB分配的，你可以通过“info threads”命令来查看正在运行程序中的线程信息。
+                                             #当你的程序被GDB停住时，所有的运行线程都会被停住。这方便你你查看运行程序的总体情况。
+                                             #而在你恢复程序运行时，所有的线程也会被恢复运行。那怕是主进程在被单步调试时。
+运行
+(gdb)run/r [argv[1] argv[2] ... argv[n]]#重新启动程序运行restart run
+(gdb)continue/c/fg [ignore-count]            #continue/c/fg三个命令一样，ignore-count表示忽略断点的次数
+                                             #next/step这两个命令必须在有源代码调试信息的情况下使用(即GCC编译时使用-g参数）
+(gdb)next/n  [count]                         #next  count表示执行后面的count条指令再停住          
+(gdb)step/s  [count]                         #step into function，前提是函数有debug信息。count表示执行子函数里的count条指令再停住。
+(gdb)ni/nexti                                #执行一条机器指令  ni/si针对的是汇编指令
+(gdb)si/stepi                                #执行一条机器指令
+(gdb)finish                                  #运行程序，直至退出当前函数。并打印函数返回时的堆栈地址和返回值及参数值信息。
+(gdb)until/u                                 #退出循环体
+(gdb)set step-mode on                        #默认值是on。打开step-mode模式。于是在单步跟踪的时候不会因为没有debug信息而不停住。
+                                             #这个参数很有利于查看机器源码
+(gdb)set step-mode off
+栈/帧
+(gdb)bt [full]                               #显示局部变量
+(gdb)bt [full]  <n>                          #只打印栈顶n层
+(gdb)bt [full]  <-n>                         #只打印栈底n层
+(gdb)f/frame                                 #check where you are
+(gdb)f/frame $(fNum)                         #0表示栈顶
+(gdb)info frame/f
+查看
+(gdb)display ...                             #设置程序中断后欲显示的数据及其格式。 http://hi.baidu.com/foxiong/blog/item/cf448dd67d40d02e06088b74.html
+                                             #例如，希望程序每次中断后可以立即看到即将被执行的下一条汇编指令，可以使用
+                                             #(gdb)display /i $pc   其中 /i表示以十六进制显示  $pc表示当前的指令
+                                             #当需要关心汇编指令时，此命令相当有用
+(gdb)undisplay 
+查看变量
+(gdb)info args                               #查看函数参数
+(gdb)info locals                             #查看局部变量
+(gdb)info registers                          #查看寄存器
+(gdb)info catch                              #查看当前函数中的异常处理信息
+(gdb)i r                                     #与上述等价  查看寄存器
+查看类型
+(gdb)ptype $(val)
+(gdb)whatis $(val)                           #查看变量类型
+查看寄存器
+(gdb)info registers                          #查看寄存器(除了浮点寄存器)
+(gdb)info all-registers                      #查看所有的寄存器(包括浮点寄存器)
+(gdb)info registers <regname...>             #查看所有指定的寄存器    或 print/p $ip加上$
+                                             #ip:当前运行指令的地址 sp:当前堆栈地址 
+打印计算表达式
+(gdb)set print pretty on
+(gdb)print/p [/f] <expresssion>              #gdb会根据当前的程序运行的数据来计算表达式。
+                                             #/f format的取值范围 x:16进制 d/u:10进制 o:8进制 t:2(two)进制 a:address c:AsciiChar s:string f:float
+                                             #既然是表达式，那么可以是当前程序运行的const变量、变量、函数等，可惜不能是宏。
+                                             #	@与数组有关
+                                             #  ::指定一个在文件file::variable或函数func::variable中的变量，
+                                                   注意与C++的::的区别,还有可能被编译器优化掉某些变量，建议调试时关闭优化选项即-O0
+                                             #  {<type>} <addrss> 表示一个指向内存地址<address>的类型type的一个对象
+(gdb)p *arrar@len                            #print arrar=(int*)malloc();//set print element 0 默认最长是200个字节
+(gdb)p/x (unsigned int[])out                 #强转为unsigned int数组并以16进制打印
+查看内存
+(gdb)help x
+(gdb)examine/x [/nfu] <address>              #n f u 是可选参数 如x /20b $addr
+                                             #n number是一个正整数，表示显示内存的长度，也就是说从当前地址address后显示n个地址的内容
+                                             #f format表示显示格式。如果地址所指的是字符串，那么格式是s；如果地址是指令地址，那么格式是i
+                                             #u unit  表示从当前地址往后请求的字节数。如果不指定的话，gdb默认是4个字节。
+                                             # u可以使用下面的字符来代替，b表示单字节，h表示双字节，w表示4个字节，g表示8个字节
+                                             # x/3uh 0x54320  从内存地址0x54320读取内容，h表示以双字节为一个单位，3表示三个单位，u表示按十六进制显示
+观察点
+(gdb)watch $(v)                              #为变量v设点断点，当v被写时stop
+(gdb)awatch $(v)                             #为变量v设点断点，当v读或写时stop
+(gdb)rwatch $(v)                             #为变量v设点断点，当v被读时stop
+设置变量
+(gdb)set var = 5                             #设置程序变量
+(gdb)set $var = 5                            #设置gdb变量,gdb中的变量以$开头，之后就可以print a[$var++]
+自动显示                                  #在gdb中，你可以设置当程序停在断点处时，自动显示变量的内容，即display命令
+(gdb)info display
+(gdb)display <expr>                          #只要gdb停下来的时候，自动显示的变量
+(gdb)display <fmt> <expr>
+(gdb)display /<fmt> <addr>
+(gdb)display /i $pc                          #$pc是GDB的环境变量，表示着指令的地址，/i则表示输出格式为机器指令码，也就是汇编。
+                                             #   于是当程序停下后，就会出现源代码和机器指令码相对应的情形
+(gdb)disable/enable display <dnums>
+(gdb)undisplay/delete <dnums>                #undisplay 2-5
+调用函数
+(gdb)call ntohs(10275)                       #调用函数
+源代码的内存指令
+可以使用info line命令查看源代码行在内存中的起始地址。
+info line后可接"linenum","function-name","filename:linenum","filename:functin-name".
+(gdb)help info line
+(gdb)info line main.c:5                   #默认显示当前行
+Line 8 of "main.c" starts at address 0x4004ae <main+22> and ends at 0x4004b2 <main+26>.
+在此后，有两种方法查看汇编layout asm或disassemble /r
+(gdb)layout asm                           #注意[main+22,main+26)
+(gdb)disassemble /r 0x4004ae,0x4004b2     #好像只有gdb7.0才支持/r
+(gdb)disassemble /m 0x4004ae,0x4004b2     #会列出源码并汇编
+汇编
+(gdb)set disassemble-flavor intel/att        #设置反汇编风格
+(gdb)show disassembly-flavor                 #查询反汇编风格，可以是intel/att
+(gdb)disassemble/disas                    #默认的反汇编范围是所选帧的pc附近的函数
+(gdb)disassemble pc/function-name            
+(gdb)disassemble /r <begin-addr,end-addr>
 
-            unset **<TAB>
-            export **<TAB>
-            unalias **<TAB>
+(gdb)info/i program                          #find out why your program stopped
+改变程序的执行
+(gdb)p var = 5                               #设置程序变量并打印
+(gdb)jump <linenum>                          #跳转到哪一行执行
+(gdb)jump <file-name:linenum>
+(gdb)jump +lineoffset
+(gdb)jump <address>                          #代码行的内存地址
+(gdb)return                                  #强制函数返回
+(gdb)return <expression>                     #强制函数返回expression
+(gdb)call <expr>                             #显示函数的返回值，如果返回值是void，那么就不显示。
+                                             #与print类似，如果函数返回void，call则不显示；print则显示返回值，并把数据存到历史数据中。
+历史
+(gdb)history
+(gdb)show commands 20                        #显示命令的历史记录
+联调
+(gdb)attach $(pid)                           #等价于gdb -p $(pid)
+信号
+(gdb)info signals                            #查看信号处理方式
+(gdb)info handle                             #查看有哪些信号被gdb检测中
+(gdb)handle <signal> <keywords...>       #改变gdb对信号signal的处理方式
+						    #  可以以SIG开头或不以SIG开头；
+                                             #	也可以定义一个范围SIGIO-SIGKILL,表示包括SIGIO,SIGIOT,SIGKILL三个信号
+                                             #  也可以使用关键字all，表明需要处理所有的信号
+                                             #keywords，可以是下面关键字的组合，实质上就3列： stop/nonstop print/nonprint pass/nopass
+                                             #	nonstop 当被调试的程序收到信号时，gdb不会停住程序的运行，但会打印信息，表示收到这种信号
+                                             #  stop    当被调试的程序收到信号时，gdb会停住程序
+                                             #  print/noprint 当被调试的程序收到信号时，gdb是否会打印信息
+                                             #  pass/noignore   当被调试的程序收到信号时，gdb不处理信号。这表示gdb会把这个信号交给程序处理
+                                             #  nopass/ignore  当被调试的程序收到信号时，gdb不会让被调试的程序处理信号
+                                             # 例如： handle SIGINT nostop print pass
+(gdb)handle SIGNAL nopass/ignore             #不将信号signal传递给程序  
+                     pass/ignore             #allow program see this signal
+(gdb)signal <signal-number>             #发送信号给被调试程序。
+                                             #signal命令与shell的kill命令不同，kill时由gdb截获，signal直接发送给被调试应用。
+                                             #signal-number范围是1-15.unix的系统信号通常在1,-15，所以signal也在这个范围
+捕捉点                                    #必须在程序处于run状态
+(gdb)help catch                          
+(gdb)catch <event>                           #throw一个C++的异常(throw为关键字)
+                                             #catch一个C++的异常(catch为关键字)
+                                             #exec系统调用(exec为关键字，目前只有HP-UX下有用)
+                                             #fork系统调用(fork为关键字，目前只有HP-UX下有用)
+                                             #vfork系统调用(vfork为关键字,目前只有HP-UX下有用)
+                                             #load或load <libname>(load为关键字，目前只有HP-UX下有用)
+                                             #unload或unload <libname>(unload为关键字，目前只有在HP-UX下有用)
+(gdb)tcatch <event>                          #只设置捕捉一次，当程序停住后，断点被自动删除
+设置显示项
+(gdb)show print address                      #
+(gdb)set print address on/off                #当gdb调用函数的时候，是否显示参数的地址，默认显示
+(gdb)show print array
+(gdb)set print array on/off                  #当打印数组时，on表示每个元素一行，off则每个元素以逗号分隔。默认off
+(gdb)show print elements
+(gdb)set print elements <number-of-elements> #设置打印数则时的最大个数，0表示不限制
+(gdb)set print null-stop on/off              #on表示显示字符串时，遇到结束符就停止显示。默认off
+(gdb)show print pretty                       #如何显示结构体
+(gdb)set print pretty on/off                 #on显示比较漂亮 off单行显示
+(gdb)show print sevenbit-strings             #设置字符是否按\nnn的格式显示
+(gdb)set print sevenbit-strings on/off       #on表示字符串或字符数据按\nnn显示。如\065
+(gdb)show print union                        #查看联合体的显示格式
+(gdb)set print union on/off                  #设置显示结构体时，是否显示其内的联合体数据
+(gdb)show print object                       #查看对象选项的设置
+(gdb)set print object on/off                 #在C++中，如果一个对象指针指向其派生类，
+                                             #如果on，gdb会自动按照虚方法调用的规则显示输出
+                                             #如果off，gdb就不管虚函数表了。 默认off
+(gdb)show print static-members               
+(gdb)set print static-members on/off         #当显示一个c++对象的内容时，是否显示其中的静态数成员。默认是on
+(gdb)show print vtbl
+(gdb)set print vtbl on/off                   #是否显示虚函数.默认是off
+环境变量
+(gdb)show convenience                        #查看所有的环境变量
+(gdb)set $v1=x
+自动化命令command                         # http://coolshell.cn/articles/3643.html
+    (gdb) b func
+    (gdb) command 1                          #command 后接breaknumber,每行命令分行，最后以end结束
+     >print arg1
+     >print arg2
+     >print arg3
+     >end
+    (gdb)
+3、调试C++
+gdb调试C++，涉及到STL容器查看，非常麻烦。 有一个GDB STL Viewer(http://www.berlinix.com/code/gdb_stl_viewer.txt)的脚本，可以帮助查看STL容器。 
+只需在调用gdb后，执行命令source gdb_stl_viewer.txt加载它即可。
+b 'C::foo                   自动补全'
+ptype C                     显示类C的声明
+info functions C::foo       显示类C的所有foo函数声明
+在模板函数中的某一行设置断点，将导致gdb只在某个模板实例中中断。 通过info b查看，如:
+breakpoint     keep y   0x08048774 in void print<char>(char) at tem.cpp:8
+必须在函数签名，而非源代码某一行设置断点，如有模板函数 print<T> 要打断点，可通过：
+i) 通过命令 objdump -tC ./tem|grep print 
+    或 objdump -t ./tem|c++filt|grep print                  #c++ filter http://book.51cto.com/art/201005/197760.htm
+    找出所有print符号。
+ii)在gdb中对这些符号下断点。如 b void print<int>(int)
 
-        git分支
-	        git checkout $(git branch -r | fzf)
+4、配置文件
+vim ~/.gdbinit                               #新建gdbinit文件
+source ~/gdb_stl_viewer.txt                  #添加gdb命令
 
-        预览窗口  fzf --preview 'cat {}'
+define commond-name                          #gdbinit定义命令语法
+commands
+end
 
-    快捷键 在输出交换窗口
-        键盘 Ctrl-j/k/n/p   单选模式Enter选中     多选模式-m下Tab和shift-Table选中
-        鼠标 滚轮滚动        单选模式双击选中      多选模式-m下Shift-Click或shift-scroll多选
+document command-name                        #给命令添加说明性文字
+desc
+end
 
+5、调试多线程
+(gdb)info threads                             #inquire threads
+(gdb)thread $(tid)                            #switch among threads
+(gdb)thread apply all bt                      #显示所有的线程堆栈              pstack 
+(gdb)thread appy $(tid1) $(tid2) bt           #显示tid1, tid2的堆栈。bt可以换成其他任何gdb命令
+(gdb)set scheduler-locking off|on|step
+			                         #off不锁定任何线程。在调试某一线程时，其他线程照常执行。默认。
+			                         #on锁定其他线程，只有当其线程会执行。
+			                         #step除了next过一个函数的情况，step只让当前线程执行。
+(gdb)break <line> [thread <threadno>] [if ...]#line  filename:linenum
+                                              #threadno 是info threads最左边的序号0,1,2而不是大数 
+6、调试多进程
+(gdb)set detach-on-fork off                   #both parent/child process will be held under the control of gdb
+(gdb)set follow-fork-mode child/parent        #default跟踪parent
+(gdb)info forks                               #显示所有进程pid
+(gdb)process $(pid)                           #切换到pid的进程
+(gdb)fork $(fork-id)                          #切换到fork-id的进程，类似process pid,但该fork-id类似于frame id，是最前面的序号0，1，2,...
 
+7、bookmark/checkpoint                        http://blog.chinaunix.net/space.php?uid=23629988&do=blog&id=2943273
+(gdb)checkpoint                               #save a snapshot
+(gdb)info checkpoints
+(gdb)restart $(checkpoint-id)                 #wind back the clock
 
+8、hook
+给gdb定义钩子，使其在执行gdb命令前、后，执行用户自定义的命令
+define hook-print           # 命令必须是全称，不能为缩写
+echo --\n
+end
+define hookpost-print       # 在命令后执行用户指令
+echo --\n
+end
 
-
-
-
-
-
-apt install alien #可以在rpm dpkg deb之间转换
-alien *.rpm
-alien -r *.deb
-
-*.rpm
-*.src.rpm  包含未编译的原始代码,所以可以修改编译参数经过编译后才可以安装
-            rpmbuild --rebuild    *.rpm   #build binary package from <source package>
-            rpmbuild --recompile  *.rpm   #build through %install (%prep, %build, then install) from <source package> 
-
-rpm格式
-    Lead    公共
-    signature
-    header  软件包信息
-    archive 文件列表
-
-rpm -qil rpmdevtools
-
-rpmdev-setuptree                        #与rpmdev-wipetree刚好相反
-rpmdev-newspec -type python -o a.spec   #rpmdev-newspec --help 模板来自于/etc/rpmdevtools/spectemplate-*.spec 
-rpmlint a.spec  &&  rpmlint -i a.spec   #检查spec语法错误    rpmbuild -E '%{_bindir}' tos.spec
-rpmdev-newinit                 a.init   #制作服务控制脚本
-
-目录结构
-    SOURCES  *.tar.gz
-    SPECS    *.spec
-
-    BUILD               #config make 
-    BUILDROOT           #make install 产生x86_64
-
-    RPMS    *.rpm       #将BUILDROOT打包
-    SRPMS   *.src.rpm   #将BUILDROOT打包
-
-rpmbuild
-    常用选项
-        --dbpath  ""             #默认值/var/lib/rpm
-        --root    ""             #根目录
-
-    编译前
-        --nobuild                 #检出spec语法
-
-    编译选项
-        -bp %prep                 #解压缩并patch
-        -bc       %build          #make
-        -bi              %install #install 
-
-        -bb                       #install之后只生成rpm          build binary package only from <specfile>        rpm
-        -bs                       #           只生成src.rpm   
-        -ba                       #                             build source and binary packages from <specfile> rpm src.rpm
-
-        --buildroot ""
-        --target i386 | i686 | x86_64
-        --rmsource                #在build之后删除src.rpm 
-        --rmspec                  #在build之后删除spec文件
-
-    编译后
-        --clean                  #删除build时的目录 BUILD/wget-1.14
-
-
-spec
-    定义变量  %define varname "xxx"
-    引用变量  %{var}
-    执行脚本  %( echo %{var} | sed 's///g' )
-
-
-    comments
-    tags 变量定义
-        包命名
-            Name               不能含空格
-            Version            不能含-
-            Release
-        描述  rpm -qpi *.rpm
-            %description:      若以空格开始则逐字显示; 若不是以空格开始则对其段落划分 在变量定义中唯一个以%开头的变量
-            Summary:  只能一行
-            CopyRight: GPL 
-            Lisence:  GPLv2 with exceptions
-            Distribution:    软件集合
-            Icon:            软件图标
-            Vendor:          组织机构
-            URL: 
-            Group:
-            Packager:    发包人的联系方式或公共的邮件列表
-        依赖 rpm -qpi  --requires
-            Provides     该包提供什么资源  既可以是一个真实存在的包,也可以只是一个虚拟的东西(仅仅是一个字符串)
-            Requires     该包依赖哪些包 不支持不等于
-                         = 1.2-2  >= > = <= < 
-            conficts     该包与哪些包冲突
-            serial       version之外的另外一种版本比较变量
-            autoreqprov  自动生成软件依赖的标志位autorequire/autoprovide 取值为yes或者no,也可用0或1表示 默认值为yes或1 一般不用操作
-        平台操作系统
-            ExcludeArch: sparc alpha   不能在某CPU平台
-            ExclusiveArch: aparc alpha 只能在某CPU平台
-            ExcludeOS:  linux irix     不能在某OS
-            ExclusiveOS: linux irix    只能在某OS
-        目录
-            prefix:  /opt  %files中声明为/opt/xx 在命令行的--prefix的优先级最高
-            BuildRoot:  %{_topdir}/%{name}-%{version}-root 
-        源码补丁
-            Source:    源代码名称和存储位置
-                Source:      #Source与Source0效果相同
-                Source1:
-                SourceN:
-            NoSource:  从源代码中忽略一个或多个文件
-            Patch:     标识源码的一个补丁文件
-                Patch0:
-                PatchN:
-            NoPatch:   忽略一个或多个补丁
-    script
-        编译时
-            %prep   为编译代码准备 1创建顶级目录 2解压源码到build目录 3如果有补丁的话打补丁
-
-            %build
-            %ifarch cond1 cond2
-                ./configure --with-ss=openssl
-            %ifnarch cond1 cond2
-            %ifos os1 os2 
-            %ifnos os1 os2
-                make RPM_OPT_FLAGS="$RPM_OPT_FLAGS -I . "
-            %else
-            %endif  
-
-            %install 
-            make install prefix=$RPM_BUILD_ROOT/usr 
-            mkdir -p $RPM_BUILD_ROOT/usr/foo 
-            install binname $RPM_BUILD_ROOT/usr/foo/bin
-
-            %clean 
-            [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-        安装/卸载时
-            %pre     第一个参数为1说明是初次安装,为2时是版本升级  hook默认使用bash来执行,但也可使用参数-p自定义
-                %pre -p /usr/bin/perl 
-                if ( $ARGV[0] == 1 ) {
-                    print "preparing for init install\n"
-                }
-                elsif ( $ARGV[0] == 2 ) {
-                    print "prepare to upgrade software\n"
-                }
-            %post    第一个参数为1说明是初次安装,为2时是版本升级
-            %preun   第一个参数为0说明是卸载,为1时是版本升级
-            %postun  第一个参数为0说明是卸载,为1时是版本升级
-
-            升级流程
-                执行新版本的%pre 
-                安装新版的文件列表
-                执行新版本的%post
-
-                检查所有其他rpm包的triggerin触发器,如果有被N的安装触发,就执行相应脚本
-                执行N的所有triggerin触发器
-                执行N的所有triggerun触发器
-
-                检查所有其他rpm包的triggerin触发器,如果有被N的卸载触发的,就执行相应的脚本
-
-                执行老版本的%preun
-                自动删除老版本中没有被新版本覆盖的文件
-                执行老版本的%postun
-        校验时          用rpm命令校验已安装的rpm时执行 rpm -qpVv *.rpm
-            %verifyscipt  因为rpm默认会校验文件列表,所以不用去校验,因此这儿可以做点自己想做的 默认不会执行%verifyscipt,除非使用verbose模式进行校验
-            echo "verify aaa" 
-        触发器Trigger   被一定的条件(如其他rpm安装或卸载)触发执行
-            B%triggerin A包安装时,如果B包已经安装,则触发该触发器
-            B%triggerun A包安装时,如果B包已经卸载,则触发该触发器
-            B%triggerpostun A包安装时,如果B包被卸载,则卸载完成后触发该触发器
-
-            eg:
-                %triggerin -p /usr/bin/perl -- ruby   #通过--符号指定被监控的包
-                # print "ruby already installed"
-    Macro 宏
-        %setup      解压缩源码  多数情况下不用任何选项
-            -n $name 设置编译目录名默认是name-version
-            -c $build_dir_name  创建build目录并进入该目录
-        %patch      给解压后的源码打补丁
-    files 文件列表指令Directives 设置与检查文件/目录/软件包的属性 rpm -qf /etc/x.conf
-        文件相关
-            %doc    用来标识一个文件是文档 安装后会被rpm数据库记录 默认安装目录是/usr/doc 可以通过修改rpmrc中的defaultdocdir变量的值来修改
-            %config 用来标识一个文件是配置文件 设置了noplace属性后 rpm在升级时就不会被覆盖 在卸载时会被保存为x.save  rpm -qp *.rpm --configfiles
-                %config(noreplace) /etc/x.conf
-            %attr   用来修改文件属性(默认权限 属主 属组)指令
-                %attr (755, root, root) foo.bar
-            %verify 校验指令
-        目录相关
-            %docdir /absolute-dir-path  用于指定配置文件目录
-            %dir    /absolute-dir-path  用于只将目录打包  默认将目录下的文件及文件夹打包
-
-        %package -n $new_sub_package_name 定义子包名,默认命名是"基础包-子包"格式
+9、kgdb
+kgdb可对Linux内核进行内核级别源码调试。需要两台机子，用串口相连(或在VMware里模拟串口通讯)。 kdb不能进行内核源码基本调试，但可以只用一台机子。
 
 
 
-全局配置      /etc/yum.conf                设置如何管理源repo
-源配置文件    /etc/yum.repos.d/*.repo      源的配置文件
-本地rpm数据库 /var/lib/rpm/_db.*           存储系统已安装了哪些rpm   /var/lib/yum
-本地缓存      /var/cache/yum/*             存储索引文件和rpm文件
-插件          /usr/lib/yum-plugins/fastestmirror.py       fastestmirror对每个mirror进行测速,然后根据连接速度排序站点速度,选择下载速度最快的站点下载
-插件配置文件   /etc/yum/pluginconf.d/fastestmirror.conf
-日志          /var/log/yum.log 
 
 
-rpmbuild -ba main.spec 
-yum install *.rpm 
-rpm -ql main 
-rpm -qi main 
+当进程不正常（死锁），但没有产生coredump，而生产环境又不允许gdb，则需要强制产生coredump：
+kill -(SIGQUIT/SIGABRT/SIGFPE/SIGSEGV) $pid
+还有一种情况，进程并没有死锁或者block在某个位置，但是我们需要在某个指定位置进行调试，获取某些变量或者其它信息。但是，有可能是客户环境或者生产环境，不允许我们进行长时间的检测。那么，我们就需要通过coredump来获得进程在运行到该点时的快照。这个时候，可以利用gdb来产生手工产生coredump。在attach上这个进程时，在指定位置打上断点，当断点触发时，使用gdb的命令gcore，可以立即产生一个coredump。这样，我们就拿到了这个位置的进程快照。
 
 
-cd BUILD
-tar -zxvf $Source.tar.gz      #$Source来自*.spec中的Source
-%build                        #执行spec中的%build
-rm -rf   $Name-$Version &&    #Name和Version来自*.spec 
-mkdir -p $Name-$Version 
-%install                      #执行spec中的%install
-打包
+
+gdb -help
+(gdb)help                      #列出类别
+(gdb)help $(class_type)        #
+(gdb)b\t\t                     #连续按两次tab键，可以显示候选命令或匹配的函数名
+(gdb)shell <command string>    #在gdb中执行shell
+(gdb)gcore                     #强制产生coredump
 
 
-索引读写分离
-缓存
-镜像
-智能DNS和多机房容灾
+
+
+远程调试
+情景：
+目标机(Server)：192.168.1.241:1100  #在端口1100监听  
+调试机(Client): 192.168.1.244
+应用程序：a.out
+步骤
+(1)目标机先启动：
+$gdbserver 192.168.1.244:1100 a.out
+(gdb) Process a.out created;pid=5384
+Listening on port 1100
+(2)在客户机：
+$gdb a.out
+(gdb)target remote 192.168.0.241:1100
+Remote debugging using 192.168.1.241:1100
+
+
+
+$gdb main
+(gdb)layout asm
+(gdb)help x             #查看内存
+Examine memory: x/FMT ADDRESS.
+ADDRESS is an expression for the memory address to examine.
+FMT is a repeat count followed by a format letter and a size letter.       [repeat-count]   默认值为1 
+Format letters are o(octal), x(hex), d(decimal), u(unsigned decimal),      [format]         
+  t(binary), f(float), a(address), i(instruction), c(char) and s(string).  [size]           b(byte) h(halfword) w(word) g(giant 8bytes)
+Size letters are b(byte), h(halfword), w(word), g(giant, 8 bytes).
+The specified number of objects of the specified size are printed
+according to the format.
+
+Defaults for format and size letters are those previously used.
+Default count is 1.  Default address is following last thing printed
+with this command or "print".
+
+
+
+
+
+
+插件：
+调试STL
+    下载http://www.yolinux.com/TUTORIALS/src/dbinit_stl_views-1.03.txt
+    cat dbinit_stl_views-1.03.txt >> ~/.gdbinit
+    若正处于gdb状态,运行(gdb)source ~/.gdbinit
+    查看帮助(gdb)help pvector 或查看源码dbinit_stl_views-1.03.txt 
+
+
+
+
+
+
+$ apt-get source coreutils
+$ sudo apt-get install coreutils-dbgsym
+$ gdb /bin/ls
+GNU gdb (GDB) 7.1-ubuntu
+(gdb) list main
+1192    ls.c: No such file or directory.
+in ls.c
+(gdb) directory ~/src/coreutils-7.4/src/
+Source directories searched: /home/hchen/src/coreutils-7.4:$cdir:$cwd
+(gdb) list main
+1192        }
+1193    }
+1194
+1195    int
+1196    main (int argc, char **argv)
+1197    {
+1198      int i;
+1199      struct pending *thispend;
+1200      int n_files;
+1201
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5.3 Signals 
+A signal is an asynchronous event that can happen in a program. The operating system defines the possible kinds of signals, and gives each kind a name and a number. For example, in Unix SIGINT is the signal a program gets when you type an interrupt character (often C-c); SIGSEGV is the signal a program gets from referencing a place in memory far away from all the areas in use; SIGALRM occurs when the alarm clock timer goes off (which happens only if your program has requested an alarm). 
+
+Some signals, including SIGALRM, are a normal part of the functioning of your program. Others, such as SIGSEGV, indicate errors; these signals are fatal (they kill your program immediately) if the program has not specified in advance some other way to handle the signal. SIGINT does not indicate an error in your program, but it is normally fatal so it can carry out the purpose of the interrupt: to kill the program. 
+
+GDB has the ability to detect any occurrence of a signal in your program. You can tell GDB in advance what to do for each kind of signal. 
+
+Normally, GDB is set up to let the non-erroneous signals like SIGALRM be silently passed to your program (so as not to interfere with their role in the program's functioning) but to stop your program immediately whenever an error signal happens. You can change these settings with the handle command. 
+
+
+info signals 
+info handle 
+Print a table of all the kinds of signals and how GDB has been told to handle each one. You can use this to see the signal numbers of all the defined types of signals. 
+info handle is an alias for info signals. 
+
+
+handle signal keywords... 
+Change the way GDB handles signal signal. signal can be the number of a signal or its name (with or without the `SIG' at the beginning); a list of signal numbers of the form `low-high'; or the word `all', meaning all the known signals. The keywords say what change to make. 
+The keywords allowed by the handle command can be abbreviated. Their full names are: 
+
+
+nostop 
+GDB should not stop your program when this signal happens. It may still print a message telling you that the signal has come in. 
+
+stop 
+GDB should stop your program when this signal happens. This implies the print keyword as well. 
+
+print 
+GDB should print a message when this signal happens. 
+
+noprint 
+GDB should not mention the occurrence of the signal at all. This implies the nostop keyword as well. 
+
+pass 
+noignore 
+GDB should allow your program to see this signal; your program can handle the signal, or else it may terminate if the signal is fatal and not handled. pass and noignore are synonyms. 
+
+nopass 
+ignore 
+GDB should not allow your program to see this signal. nopass and ignore are synonyms. 
+When a signal stops your program, the signal is not visible to the program until you continue. Your program sees the signal then, if pass is in effect for the signal in question at that time. In other words, after GDB reports a signal, you can use the handle command with pass or nopass to control whether your program sees that signal when you continue. 
+
+The default is set to nostop, noprint, pass for non-erroneous signals such as SIGALRM, SIGWINCH and SIGCHLD, and to stop, print, pass for the erroneous signals. 
+
+You can also use the signal command to prevent your program from seeing a signal, or cause it to see a signal it normally would not see, or to give it any signal at any time. For example, if your program stopped due to some sort of memory reference error, you might store correct values into the erroneous variables and continue, hoping to see more execution; but your program would probably terminate immediately as a result of the fatal signal once it saw the signal. To prevent this, you can continue with `signal 0'. See section Giving your program a signal.
