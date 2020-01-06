@@ -379,17 +379,62 @@ resize2fs更改文件系统的大小
 
 
 ag advanced grep
-fzf  vim $(fzf)        fuzzy finder
-	 cd $(find * -type d | fzf) 
-	 git checkout $(git branch -r | fzf)
-shellchekc  a.sh  检查shell语法
-mycli mysql彩色客户端
+fzf  
+mycli             #mysql彩色客户端
+shellchekc  a.sh  #检查shell语法
+
 axel -n 20 $addr    多线程下载
+lynx  终端浏览器
 tig git https://www.jianshu.com/p/e4ca3030a9d5
 multitail
 script/scriptreplay  终端会话录制并回放
 top htop glances
-lynx  终端浏览器
 
 
 https://blog.csdn.net/u010625000/article/details/44455023
+
+
+ag
+    安装
+        apt search silver
+        apt search silver | grep search
+        apt insall silversearcher-ag
+
+
+fzf  fuzzy find 模糊查询 媲美vim的CtrlP插件
+    安装
+        apt install fzf 
+
+        git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+        cd ~/.fzf && git pull && ./install
+
+    使用
+        keybinding bash zsh fish
+            Ctrl-T  查找粘贴目录下的文件名或目录名到命令行
+                vi Ctrl-T
+                cd Ctrl-T
+            Ctrl-R  查找粘贴选中的历史命令到命令行
+                Ctrl-R  再按一次则在时间和相关性之间排序历史命令
+            Ctrl-c  切换目录 == cd  + Ctrl-T
+        autocomplete bash zsh
+            kill -9/15 <tab>  然后tab或shift-Table选中
+
+            vi $path/**<Tab>   vim $(fzf)
+            cd $path/**<Tab>   cd $(find * -type d | fzf) 
+
+            ssh **<tab>
+            telnet **<tab>
+
+            unset **<TAB>
+            export **<TAB>
+            unalias **<TAB>
+
+        git分支
+	        git checkout $(git branch -r | fzf)
+
+        预览窗口  fzf --preview 'cat {}'
+
+    快捷键 在输出交换窗口
+        键盘 Ctrl-j/k/n/p   单选模式Enter选中     多选模式-m下Tab和shift-Table选中
+        鼠标 滚轮滚动        单选模式双击选中      多选模式-m下Shift-Click或shift-scroll多选
+

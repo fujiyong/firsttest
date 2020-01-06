@@ -3,7 +3,7 @@
 帮助
 
 ```
-whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
+	whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
 man yum.conf   #查看配置文件的说明
 
 linux各家族  Yellow dog Updater, Modified
@@ -102,6 +102,8 @@ type function  user_cmd builtin_cmd
 unset
     unset
 	unset f
+	
+$-  #可以从help set得知shell的当前选项
 ```
 
 ###  用户命令
@@ -327,8 +329,25 @@ until [ condition ]; do done
 #命令行处理
 ##位置变量
 	只能处理简单固定位置的变量
+	
+##迭代处理
+for opt in "$@"; do
+  case $opt in
+    --help)
+      help
+      exit 0
+      ;;
+    --xdg)
+      ;;
+    *)
+      echo "unknown option: $opt"
+      help
+      exit 1
+      ;;
+  esac
+done
 
-##bash内置的getopts
+###############################bash内置的getopts
 optstrinng的格式
 	若第一个字符为":",表示不报任何错误,优先级低于OPTERR
 	字母后面的":"表示该选项需要参数, 参数存储在变量OPTARG中
@@ -369,7 +388,7 @@ echo $OPTIND            #下一个要处理的参数的位置号 输出11
 echo $0 $#              #脚本名                 输出getopts.sh aa
 echo $*                 #参数列表                输出aa
 
-##getopt功能更强大
+#####################################getopt功能更强大
 老版本有bug，新版本/增强版修正了 若getopt -T && echo $? 返回4则表示增强版
 getopt --help
 -o      短选项
@@ -452,6 +471,19 @@ select name [in list]; do
             otherwise ;;
 	esac
 done
+
+answer_yes_or_no() {
+  while true; do
+  	#help read  -r表示do not allow backslashes to escape any characters
+    read -p "prompt_string ([y]/n) " -r
+    REPLY=${REPLY:-"y"}
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      return 0
+    elif [[ $REPLY =~ ^[Nn]$ ]]; then
+      return 1
+    fi
+  done
+}
 
 https://www.cnblogs.com/yxzfscg/p/5338775.html
 
@@ -577,13 +609,32 @@ set -v		   #Print shell input lines as they are read
 ```
 shellcheck $shell_name.sh
 
+#添加path
+if [[ ! "$PATH" == */root/.fzf/bin* ]]; then
+  export PATH="${PATH:+${PATH}:}/root/.fzf/bin"
+fi
+
+help() {
+  cat << EOF
+usage: $0 [OPTIONS]
+    --help               Show this message
+EOF
+}
+
 引号""
 变量特别是路径变量需要使用双引号围住如"$path",否则如果path中含有空格则有可能前一部分赋值后一部分执行命令
+'"${variable}"'   尽管''中直接变量${v}不转义,但${v}先在""中
+" "${var}" is ok" 里面的双引号""竟然不用转义
 
-``替换为"$()"
+赋值
+va="$()"
+va=$()
+
+``替换为"$($cmd)" 且不用空格
+$(( $n + 1 ))    数值计算$((后需要空格
 
 在shell脚本中不能使用~代替用户根目录而应该使用$HOME 例如 mkdir "{HOME}"/ipfs, 而不能是mkdir ~/ipfs
-if [ $environment_variable ]; #判断环境变量是否设置
+[ $environment_variable ] && echo "OK"  #判断环境变量是否设置 对于简单判断if-then-fi直接&&
 若写入到~/.bash_profile的环境变量未生效, 则在shell脚本中先source "${HOME}"/.bash_profile
 ```
 
@@ -928,6 +979,9 @@ awk '{i=1;while(i<NF) {printf(\"%s\n\", \$i);i++}}'
 
 history | awk '{a[$2]++}END{for(i in a){print a[i] " " i}}' | sort -rn | head
 netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
+
+awk -v n=4 'NR == n {next} {print}' a.sh #去掉第4行 当行号等于4时执行next就是处理下一行
+                                         #v表示外面变量赋值并传入里面
 ```
 
 ## lsof
@@ -1831,6 +1885,9 @@ yum makecache
   ​                                                                  \#dpkg-query: package 'logwatch' is not installed
 
 - dpkg **-S**  filename-search-pattern...    反查  Search 查询某一文件来源于哪一安装包
+
+  ​                                                       			\# dpkg -S  \`which ag`
+  ​																	\# silversearcher-ag: /usr/bin/ag
 
 查看没有安装的deb包命令
 
@@ -2773,7 +2830,7 @@ docker exec  "$cmd"
 
 # FAQ
 
-## ls无色
+## ls无色 vi无色 vim才有色
 
 ```
 alias ls='ls --color=auto '
@@ -2790,7 +2847,6 @@ alias fgrep='fgrep --color=auto '
 
 stty -echo    #关闭回显。比如在脚本中用于输入密码时。
 stty echo     #打开回显。
-
 ```
 
 ##  解决grep无header  
