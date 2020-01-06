@@ -575,9 +575,16 @@ set -v		   #Print shell input lines as they are read
 ##  经验
 
 ```
-在shell脚本中,不能使用~代替用户根目录,而应该使用$HOME 例如 mkdir {HOME}/ipfs, 而不能是mkdir ~/ipfs
+shellcheck $shell_name.sh
+
+引号""
+变量特别是路径变量需要使用双引号围住如"$path",否则如果path中含有空格则有可能前一部分赋值后一部分执行命令
+
+``替换为"$()"
+
+在shell脚本中不能使用~代替用户根目录而应该使用$HOME 例如 mkdir "{HOME}"/ipfs, 而不能是mkdir ~/ipfs
 if [ $environment_variable ]; #判断环境变量是否设置
-若写入到~/.bash_profile的环境变量未生效, 则在shell脚本中先source ${HOME}/.bash_profile
+若写入到~/.bash_profile的环境变量未生效, 则在shell脚本中先source "${HOME}"/.bash_profile
 ```
 
 #  命令
@@ -1161,7 +1168,25 @@ iptraf -s eth0 //各端口统计
 
 iptraf -i eth0 //某端口统计
 
-#  用户权限
+#  用户及权限
+
+- 用户/组
+
+  所有用户 /etc/passwd 所有组 /etc/group 所有密码 /etc/shadow
+
+  某一用户属于哪些组  id  $user 中的groups字段
+
+  某组有哪些用户
+
+  groupmems [opt]  [-g [root]]
+
+  ​	-a $user #add 添加用户
+
+  ​	-d $user #del 删除用户
+
+  ​	-p            #purge 删除整个组成员
+
+  ​	-l              #列举组成员
 
 - su
 
@@ -1189,6 +1214,157 @@ iptraf -i eth0 //某端口统计
     yy 192.168.175.136,192.168.175.138=(root) /usr/sbin/,!/usr/sbin/useradd
 
   - 
+
+#  文件目录路径及权限
+
+```
+pwd 
+	-L    #尽量使用link path
+	-P    #尽量不使用link path, 使用物理路径
+
+touch 
+	-a  修改accesstime
+	-c  修改状态改变时间
+	-m  修改文件modifytime
+	-d  后接date，默认为today
+	-t  后接时间，默认为now   格式为YYYYMMDHHmm
+
+文件的rwx都是相对内容来说，不能修改文件名/删除文件本身
+目录的内容指的是下面的文件名列表
+所以目录的读指的是只读取目录下面的文件名，不能读取文件的除文件名的其他属性（ls -l除了知道是文件和文件名之外，其他都不知道，用？表示）
+    目录的写指的是+(新建子文件和子目录)-（删除子文件和子目录) 改(修改子文件名和子目录名)
+    目录的执行指的是进入该目录 cd $dir 
+	所以目录为了安全与方便， 一般给rx权限
+	
+mkdir -m 711 $dir
+
+mytempdirname=$(mktemp -d)
+pushd ${mytempdirname}     # 目录压栈并进入新目录
+//do something
+popd                # 弹出并进入栈顶的目录
+tar czvf $(uname -n)-$(date +'%Y-%m-%dT%H:%M:%S%z').tar.gz -C $mytempdirname .
+rm -rf ${mytempdirname}
+
+dirs -v             # 列出当前目录栈
+
+cd -                # 回到之前的目录
+cd -{N}             # 切换到目录栈中的第 N个目录，比如 cd -2 将切换到第二个
+
+stat {file}
+du -sh {file|dir}
+mkdir -p work/{project1,project2}/{src,bin,bak}
+
+chmod -R  u=rwx,go=rx        $dir 
+chown -R  $newUser:$newGroup $dir  
+chown -R  $newUser.$newGroup $dir 
+chown -R  $newUser           $dir 
+chown -R .$newGroup          $dir
+chgrp -R  $newGroup          $dir
+
+
+umask #显示用户掩码  数字表示  mask是表示需要去掉的权限 
+      #文件的默认权限是rw-rw-rw-(666) 文件夹的默认权限是rwxrwxrwx(777)
+	  #所以当umask是0022时，关注后三位，说明owner不用去掉权限，group要去掉权限2/w，other要去掉权限2/w
+		  #不是简单去掉（做减法去借位),而是有这个权限的前提下，即同位相减，不能借位
+		  #所以拥有mask为022创建文件权限rw-r--r--(666-022=644) 文件夹rwxr-xr-x(777-022=755)
+umask 002 #临时修改用户掩码
+umask -S  #symbol表示
+		  #默认root的umask为022，一般用户为002，即普通用户同组可以有写权限
+
+rename  批量更名
+head -n -100  #倒数100行不显示
+tail -n +100  #前100行不显示
+
+ls   默认按名称排序
+   	-d        #显示目录，而不是目录下的内容
+   	-i        #显示inode节点编号 
+   	
+   	-lS       #size 按大小排序
+   	-lt       #time 按时间排序  
+		--time-style=long-iso  等价于 --full-time
+		--time={atime,ctime} 
+				mtime 默认是modification time  如果之后未修改文件内容，这就是文件的建立时间
+				atime访问文件内容 
+				ctime改变文件属性(权限 用户 时间)
+				
+   -h  大小以人类可读形式
+   -R 递归
+
+cp 
+    -r   
+    -p 连带文件属性复制 --preserve=mode,ownership,timestamps 否则文件的时间为执行复制的时间
+    -d 连带链接属性复制 --no-dereference --preserve
+    -a ==-rpd   打炮啊  #无法复制ctime这个属性
+	
+	-l 复制为一个软连接
+	-l 复制为一个硬链接
+	
+####10位之内的特殊权限
+SUID 
+	chmod u+s  针对owner而言 所以ls -l中owner中的执行位为可能表现为S或s(S+x)  
+	例如ls -l /usr/bin/passwd
+	特点
+		只针对二进制可执行程序而言
+		该标志位可以使执行者仅在执行过程中具有owner权限
+		如执行者other使用命令passwd可通过owner为root更新other没任何权限的/etc/passwd文件
+SGID
+	chmod g+s  针对group而言 所以ls -l中group中的执行位为可能表现为S或s(S+x)  
+	例如ls -l /usr/bin/locate 或 ls -l /usr/bin/mlocate
+	特点
+		可针对二进制可执行程序而言，该标志位可以使执行者在执行过程中具有group权限
+			执行者other使用命令locate可通过group为slocate查询执行者没有任何权限的mlocate.db
+		可针对文件夹，用户对该目录具有rx权限
+SBIT 
+	chmod o+t  针对other而言 所以ls -l中other中的执行位为可能表现为T或t(T+x) 
+	例如 ls -ld /tmp
+	特点
+		只针对目录而言 group或other用户对该目录具有wx权限
+		在该目录下谁创建的文件、文件夹，这个新创建的文件或文件夹只有自己和root能够删除
+		
+	chmod (SUID+SGID+SBIT)xxx 以前C语言api中参数mode一般设置0777，现在这个0要设置值了
+		                      SUID为4 SGID为2 SBIT为1
+	S+x == s
+	T+x == t
+			man ls 在最后 info '(coreutils) ls invocation' 
+		    执行info '(coreutils) ls invocation'
+		    在*What information is listed按回车
+     ‘s’
+          If the set-user-ID or set-group-ID bit and the corresponding
+          executable bit are both set.
+
+     ‘S’
+          If the set-user-ID or set-group-ID bit is set but the
+          corresponding executable bit is not set.
+
+     ‘t’
+          If the restricted deletion flag or sticky bit, and the
+          other-executable bit, are both set.  The restricted deletion
+          flag is another name for the sticky bit.  *Note Mode
+          Structure::.
+
+     ‘T’
+          If the restricted deletion flag or sticky bit is set but the
+          other-executable bit is not set.
+
+     ‘x’
+          If the executable bit is set and none of the above apply.
+
+####10位之外的特殊权限
+lsattr  $file/dir  #列举mod10位之外的特殊属性  ls只会列举一些普通的mod10位的属性
+chattr  $file/dir  #改变特殊属性  ex2~4全支持 xfs只支持aiAds
+	+-=            #类似于chmod的action，但没有uog这些参数
+	a  只能增加数据，不能删除和修改数据   只有root才有此权限
+	i  root也不能直接增加删除数据 不能改名 不能删除 不能建立连接 只能读取属性和数据，简直固如磐石 
+	   只有root才有此权限设置该属性 root也只能先通过去掉该属性后(chattr -i)才可以删除
+	
+	A 不会更改文件的accestime属性
+	S  修改文件时，没有系统缓冲区，直接更改到文件 所以不需要执行sync命令
+	c  读取和写入的时候会经过解压/压缩的步骤 一般针对大文件而言
+	d  当dump程序执行时，该文件/目录不可dump
+	s  当删除后， 数据就真删除了 神仙也无法恢复
+	u  当删除后， 数据还是硬盘， 还是可以修复的
+	
+```
 
 #  ssh
 
@@ -1950,7 +2126,271 @@ curl -o curl.output -v http://xx.html
 rsync -avzh   --verbose  -h进度条
 ```
 
+#  文件系统
+
+##  分区及加载
+
+```
+磁盘  磁盘名是hda中的最后一个a
+				       某根IDE数据线第一块Master  某根IDE数据线第二块Slave
+	主板插槽1primary	/dev/hda    			 /dev/hdb
+	主板插槽2second     /dev/hdc    			 /dev/dhc
+	
+	/dev         这个是真正的外部数据，系统会自动将cdrom安装到/dev
+	/mnt         用户手动或系统自动挂载/dev到/mnt目录    固定存储        以前
+	/media/cdrom 用户手动或系统自动挂载/dev到/media目录  移动存储 如USB  后来   有桌面图标
+	
+
+一块磁盘可以分区 分区名是hda1中的最后一个1
+	分区类型
+		Primary Partition 主分区
+		Extend  Partition 扩展分区
+		logic   Partition 逻辑分区
+		
+	由于硬盘的限制,主分区primary和扩展分区最多只能有4个
+	由操作系统的限制, 一块磁盘最多可以有一个扩展Extend分区 
+	逻辑分区只能由扩展分区而来,扩展分区名从数字5开始,最大根据操作系统不同而不同,一般是16或64两种情况
+	只能格式化主分区和扩展分区,不能格式化扩展分区
+
+	经典方案 P+P+P+E (3P+E)   P+E
+	
+文件系统类型
+    ext2/3/4 由于ext3 ext4多了日志的记录,所以系统复原会比较快  已过时
+    swap     并不会使用到目录树的挂载, 所以并不需要指定挂载点
+    xfs      centos预设的, 格式化好几T的空间速度快
+    vfat     linux/windows都支持  如果windows和linux在硬盘中共存,为了数据交换,可以设置为这个
+
+查看文件系统类型
+    cat /proc/filessystem                     内存已加载的文件系统
+    ls -l /lib/modules/$(uname -r)/kernel/fs  这个版本系统可支持的
+```
+
+### 分区
+
+```
+fdisk -l 只能列出硬盘的分区表、容量大小以及分区类型，但看不到文件系统类型
+
+1 使用df查看磁盘名 如 /dev/hda
+2 使用命令
+  fdisk $disk_name  #如/dev/hda 千万不能跟数字, 数字就是分区了
+  Command (m for help): m  #打印帮助
+  
+  Command (m for help): q  #quit
+  Command (m for help): w  #write
+  
+  Command (m for help): F  #list free unpartitioned space
+  Command (m for help): l  #list known partion space
+  Command (m for help): n  #增加一个分区
+  Command (m for help): d  #删除一个分区
+  
+3 partprob  #分区生效 让系统识别probe partition  否则只能重启生效
+```
+
+###  格式化
+
+```
+mkfs [opt]  $partitionName  #格式化分区并设定分区的文件系统类型 /dev/hda4
+	-t	[ext2 ext2 xfs ]    #type 设定文件系统类型
+```
+
+###  检查
+
+```
+fsck  检验磁盘
+```
+
+### 挂载
+
+```
+mount     #查询系统中已挂载的设备
+mount -a  #依据配置文件/etc/fstab的内容，自动挂载 
+          #光盘/U盘不建议写入自动挂载中,否则开机时没有光盘/U盘的话, 系统会崩溃
+
+mount [-t 文件系统] [-o 特殊选项] [设备文件名] [挂载点]
+    -t 文件系统：加入文件系统类型来指定挂载的类型，ext3,ext4,光盘：iso9660等文件系统
+    -o 特殊选项：可以指定挂载的额外选项
+
+#挂载光盘
+mount -t iso9660 /dev/sr0 /mnt/cdrom/
+ll /mnt/cdrom/
+umount /mnt/cdrom/ 或umount /dev/sr0
+
+#挂载U盘
+fdisk -l //查看系统中已经识别的硬盘  U盘一般为sdb1
+mount -t vfat /dev/sdb1 /mnt/usb/ #vfat指的是fat32文件系统，单个文件不超过4GB
+                            #Linux默认不支持NTFS文件系统的 可以下载ntfs-3g软件安装，
+                            #但是ntfs格式只能是只读的 //一般为移动硬盘
+```
+###  查看战果
+
+```
+block 1K 2K 4K
+blockgrooup1
+	superblock
+	filesystemdescription
+	inodeblockbitmap
+	datablockbitmap
+	inodeblock
+
+du
+	 默认不会列出当前目录下单个文件的大小，尽管最后表示当前目录的.会统计
+	 -a 会列出当前目录下单个文件的大小
+	 -Sh 不包括子目录的统计， 更准备 因为目录已经统计过一次了
+	 -sh 
+	
+
+df  /   #重点找到磁盘名而已 例如/dev/hdc2中的磁盘名是/dev/hdc 是不含数字的， 数字是3分区                    
+	-T  增加文件类型列
+	-h   
+	-a  列出所有的文件系统  包括特殊的/proc  基本特殊的文件系统都不会占用硬盘空间
+	-i  查看inode，默认为data
+	
+dumpe2fs /dev/hda1   #dump ext2 file sysem 查看superblock信息和每个blockgroup信息
+	-h  #只查看header部分,即superblock信息 
+```
+
+##  quote
+
+```
+限制某目录大小 某用户使用空间大小  某组使用空间大小  
+超过waterLowerLevel警告 waterHighLevel禁止写入 在这两者之间有个存活期
+```
+
+##  raid
+
+```
+目的
+	读写效率  分区写
+	安全     镜像
+```
+
+##  lvm
+
+```
+管理调整分区的容量大小
+```
+
 #  za
+
+##  man/info
+
+```
+man           #针对未使用过的命令或文件格式manual 而$cmd --help针对的是曾经使用过的命令
+man man       #从中可以查看各级别含义
+    -h  for help
+man [opt] $cmd
+	-f      #查看命令的所有级别 
+	        #######等价于whatis $cmd
+	-k      #查看包含关键字key的所有级别
+		    ######等价于apropos
+	null    #默认查看最低级别  man 5 updatedb.conf  man 5 /etc/updatedb.conf
+	$number 
+	-a      #查看所有级别 按照cat /etc/man_db.conf其中定义的顺序依次查看
+
+
+info  文件位于/usr/share/info
+    'q' quits
+    'H' lists all Info commands
+    'mTexinfo RET' visits the Texinfo manual
+
+    定位Coreutils按回车就进入了子页面,可以浏览基本的命令并其概述  
+info info #
+info $cmd
+    ### 上一级
+        u     up    进入上一层
+    ### 下一级
+        Enter 进入子帮助页面(带有*号)
+    ### 同级不同页面
+        n     next  进入下一个帮助小节
+        p     pre   进入上一个帮助小节
+
+    ### 当前页面
+    tab   跳转到下一个链接/node节点
+    b     begin  第一个节点
+	e     end    最后一个节点
+
+    空格  下一页
+	PageDown 
+	PageUp
+	s|/  reg search 按s或/进行正则搜索
+    h    help  帮助
+    q    quit  退出
+```
+
+##  查找四天王which find  whereis locate
+
+```
+##从环境变量$PATH中完全匹配查找可执行程序的位置 
+which [-a] $filename  
+                      #-a表示有多处时返回多处，默认只返回最前一次
+
+#效率最低 功能最强
+find     #按照ls -l的顺序
+	-t TYPE         #一般正规文件(f)、设备文件(b、c)、目录（d）、socket(s)等
+	
+	-perm mode      #查找文件权限正好是mode的文件
+	-perm -mode     #小于mode
+	-perm +mode     #大于mode
+		
+    -user root
+	-uid  0
+	-group root
+	-gid  0
+	-nouser:        #寻找文件的所有者不在/etc/passwd的文件
+	-nogroup:       #寻找文件的用户组不在/etc/group的文件
+	
+    -size +20k -a -size -50k  #+表示多于 -表示少于 c:代表byte k:代表1024byte -a表示and -o表示or
+    -a #and
+    -o #or
+	
+    -ctime +10      #10天前  file status change 列出n天之前(不包含n本身)被更改过的文件名
+    -mtime 0        #今天修改    file data  modify 几天之前的"一天之内"被更改过的文件
+    -atime -10      #10天内  列出n天之内(包含n本身)被更改过的文件名
+	-newer $file    #比file更新的文件
+	
+	-name filename  #查找文件名为filename的文件
+	
+	-depth N        #深度
+	-prune
+	
+	-fellow         #跟踪符号链接所指向的文件
+	
+	-fstype         #在某一特定的file system文件系统/etc/fstab中查找
+	
+	-print          #默认动作
+	-cpio           #对匹配的文件执行cpio备份到磁带设备中
+    -exec/ok $cmd {} \; #自定义动作 对搜索结果进行处理 使用\对;进行转义
+	                    #cmd不能用alias只能全称如 ls -l不能 ll
+						#有没有C语言的感觉 -exec ls -l {find / -t f} \;
+
+##数据库一般查询
+#whatis $cmd   使用whatis命令必须先sudo makewhatis(老版本)/mandb(新版本)建立数据库
+whereis [opt] filename #只能在特定目录下(whereis -l或数据库/var/lib/slocate/slocate.db)中
+                       #完全匹配查找可执行文件的位置+源文件、配置文件的位置+帮助文件的位置
+					   #当提供的filename包含.后缀时会被截断，只留下.前面的
+    -b  #binary 可执行文件
+	-s  #source 源文件      eg： whereis stdio  whereis nginx  ##/usr/include/stdio.h
+    -m  #manual 帮助文件    eg: ##/usr/share/man/man3/stdio.3.gz                           
+	-l  #output effective lookup paths
+	
+#数据库正则匹配reg查询
+locate [opt] $filename #默认一天更新一次数据库/var/lib/mlocate, 
+					   #可以通过命令updatedb临时更新 
+					   #只能按文件名搜索，而不能更复杂的搜索
+                 #部分匹配模糊查找
+	-i           #忽略大小写
+	-r           #正则表达式支持* ？
+	-n           #只返回前面n个
+	-q           #安静模式 不会显示任何错误
+    cat /etc/updatedb.conf
+		PRUNE_BIND_MOUNTS="yes" #开启搜索限制
+		PRUNEFS=                #搜索时,不搜索的文件系统
+		PRUNENAMES              #搜索时,不搜索的文件类型
+		PRUNEPATHS=             #搜索时,不搜索的路径
+slocate #security locate locate的升级版
+mlcoate #slocate的升级版 与locate公用一个数据库 
+        #根据时间戳更新数据库，而不必重新读取一下文件系统 apt show mlocate
+```
 
 ##  df/du
 
@@ -1963,26 +2403,6 @@ du
 	-a   #默认仅统计文件量,而没有统计到子目录
 	-s   #列出总量,而不是分别统计各子目录
 	-S   #不统计子目录
-```
-
-##  目录
-
-```
-mytempdirname=$(mktemp -d)
-pushd ${mytempdirname}     # 目录压栈并进入新目录
-//do something
-popd                # 弹出并进入栈顶的目录
-tar czvf $(uname -n)-$(date +'%Y-%m-%dT%H:%M:%S%z').tar.gz -C $mytempdirname .
-rm -rf ${mytempdirname}
-
-dirs -v             # 列出当前目录栈
-
-cd -                # 回到之前的目录
-cd -{N}             # 切换到目录栈中的第 N个目录，比如 cd -2 将切换到第二个
-
-stat {file}
-du -sh {file|dir}
-mkdir -p work/{project1,project2}/{src,bin,bak}
 ```
 
 ##  进程
@@ -2063,6 +2483,39 @@ nmap -O -sV 10.0.0.12              # 探测主机服务和操作系统版本
 trap cmd sig1 sig2        # 在脚本中设置信号处理命令
 trap "" sig1 sig2         # 在脚本中屏蔽某信号
 trap - sig1 sig2          # 恢复默认信号处理行为
+```
+
+##  开关机
+
+```
+启动一开始就进入tty1
+终端控制台界面Ctl+Alt+F2-6  tty2-6    #startx不灵啊
+XWindow      Ctl+Alt+F1             
+
+注销 exit logout
+cal [[[day] month] year]
+
+sync
+shutdown 
+	-k "msg"
+	-h  now       #==0 默认是1 1分钟后关机
+	-h  +10       #10分钟后关机
+	-h  20:35     #24小时制20:35关机
+	-r  now       #==0 立即
+	-r  +30 "msg" 
+    -c            #可用这条目录取消前一个shutdown命令 
+	
+halt       #屏幕可能会保留系统已停止的信息
+poweroff   #没电了 屏幕空白
+reboot
+
+init 0     #关机
+init 6     #重启
+
+systemctl halt
+systemctl poweroff
+systemctl reboot
+systemctl suspend     #休眠模式
 ```
 
 ##  系统版本
