@@ -390,6 +390,11 @@ multitail
 script/scriptreplay  终端会话录制并回放
 top htop glances
 
+zeal  dash
+everything listary
+Mockoon
+chocolatey homebrew
+
 
 https://blog.csdn.net/u010625000/article/details/44455023
 
@@ -438,3 +443,43 @@ fzf  fuzzy find 模糊查询 媲美vim的CtrlP插件
         键盘 Ctrl-j/k/n/p   单选模式Enter选中     多选模式-m下Tab和shift-Table选中
         鼠标 滚轮滚动        单选模式双击选中      多选模式-m下Shift-Click或shift-scroll多选
 
+
+apt install alien #可以在rpm dpkg deb之间转换
+alien *.rpm
+alien -r *.deb
+
+
+
+
+rpmbuild --rebuild    *.rpm   #build binary package from <source package>
+rpmbuild --recompile  *.rpm   #build through %install (%prep, %build, then install) from <source package>   
+
+rpmbuild -ba          *.spec  #build source and binary packages from <specfile> rpm src.rpm
+rpmbuild -bb          *.spec  #build binary package only from <specfile>        rpm
+
+
+rmp -ivh *.src.rpm 
+
+rpmbuild -ba main.spec 
+yum install *.rpm 
+rpm -ql main 
+rpm -qi main 
+
+
+SOURCES  *.tar.gz
+SPECS    *.spec
+
+BUILD  
+BUILDROOT  
+
+RPMS    *.rpm
+SRPMS   *.src.rpm  
+
+
+cd BUILD
+rm -rf   $Name-$Version && 
+mkdir -p $Name-$Version && 
+cd $Name-$Version             #Name和Version来自*.spec 
+tar -zxvf $Source.tar.gz      #$Source来自*.spec中的Source
+%build                        #执行spec中的%build
+%install                      #执行spec中的%install

@@ -1750,7 +1750,9 @@ systemctl set-default TARGET.target
 
 - -q    $pkgName #查询是否安装了该软件
 
-- -qp  *.rpm         #package Query an (uninstalled) package
+- -qpl  *.rpm         #package Query an (uninstalled) package 列出有哪些文件类似于rpm -ql
+
+- -qp *.rpm   --requires #查看包的依赖
 
 - **-qa**                     #all    Query all installed packages
 
@@ -1938,11 +1940,6 @@ apt update
 
 
 ```
-
-
-
-
-
 apt-get update     #更新源   可以频繁操作,类似于保存文件Ctl-s的频率
                    #依据/etc/apt/sources.list从镜像站点更新本地文件索引/var/lib/apt/lists
 
@@ -1989,13 +1986,18 @@ apt-get check                         检查是否有损坏的依赖
 |          | rpm/yum                     | dpkg/apt              |
 | -------- | --------------------------- | --------------------- |
 |          |                             | apt-update            |
-| 已安装   | rpm -qa                     | dpkg -l [$pkgName]    |
-|          | yum list                    | apt list [$pkgName]   |
-| 是否安装 | rpm -q [$pkgName]           |                       |
+| 已安装   | rpm -qa                     | dpkg -l        [$pkgName] |
+|          | yum list                    | apt list        [$pkgName] |
+| 是否安装 | rpm -q           [$pkgName] |                       |
 | 查询     | yum  search [all] $pkgName  | apt search   $pkgName |
 | pkg信息  | yum **info**       $pkgName | apt show     $pkgName |
-| 正查pkg包含文件 | rpm -ql $pkgName | dpkg -L $pkgName |
-| 反查pkg | rpm -qS $full_path_fileName | dpkg -S $full_path_fileName |
+| 安装时间 | rpm -qi   $pkgName  "Install Date"字段 |  |
+| 正查pkg包含文件 | rpm -ql          $pkgName | dpkg -L        $pkgName |
+| 反查文件属于哪个包pkg | rpm -qf         $full_path_fileName | dpkg -S        $full_path_fileName |
+| 正查pkg的依赖 | rpm -qp *.rpm   --requires |  |
+|  | rpm  -qR   $pkgName |  |
+|  | yum deplist openssh-server | apt depends openssh-server |
+| 反查pkg的依赖 |  | apt rdepends rssh |
 
 #  Tool
 
