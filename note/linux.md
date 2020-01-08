@@ -1201,6 +1201,10 @@ iostat [delay [count]]
 
 -n  localAddress 默认显示host:serviceName, 转化为ip:port
 
+-s  Display summary statistics for each protocol
+-i  Display a table of all network interfaces, or the specified iface.
+-r  Display the kernel routing tables
+
 经典用法
 netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
 netstat -rn    #查看路由
@@ -1746,7 +1750,7 @@ systemctl set-default TARGET.target
 
   
 
-  rpm {-q|--query}  [select-options][query-options] [query-options]
+  rpm {-q|--query}  [select-options][query-options] [query-options]  通过查询数据库file /var/lib/rpm/packages
 
 - -q    $pkgName #查询是否安装了该软件
 
@@ -1994,7 +1998,7 @@ apt-get check                         检查是否有损坏的依赖
 | 安装时间 | rpm -qi   $pkgName  "Install Date"字段 |  |
 | 正查pkg包含文件 | rpm -ql          $pkgName | dpkg -L        $pkgName |
 | 反查文件属于哪个包pkg | rpm -qf         $full_path_fileName | dpkg -S        $full_path_fileName |
-| 正查pkg的依赖 | rpm -qp *.rpm   --requires |  |
+| 正查pkg的依赖 | rpm -qp *.rpm   -requires |  |
 |  | rpm  -qR   $pkgName |  |
 |  | yum deplist openssh-server | apt depends openssh-server |
 | 反查pkg的依赖 |  | apt rdepends rssh |

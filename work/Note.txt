@@ -384,7 +384,7 @@ mycli             #mysql彩色客户端
 shellchekc  a.sh  #检查shell语法
 
 axel -n 20 $addr    多线程下载
-lynx  终端浏览器
+lynx  --dump http://www.baidu.com  终端浏览器
 tig git https://www.jianshu.com/p/e4ca3030a9d5
 multitail
 script/scriptreplay  终端会话录制并回放
@@ -444,21 +444,198 @@ fzf  fuzzy find 模糊查询 媲美vim的CtrlP插件
         鼠标 滚轮滚动        单选模式双击选中      多选模式-m下Shift-Click或shift-scroll多选
 
 
+
+
+
+
+
+
+
 apt install alien #可以在rpm dpkg deb之间转换
 alien *.rpm
 alien -r *.deb
 
+*.rpm
+*.src.rpm  包含未编译的原始代码,所以可以修改编译参数经过编译后才可以安装
+            rpmbuild --rebuild    *.rpm   #build binary package from <source package>
+            rpmbuild --recompile  *.rpm   #build through %install (%prep, %build, then install) from <source package> 
+
+rpm格式
+    Lead    公共
+    signature
+    header  软件包信息
+    archive 文件列表
+
+
+rpmdev-setuptree . 
+rpmdev-newspec a.spec
+rpmdev-newinit a.init
+
+目录结构
+    SOURCES  *.tar.gz
+    SPECS    *.spec
+
+    BUILD  
+
+    RPMS    *.rpm
+    SRPMS   *.src.rpm  
+
+rpmbuild
+    常用选项
+        --dbpath  ""             #默认值/var/lib/rpm
+        --root    ""             #根目录
+
+    编译前
+        --nobuild                 #检出spec语法
+
+    编译选项
+        -bp %prep                 #解压缩并patch
+        -bc       %build          #make
+        -bi              %install #install 
+
+        -bb                       #install之后只生成rpm          build binary package only from <specfile>        rpm
+        -bs                       #           只生成src.rpm   
+        -ba                       #                             build source and binary packages from <specfile> rpm src.rpm
+
+        --buildroot ""
+        --target i386 | i686 | x86_64
+        --rmsource                #在build之后删除src.rpm 
+        --rmspec                  #在build之后删除spec文件
+
+    编译后
+        --clean                  #删除build时的目录 BUILD/wget-1.14
+
+
+spec
+    comments
+    tags 变量定义
+        包命名
+            Name               不能含空格
+            Version            不能含-
+            Release
+        描述  rpm -qpi *.rpm
+            %description:      若以空格开始则逐字显示; 若不是以空格开始则对其段落划分 在变量定义中唯一个以%开头的变量
+            Summary:  只能一行
+            CopyRight: GPL 
+            Lisence:  GPLv2 with exceptions
+            Distribution:    软件集合
+            Icon:            软件图标
+            Vendor:          组织机构
+            URL: 
+            Group:
+            Packager:    发包人的联系方式或公共的邮件列表
+        依赖 rpm -qpi  --requires
+            Provides     该包提供什么资源  既可以是一个真实存在的包,也可以只是一个虚拟的东西(仅仅是一个字符串)
+            Requires     该包依赖哪些包 不支持不等于
+                         = 1.2-2  >= > = <= < 
+            conficts     该包与哪些包冲突
+            serial       version之外的另外一种版本比较变量
+            autoreqprov  自动生成软件依赖的标志位autorequire/autoprovide 取值为yes或者no,也可用0或1表示 默认值为yes或1 一般不用操作
+        平台操作系统
+            ExcludeArch: sparc alpha   不能在某CPU平台
+            ExclusiveArch: aparc alpha 只能在某CPU平台
+            ExcludeOS:  linux irix     不能在某OS
+            ExclusiveOS: linux irix    只能在某OS
+        目录
+            prefix:  /opt  %files中声明为/opt/xx 在命令行的--prefix的优先级最高
+            BuildRoot:  %{_topdir}/%{name}-%{version}-root 
+        源码补丁
+            Source:    源代码名称和存储位置
+                Source:
+                Source1:
+                SourceN:
+            NoSource:  从源代码中忽略一个或多个文件
+            Patch:     标识源码的一个补丁文件
+                Patch0:
+                PatchN:
+            NoPatch:   忽略一个或多个补丁
+    script
+        编译时
+            %prep   为编译代码准备 1创建顶级目录 2解压源码到build目录 3如果有补丁的话打补丁
+
+            %build
+            %ifarch cond1 cond2
+                ./configure --with-ss=openssl
+            %ifnarch cond1 cond2
+            %ifos os1 os2 
+            %ifnos os1 os2
+                make RPM_OPT_FLAGS="$RPM_OPT_FLAGS -I . "
+            %else
+            %endif  
+
+            %install 
+            make install prefix=$RPM_BUILD_ROOT/usr 
+            mkdir -p $RPM_BUILD_ROOT/usr/foo 
+            install binname $RPM_BUILD_ROOT/usr/foo/bin
+
+            %clean 
+            [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+        安装/卸载时
+            %pre     第一个参数为1说明是初次安装,为2时是版本升级  hook默认使用bash来执行,但也可使用参数-p自定义
+                %pre -p /usr/bin/perl 
+                if ( $ARGV[0] == 1 ) {
+                    print "preparing for init install\n"
+                }
+                elsif ( $ARGV[0] == 2 ) {
+                    print "prepare to upgrade software\n"
+                }
+            %post    第一个参数为1说明是初次安装,为2时是版本升级
+            %preun   第一个参数为0说明是卸载,为1时是版本升级
+            %postun  第一个参数为0说明是卸载,为1时是版本升级
+
+            升级流程
+                执行新版本的%pre 
+                安装新版的文件列表
+                执行新版本的%post
+
+                检查所有其他rpm包的triggerin触发器,如果有被N的安装触发,就执行相应脚本
+                执行N的所有triggerin触发器
+                执行N的所有triggerun触发器
+
+                检查所有其他rpm包的triggerin触发器,如果有被N的卸载触发的,就执行相应的脚本
+
+                执行老版本的%preun
+                自动删除老版本中没有被新版本覆盖的文件
+                执行老版本的%postun
+        校验时          用rpm命令校验已安装的rpm时执行 rpm -qpVv *.rpm
+            %verifyscipt  因为rpm默认会校验文件列表,所以不用去校验,因此这儿可以做点自己想做的 默认不会执行%verifyscipt,除非使用verbose模式进行校验
+            echo "verify aaa" 
+        触发器Trigger   被一定的条件(如其他rpm安装或卸载)触发执行
+            B%triggerin A包安装时,如果B包已经安装,则触发该触发器
+            B%triggerun A包安装时,如果B包已经卸载,则触发该触发器
+            B%triggerpostun A包安装时,如果B包被卸载,则卸载完成后触发该触发器
+
+            eg:
+                %triggerin -p /usr/bin/perl -- ruby   #通过--符号指定被监控的包
+                # print "ruby already installed"
+    Macro 宏
+        %setup      解压缩源码  多数情况下不用任何选项
+            -n $name 设置编译目录名默认是name-version
+            -c $build_dir_name  创建build目录并进入该目录
+        %patch      给解压后的源码打补丁
+    files 文件列表指令Directives 设置与检查文件/目录/软件包的属性 rpm -qf /etc/x.conf
+        文件相关
+            %doc    用来标识一个文件是文档 安装后会被rpm数据库记录 默认安装目录是/usr/doc 可以通过修改rpmrc中的defaultdocdir变量的值来修改
+            %config 用来标识一个文件是配置文件 设置了noplace属性后 rpm在升级时就不会被覆盖 在卸载时会被保存为x.save  rpm -qp *.rpm --configfiles
+                %config(noreplace) /etc/x.conf
+            %attr   用来修改文件属性(默认权限 属主 属组)指令
+                %attr (755, root, root) foo.bar
+            %verify 校验指令
+        目录相关
+            %docdir /absolute-dir-path  用于指定配置文件目录
+            %dir    /absolute-dir-path  用于只将目录打包  默认将目录下的文件及文件夹打包
+
+        %package -n $new_sub_package_name 定义子包名,默认命名是"基础包-子包"格式
 
 
 
-rpmbuild --rebuild    *.rpm   #build binary package from <source package>
-rpmbuild --recompile  *.rpm   #build through %install (%prep, %build, then install) from <source package>   
+全局配置      /etc/yum.conf 
+源配置文件    /etc/yum.repos.d/*.repo 
+本地rpm数据库 /var/lib/rpm/_db.*
+本地缓存      /var/cache/yum/*
+插件          /usr/lib/yum-plugins/*.py /etc/yum/pluginconf.d/*.conf
+日志          /var/log/yum.log 
 
-rpmbuild -ba          *.spec  #build source and binary packages from <specfile> rpm src.rpm
-rpmbuild -bb          *.spec  #build binary package only from <specfile>        rpm
-
-
-rmp -ivh *.src.rpm 
 
 rpmbuild -ba main.spec 
 yum install *.rpm 
@@ -466,20 +643,10 @@ rpm -ql main
 rpm -qi main 
 
 
-SOURCES  *.tar.gz
-SPECS    *.spec
-
-BUILD  
-BUILDROOT  
-
-RPMS    *.rpm
-SRPMS   *.src.rpm  
-
-
 cd BUILD
-rm -rf   $Name-$Version && 
-mkdir -p $Name-$Version && 
-cd $Name-$Version             #Name和Version来自*.spec 
 tar -zxvf $Source.tar.gz      #$Source来自*.spec中的Source
 %build                        #执行spec中的%build
+rm -rf   $Name-$Version &&    #Name和Version来自*.spec 
+mkdir -p $Name-$Version 
 %install                      #执行spec中的%install
+打包
