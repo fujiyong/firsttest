@@ -22,6 +22,7 @@ ipfs3	192.168.1.120	22	root	13622228504
 git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
 
 
+zcat *.tar.gz
 
 alias | grep -E "b\."
 echo $DIFOSS_ENV_BASE/.privacy/__init__.sh
@@ -393,7 +394,7 @@ top htop glances
 zeal  dash
 everything listary
 Mockoon
-chocolatey homebrew
+chocolatey homebrew  
 
 
 https://blog.csdn.net/u010625000/article/details/44455023
@@ -629,11 +630,12 @@ spec
 
 
 
-全局配置      /etc/yum.conf 
-源配置文件    /etc/yum.repos.d/*.repo 
-本地rpm数据库 /var/lib/rpm/_db.*
-本地缓存      /var/cache/yum/*
-插件          /usr/lib/yum-plugins/*.py /etc/yum/pluginconf.d/*.conf
+全局配置      /etc/yum.conf                设置如何管理源repo
+源配置文件    /etc/yum.repos.d/*.repo      源的配置文件
+本地rpm数据库 /var/lib/rpm/_db.*           存储系统已安装了哪些rpm   /var/lib/yum
+本地缓存      /var/cache/yum/*             存储索引文件和rpm文件
+插件          /usr/lib/yum-plugins/fastestmirror.py       fastestmirror对每个mirror进行测速,然后根据连接速度排序站点速度,选择下载速度最快的站点下载
+插件配置文件   /etc/yum/pluginconf.d/fastestmirror.conf
 日志          /var/log/yum.log 
 
 
@@ -650,3 +652,9 @@ rm -rf   $Name-$Version &&    #Name和Version来自*.spec
 mkdir -p $Name-$Version 
 %install                      #执行spec中的%install
 打包
+
+
+索引读写分离
+缓存
+镜像
+智能DNS和多机房容灾

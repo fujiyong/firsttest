@@ -2,20 +2,26 @@
 
 帮助
 
+- Linux Family   Yellow dog Updater, Modified
+
+| Linux Family                     |                       |                       |      |
+| -------------------------------- | --------------------- | --------------------- | ---- |
+| fedora RHEL CentOS  Oracle Linux | dnf     install jq    | Dandified YUM         |      |
+| Debian ubuntulinux Mint          | apt-get install jq    | advanced package tool |      |
+| SUSE    SLES	OpenSUSE         | zypper   install jq   |                       |      |
+| Arch                             | pacman   -Sy    jq    | packageMan            |      |
+| **BSD Family**                   |                       |                       |      |
+| freeBSD                          | pkg install jq        |                       |      |
+| solaries                         | pkgutil -i jq         |                       |      |
+| mac                              | brew install jq       |                       |      |
+| **Windows Family**               |                       |                       |      |
+| windows                          | chocolatey install jq |                       |      |
+
 ```
-	whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
+whereis        #搜索可执行，头文件和帮助信息的位置，使用系统内建数据库
 man yum.conf   #查看配置文件的说明
 
-linux各家族  Yellow dog Updater, Modified
-    Debian	ubuntu	linux Mint                   apt-get install jq      advanced package tool
-    fedora	RHEL	centos  	Oracle Linux     dnf     install jq     Dandified YUM
-    SUSE    SLES	OpenSUSE                     zypper   install jq
-    Arch                                          pacman   -Sy    jq     packageMan
-BSD各家族
-    freeBSD	                                     pkg install jq
-    mac                                          brew install jq
-    solaries                                     pkgutil -i jq
- windows                                         chocolatey install jq
+chocolatey install jq
 
 init 3  #从界面进入命令行
 startx  #从命令行进入正常界面
@@ -1792,7 +1798,7 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
 
 - yum repolist all                                #查询有哪些库Repo可以install
 
-- yum search [all]  $pkgName          #
+- yum search [all]  $pkgName          #Name and summary matches only, use "search all" for everything
 - 
 
   yum check-update  #列出所有可更新的软件
@@ -1924,7 +1930,7 @@ dpkg -P pkgName                                         彻底卸载Purge 包括
 更新源
 
 ```
-ubuntu默认使用国外的源,下载速度比较慢,不像centos yum时会自动选择站点, 所以需要更换源
+ubuntu默认使用国外源,下载速度比较慢,不像centos yum会依赖fastestmirror插件自动选择站点, 所以需要更换源
 mv /etc/apt/sources.list /etc/apt/sourses.list.backup
 
 deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse
