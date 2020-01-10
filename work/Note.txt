@@ -467,19 +467,22 @@ rpm格式
     header  软件包信息
     archive 文件列表
 
+rpm -qil rpmdevtools
 
-rpmdev-setuptree . 
-rpmdev-newspec a.spec
-rpmdev-newinit a.init
+rpmdev-setuptree                        #与rpmdev-wipetree刚好相反
+rpmdev-newspec -type python -o a.spec   #rpmdev-newspec --help 模板来自于/etc/rpmdevtools/spectemplate-*.spec 
+rpmlint a.spec  &&  rpmlint -i a.spec   #检查spec语法错误    rpmbuild -E '%{_bindir}' tos.spec
+rpmdev-newinit                 a.init   #制作服务控制脚本
 
 目录结构
     SOURCES  *.tar.gz
     SPECS    *.spec
 
-    BUILD  
+    BUILD               #config make 
+    BUILDROOT           #make install 产生x86_64
 
-    RPMS    *.rpm
-    SRPMS   *.src.rpm  
+    RPMS    *.rpm       #将BUILDROOT打包
+    SRPMS   *.src.rpm   #将BUILDROOT打包
 
 rpmbuild
     常用选项
@@ -508,6 +511,11 @@ rpmbuild
 
 
 spec
+    定义变量  %define varname "xxx"
+    引用变量  %{var}
+    执行脚本  %( echo %{var} | sed 's///g' )
+
+
     comments
     tags 变量定义
         包命名
@@ -542,7 +550,7 @@ spec
             BuildRoot:  %{_topdir}/%{name}-%{version}-root 
         源码补丁
             Source:    源代码名称和存储位置
-                Source:
+                Source:      #Source与Source0效果相同
                 Source1:
                 SourceN:
             NoSource:  从源代码中忽略一个或多个文件

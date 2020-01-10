@@ -152,3 +152,10 @@ https://juejin.im/post/5d8962c06fb9a06afe12d5fc
 #  pg
 
 #  MongoDB
+
+#  Redis
+
+```
+https://mp.weixin.qq.com/s/2JcJqhweJOHeKnYmdpR0MQ
+```
+

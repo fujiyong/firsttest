@@ -954,6 +954,8 @@ s #类似于vi中:s
         1   #行内第一处
         N   #行内第N处
         Ng  #从行内第N处开始
+        
+sed -r 's/^[ \t]+(.*)[ \t]+$/\1/g'  #去掉收尾空格
 
 
 sed 's/find/replace/' file         # 替换文件中首次出现的字符串并输出结果 
@@ -1813,13 +1815,12 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
   yum list ssh*        #installed Packages已安装和可升级/安装Available Packages
 
 - group
-  yum group list          
-  yum group install      $groupName
-  yum group remove   $groupName
+  yum group list
+  yum group install      \$groupName
+  yum group remove   ​\$groupName
   yum group info          $groupName                    #yum group info "Development Tools"
-- 
-  yum install -y  $pkgName
-  yum remove   $pkgName
+- yum install -y  \$pkgName
+  yum remove   ​\$pkgName
   yum update   $pkgName
 - clean
 
