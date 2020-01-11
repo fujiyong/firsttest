@@ -730,7 +730,7 @@ dumpe2fs /dev/hda1   #dump ext2 file sysem 查看superblock信息和每个blockg
 
 
 
-
+ls -lsh 第一列为因为占块所占的大小 size为实际数据的大小
 
 
 https://blog.csdn.net/u010625000/article/details/44455023
