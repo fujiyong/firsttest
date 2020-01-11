@@ -591,11 +591,7 @@ set  -exuvno pipefail #一次性设置
 
 set -n			#语法检查Read commands but do not execute them
 			    #等价于set -o noexec
-
-set -o pipefail #the return value of a pipeline is the status of
-                #the last command to exit with a non-zero status,
-                #or zero if no command exited with a non-zero status
-
+			    
 set -e         #Exit immediately if a command exits with a non-zero status
 		       #默认情况下 遇到错误仍然会继续往下执行
 		       #等价于set -o errexit
@@ -609,6 +605,18 @@ set -u         #Treat unset variables as an error when substituting
 
 set -v		   #Print shell input lines as they are read
                #等价于set -o verbose  跟踪每个命令的执行 
+               
+set -o pipefail #the return value of a pipeline is the status of
+                #the last command to exit with a non-zero status,
+                #or zero if no command exited with a non-zero status
+                #
+                #set -e的对管道的失效
+                #	默认情况下, 即使设置了set -e 但管道只要最后一个命令不失败, 
+                #   则管道命令总是会执行, 管道命令下面一行的命令也会执行,如
+                #       set -e
+                #       failCmd | echo "aa"
+                #       echo "bbb"
+                #为了使管道错误就不执行下面一行命令代码而退出,需要设置该选项
 ```
 ##  经验
 
@@ -621,7 +629,7 @@ if [[ ! "$PATH" == */root/.fzf/bin* ]]; then
 fi
 
 help() {
-  cat << EOF
+cat << EOF
 usage: $0 [OPTIONS]
     --help               Show this message
 EOF
@@ -1798,17 +1806,27 @@ Server将pkg根据类别存放到不同Repo中,包的依赖的关系存放在xml
 
 Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下载依赖文件xml于本地/var/cache/yum中
 
-- yum repolist all                                #查询有哪些库Repo可以install
+- yum repolist [all|enabled|disabled]              #查询有哪些库Repo可以install
+
+  yum repoinfo  [all|enabled|disabled]
 
 - yum search [all]  $pkgName          #Name and summary matches only, use "search all" for everything
+
+  ​                                                             \#decription and url
+
 - 
 
-  yum check-update  #列出所有可更新的软件
+  yum check-update                 #列出所有可更新的软件
 
-  yum update             #更新所有软件
+  yum update  [$pkgName]     #更新所有已安装的软件
+  
 - list
 
-  yum list                  #列出所有可安装的软件
+  yum list                  #列出所有可安装的软件及安装过的
+
+  yum list available 
+
+  yum list installed 
 
   yum list updates  #可供升级
 
@@ -1819,9 +1837,19 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
   yum group install      \$groupName
   yum group remove   ​\$groupName
   yum group info          $groupName                    #yum group info "Development Tools"
+  
 - yum install -y  \$pkgName
   yum remove   ​\$pkgName
   yum update   $pkgName
+  
+- history
+  
+  yum history list               #安装历史记录
+  
+  yum history info  $ID     #某一次安装历史记录
+  
+  yum history stats            #统计
+  
 - clean
 
   yum clean packages
@@ -1834,20 +1862,16 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
 
   yum clean all == yum clean packages &&  yum clean oldheaders
 
-yum makecache
-
-
-
 只下载不安装 存放于/var/cache/yum/x86_64/7/updates/packages 7发行版本号CentOS7 updates仓库名
 
- yum install --downloadonly dhcp
+ yum install --downloadonly --downloaddir=.   dhcp
  rpm -qlp <下载后包的完整路径> 可以查看rpm包中的文件
 
 
 
 流程
 
-​	rmp -q          $pkgName   #查询是否安装了包 rpm -qa | grep pkgName
+​	rmp -q          $pkgName   #查询是否安装了包 rpm -qa | grep ​\$pkgName
 
 ​	yum **search**  $pkgName #只匹配名字和summary, use "search all" match everything
 
@@ -1977,8 +2001,8 @@ apt-get install --reinstall  package  重新安装包
 apt-get remove         package        删除包
 apt-get purge          package        删除包，包括删除配置文件等
 
-apt-get autoclean                     清理那些已经被removed/purged软件的安装包*.deb,以释放磁盘空间
-apt-get clean                         清理那些已经被安装了但还有安装包的*.deb,以释放磁盘空间
+apt-get autoclean                 清理那些已经被removed/purged软件的安装包*.deb,以释放磁盘空间
+apt-get clean                     清理那些已经被安装了但还有安装包的*.deb,以释放磁盘空间
 
 apt-get build-dep package             安装相关的编译环境
 apt-get source package                下载该包的源代码
@@ -1996,19 +2020,21 @@ apt-get check                         检查是否有损坏的依赖
 
 |          | rpm/yum                     | dpkg/apt              |
 | -------- | --------------------------- | --------------------- |
-|          |                             | apt-update            |
+| 更新索引 | yum makecache | apt update           |
 | 已安装   | rpm -qa                     | dpkg -l        [$pkgName] |
-|          | yum list                    | apt list        [$pkgName] |
-| 是否安装 | rpm -q           [$pkgName] |                       |
+| 可安装 | yum list                    | apt list        [$pkgName] |
+| 是否安装 | rpm -q           [$pkgName] | dpkg -s   $pkgName |
 | 查询     | yum  search [all] $pkgName  | apt search   $pkgName |
-| pkg信息  | yum **info**       $pkgName | apt show     $pkgName |
-| 安装时间 | rpm -qi   $pkgName  "Install Date"字段 |  |
+| pkg信息  | yum **info**       $pkgName | apt **show**     $pkgName |
+| 下载源码  |yumdownload **--source** $pkgName | apt **source** $pkgName |
+| 安装历史 | yum history list | cat/var/log/[apt/history.logdpkg.log |
+| 安装时间 | rpm -qi $pkgName  "Install Date"字段 |  |
 | 正查pkg包含文件 | rpm -ql          $pkgName | dpkg -L        $pkgName |
 | 反查文件属于哪个包pkg | rpm -qf         $full_path_fileName | dpkg -S        $full_path_fileName |
 | 正查pkg的依赖 | rpm -qp *.rpm   -requires |  |
 |  | rpm  -qR   $pkgName |  |
 |  | yum deplist openssh-server | apt depends openssh-server |
-| 反查pkg的依赖 |  | apt rdepends rssh |
+| 反查pkg的依赖 | yum provides rssh | apt rdepends rssh |
 
 #  Tool
 
@@ -2619,6 +2645,7 @@ dd if=/path/to/image of=/dev/sdx bs=4M count=1
 	#   ucase     转化为大小
 	#	noerror   出现错误不停止
 pkill –USR1 –n –x dd  #查看dd进度 或 ubuntu的pv命令
+                      #主要是dd接受信号SIGUSR1并进行处理了
 
 dd if=/dev/zero bs=1024 count=1000000 of=/root/1Gb.file #通过命令的执行时间可以计算出硬盘的读写速度
 dd if=/root/1Gb.file bs=64k | dd of=/dev/null
@@ -2843,13 +2870,33 @@ docker exec  "$cmd"
 
 # FAQ
 
-## ls无色 vi无色 vim才有色
+## ls无色 vi无色 vim才有色 echo有色
 
 ```
 alias ls='ls --color=auto '
 alias grep='grep --color=auto '
 alias egrep='egrep --color=auto '
 alias fgrep='fgrep --color=auto '
+
+echo -e "\e[显示方式;前景色;背景色m"   #\e也可以写成8进制的\033
+                                   #显示方式 前景色 背景色 都是数字
+                                   #不是按;;位置来判别,而是用数值范围来确定各位置数值
+                                   #这三个参数可以都使用,也可以只使用前景色和背景色
+                                   # \e[0m表示结束
+显示方式0终端默认 1高亮 4使用下划线 5闪烁 7反白显示 8不可见
+前景色 黑30 红31 绿32 黄33 蓝34 紫红35 青蓝36 白37
+背景色 黑40 红41 绿42 黄43 蓝44 紫红45 青蓝46 白47
+\33[nA   光标上移n行 
+\33[nB   光标下移n行 
+\33[nC   光标右移n行 
+\33[nD   光标左移n行 
+\33[y;xH 设置光标位置 
+\33[2J   清屏 
+\33[K    清除从光标到行尾的内容 
+\33[s    保存光标位置 
+\33[u    恢复光标位置 
+\33[?25l 隐藏光标 
+\33[?25h 显示光标
 ```
 
 命令行中输入错误按删除键多出字符^H
