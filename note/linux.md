@@ -92,24 +92,11 @@ help    ${builtin_cmd}   #查看bash的内置命令的帮助,类似于查看用�
 enable                   #查看bash的所有内置命令, 或禁止某命令
 builtin ${builtin-cmd}   #忽略alias, 直接运行内置命令
 command ${buildin_cmd}   #忽略alias, 直接运行内置命令或执行程序
-bind -P                       # 列出所有 bash 的快捷键
-declare
-    declare -a                # 查看所有数组
-    declare -f                # 查看所有函数
-    declare -F                # 查看所有函数，仅显示函数名
-    declare -i                # 查看所有整数
-    declare -r                # 查看所有只读变量
-    declare -x                # 查看所有被导出成环境变量的东西
-    declare -p varname        # 输出变量是怎么定义的（类型+值）
-eval $script                  # 对script 变量中的字符串求值（执行）
+bind -P                  #列出所有 bash 的快捷键
+eval $script             #en对script 变量中的字符串求值（执行）
 source a.sh   #source 包含函数的脚本, 然后可以在shell中直接使用: $ $func_name $arg1 $arg2
 set -o vi     #设置在命令行的操作方式  默认是emacs
 type function  user_cmd builtin_cmd 
-unset
-    unset
-	unset f
-	
-$-  #可以从help set得知shell的当前选项
 ```
 
 ###  用户命令
@@ -136,14 +123,113 @@ stty -a                            # 查看发送信号的快捷键
 ```
 
 ## 变量
+###  set
 
 ```
-环境变量
-	set
-预定义变量
-    echo $$                   # 查看当前 shell 的进程号
-    echo $!                   # 查看最近调用的后台任务进程号
-    echo $?                   # 查看最近一条命令的返回码
+显示shell变量
+设置shell变量为新值, 不能定义新的变量
+使用+/-打开或关闭特定的模式
+```
+
+###  declare/typeset
+
+```
+declare [-aAfFgilnrtux] [-p] [name[=value] ...]
+	display/set variable values and attributes.
+	Options:
+      -f        restrict action or display to function names and definitions
+      -F        restrict display to function names only (plus line number and
+    				source file when debugging)
+      -g        create global variables when used in a shell function; otherwise ignored
+      -p        display the attributes and value of each NAME
+
+	属性attr   +设置变量的属性 -取消变量的属性
+	  -a        to make NAMEs indexed arrays (if supported)
+      -A        to make NAMEs associative arrays (if supported)
+      -i        to make NAMEs have the `integer' attribute
+      -l        to convert NAMEs to lower case on assignment
+      -n        make NAME a reference to the variable named by its value
+      -r        to make NAMEs readonly
+      -t        to make NAMEs have the `trace' attribute
+      -u        to convert NAMEs to upper case on assignment
+      -x        to make NAMEs export
+	查看
+		declare -a                # 查看所有数组
+    	declare -f                # 查看所有函数
+    	declare -F                # 查看所有函数，仅显示函数名
+    	declare -i                # 查看所有整数
+    	declare -r                # 查看所有只读变量
+    	declare -x                # 查看所有被导出成环境变量的东西
+    	declare -p varname        # 输出变量是怎么定义的（类型+值）
+	声明
+		declare var=value         #等价于1.var=value  2.typeset var=value
+		declare -x var1=value1 
+```
+
+###  env 唯一非buildin
+
+```
+显示环境变量
+在一新环境中设置变量
+	[OPTION]... [-] [NAME=VALUE]... [COMMAND [ARG]...]
+	Set each NAME to VALUE in the environment and run COMMAND.
+	-i, --ignore-environment   start with an empty environment
+	-u, --unset=NAME           remove variable from the environment
+```
+
+###  export
+
+```
+默认情况下,用户变量不会传递给子shell.export之后,就可以了
+-f：代表[变量名称]中为函数名称
+-n：删除指定的变量。变量实际上并未删除，只是不会输出到后续指令的执行环境中
+-p：列出所有的shell赋予程序的环境变量
+```
+
+###  readonly
+
+```
+定义
+-a	n=v	定义只读数组
+-f 	定义只读函数
+-p	查看只读变量或数组或函数
+```
+
+###  unset
+
+```
+取消变量的定义
+unset
+    unset
+	unset f
+```
+
+
+
+```
+3种变量
+shell变量set  
+	内部变量  
+		系统提供 不用定义  不能修改   如$0 $@ $# $? $$
+    环境变量env   
+        系统提供 不用定义  可以修改,可以导出为用户变量 如HOME PS1 PWD
+        用户变量 用户提供 用户定义  可以修改
+
+set    表示当前这个shell比如说bash而不是dash的环境变量,包括当前用户的环境变量 env | sort
+export 将bash变量导出为用户变量    export | sort
+env    表示当前用户的环境的变量     env | sort
+
+预定义变量                   
+    $#  #参数个数
+    $0  #第0个参数 即应用名
+    $@  #参数数组组成的字符串
+    $*  #参数数组
+    $?  # 查看最近一条命令的返回码
+    $-  # set选项 or those set by the shell itself (such as the -i option)
+        # 可以从help set得知shell的当前选项
+    $$  # 查看当前 shell 的进程号
+    $!  # 查看最近调用的后台任务进程号
+    $_  
 用户定义变量
 	local var=''   #在单引号里不能进行任何变量转义
 	local var="x ${var2} yy"   #在等号前不能有空格 左边不需要,右边引用变量需要 在双引号$变量可以转义
@@ -289,25 +375,13 @@ stty -a                            # 查看发送信号的快捷键
 ##  文件属性
 
 ```
--a file                   # 判断文件存在，如 [ -a /tmp/abc ] && echo "exists"
--d file                   # 判断文件存在，且该文件是一个目录
--e file                   # 判断文件存在，和 -a 等价
--f file                   # 判断文件存在，且该文件是一个普通文件（非目录等）
--r file                   # 判断文件存在，且可读
--s file                   # 判断文件存在，且尺寸大于0
--w file                   # 判断文件存在，且可写
--x file                   # 判断文件存在，且执行
--N file                   # 文件上次修改过后还没有读取过
--O file                   # 文件存在且属于当前用户
--G file                   # 文件存在且匹配你的用户组
-file1 -nt file2           # 文件1 比 文件2 新
-file1 -ot file2           # 文件1 比 文件2 旧
+help test
 ```
 
 ## 逻辑运算
 
 ```
-buildin关键字 true false
+buildin关键字 true(0) false(1)
 
 test {expression}         # 判断条件为真的话 test 程序返回0 否则非零
 [ expression ]            # 判断条件为真的话返回0 否则非零
@@ -322,15 +396,10 @@ exp1 -o exp2              # exp1 和 exp2 有一个为真就返回真（POSIX XS
 ##  流程控制
 
 ```
-if [condition]; then
-elif [condition]; then
-else
-fi
-
-for ;do done
-while [ condition ]; do done
-until [ condition ]; do done
-
+help if     if []; then xxx; [ elif []; then xxx; ]... [ else xxx; ] fi   
+help for    见数组
+help while  while []; do xxx; done
+help until  util  []; do xxx; done
 
 #命令行处理
 ##位置变量
@@ -492,8 +561,6 @@ answer_yes_or_no() {
 }
 
 https://www.cnblogs.com/yxzfscg/p/5338775.html
-
-
 ```
 
 ##  函数 
@@ -503,12 +570,12 @@ function myfunc() {
 	# $# 代表参数个数
 	# $0 代表被调用者自身的名字
     # $1 代表第一个参数，$N 代表第 N 个参数
+    # ${10} 代表第10个参数 当参数序数大于9时,需用{}表示截止
     # $* 空格链接起来的所有参数，类型是字符串 
     #	for i in "$*";do echo $i; done
     # $@ 代表所有参数，类型是个数组，想传递所有参数给其他命令用 cmd "$@" 
     #	for i in "$@";do echo $i; done
     {shell commands ...}
-    
     //readonly local
 }
 
@@ -560,6 +627,13 @@ n<&m                               # 文件描述符 n 被作为描述符 m 的�
 n>&-                               # 关闭作为输出的文件描述符 n
 n<&-                               # 关闭作为输入的文件描述符 n
 diff <(cmd1) <(cmd2)               # 比较两个命令的输出
+```
+
+##  组合命令
+
+```
+()
+{}
 ```
 
 ##  调试
@@ -620,37 +694,57 @@ set -o pipefail #the return value of a pipeline is the status of
 ```
 ##  经验
 
-```
-shellcheck $shell_name.sh
-
-#添加path
-if [[ ! "$PATH" == */root/.fzf/bin* ]]; then
-  export PATH="${PATH:+${PATH}:}/root/.fzf/bin"
-fi
-
-help() {
-cat << EOF
-usage: $0 [OPTIONS]
-    --help               Show this message
-EOF
-}
-
-引号""
-变量特别是路径变量需要使用双引号围住如"$path",否则如果path中含有空格则有可能前一部分赋值后一部分执行命令
-'"${variable}"'   尽管''中直接变量${v}不转义,但${v}先在""中
-" "${var}" is ok" 里面的双引号""竟然不用转义
-
-赋值
-va="$()"
-va=$()
-
-``替换为"$($cmd)" 且不用空格
-$(( $n + 1 ))    数值计算$((后需要空格
-
-在shell脚本中不能使用~代替用户根目录而应该使用$HOME 例如 mkdir "{HOME}"/ipfs, 而不能是mkdir ~/ipfs
-[ $environment_variable ] && echo "OK"  #判断环境变量是否设置 对于简单判断if-then-fi直接&&
-若写入到~/.bash_profile的环境变量未生效, 则在shell脚本中先source "${HOME}"/.bash_profile
-```
+> ```
+> shellcheck $shell_name.sh
+> 
+> ubuntu6.0默认是dash 比bash精简了很多指令 执行速度更快 也就少了一些功能的支持
+> 解决source命令没找到的方法
+> 方法1  代码头部添加#!/bin/bash 执行的时候使用source a.sh 或/bin/bash a.sh 或 ./a.sh
+>       绝对不能sh a.sh 因为sh使用默认值dash 优先级高于a.sh的提示行,会覆盖掉a.sh的提示行
+> 方法2  改变默认的shell为bash, sudo dpkg-reconfig bash
+> 
+> export OH=  等价于  export OH=""  等价于 javascript中的undefined
+> if [ $OH ]; then echo "1"; else echo "2"; fi
+> 
+> 对于设置set -e的shell来说
+> 情景1:
+> 	if [ `which ipfs2` ]; then echo "11"; else echo "22"; fi
+> 情景2  #崩了, 不能赋值, 更不用说再往下执行了
+> 	$badCmd
+> 	v=`$badCmd`  
+> 	$badCmd | $(some cmd has something to do with preCmd)
+> 情景4   #这条组合命令的返回值等于后一个命令的返回值
+> 	$badCmd || $(some cmd has nothing to do with preCmd) 
+> 
+> #添加path
+> if [[ ! "$PATH" == */root/.fzf/bin* ]]; then
+>   export PATH="${PATH:+${PATH}:}/root/.fzf/bin"
+> fi
+> 
+> help() {
+> cat << EOF
+> usage: $0 [OPTIONS]
+>     --help               Show this message
+> EOF
+> }
+> 
+> 引号""
+> 变量特别是路径变量需要使用双引号围住如"$path",否则如果path中含有空格则有可能前一部分赋值后一部分执行命令
+> '"${variable}"'   尽管''中直接变量${v}不转义,但${v}先在""中
+> " "${var}" is ok" 里面的双引号""竟然不用转义
+> 
+> 赋值
+> va="$()"
+> va=$()
+> 
+> ``替换为"$($cmd)" 且不用空格
+> $(( $n + 1 ))    数值计算$((后需要空格
+> 
+> 在shell脚本中不能使用~代替用户根目录而应该使用$HOME 例如 mkdir "{HOME}"/ipfs, 而不能是mkdir ~/ipfs
+> [ $environment_variable ] && echo "OK"  #判断环境变量是否设置 对于简单判断if-then-fi直接&&
+> 若写入到~/.bash_profile的环境变量未生效, 则在shell脚本中先source "${HOME}"/.bash_profile
+> ```
+>
 
 #  命令
 
@@ -1666,24 +1760,24 @@ systemctl [option][cmd]  cmd
 
 systemctl list-unit-files
 
-systemctl is-enabled $service  #查看服务是否开机启动
+systemctl is-enabled \$service  #查看服务是否开机启动
                                                      \#若返回static, 则表示不可以自己启动,只能被其他enable的unit唤醒
-systemctl enable       $service
-systemctl disable      $service
-systemctl mask	     $service   #注销
-systemctl unmask     $service   #取消注销
+systemctl enable       \$service
+systemctl disable      \$service
+systemctl mask	     \$service   #注销
+systemctl unmask     \$service   #取消注销
 
 ###  unit
 
 systemctl list-units [-t service]   \[-a\]        #-,--type 
 
-systemctl start/stop/restart/kill $service
-systemctl reload       $service
-systemctl status        $service  #active inactive 
+systemctl start/stop/restart/kill \$service
+systemctl reload       \$service
+systemctl status        \$service  #active inactive 
                                                      \#active(exited)只执行一次就退出 
                                                      \#active(waiting)等待比如打印    
-systemctl is-active  $service
-systemctl show       $service  #列出配置
+systemctl is-active  \$service
+systemctl show       \$service  #列出配置
 
 ```
 查看运行级别 who -r 或 runlevel
