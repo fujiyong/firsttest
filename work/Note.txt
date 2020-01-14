@@ -356,6 +356,318 @@ Goland正版授权
 812LFWMRSH-eyJsaWNlbnNlSWQiOiI4MTJMRldNUlNIIiwibGljZW5zZWVOYW1lIjoi5q2j54mIIOaOiOadgyIsImFzc2lnbmVlTmFtZSI6IiIsImFzc2lnbmVlRW1haWwiOiIiLCJsaWNlbnNlUmVzdHJpY3Rpb24iOiIiLCJjaGVja0NvbmN1cnJlbnRVc2UiOmZhbHNlLCJwcm9kdWN0cyI6W3siY29kZSI6IklJIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9LHsiY29kZSI6IkFDIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9LHsiY29kZSI6IkRQTiIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJQUyIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJHTyIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJETSIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJDTCIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJSUzAiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUkMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUkQiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUEMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUk0iLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiV1MiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiREIiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiREMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUlNVIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9XSwiaGFzaCI6IjEyNzk2ODc3LzAiLCJncmFjZVBlcmlvZERheXMiOjcsImF1dG9Qcm9sb25nYXRlZCI6ZmFsc2UsImlzQXV0b1Byb2xvbmdhdGVkIjpmYWxzZX0=-ti4tUsQISyJF/zfWxSHCr+IcYrX2w24JO5bUZCPIGKSi+IrgQ0RT2uum9n96o+Eob9Z1iQ9nUZ6FJdpEW5g0Exe6sw8fLrWMoLFhtCIvVgQxEEt+M7Z2xD0esmjP1kPKXZyc/i+NCxA2EO2Sec9uifqklBGP1L3xoENAw2QsIWBfttIe6EPWhbS8TIMMr2vF/S3HrN8To5Hj5lwD/t1GHgFK1uWrhsuifAiKcVzqogybzGiR1h2+yNYTMbKxP7uPCcdYMsIyrBNVRGA3IuEJgyGQTQlFbnVQoVUTGPW2tQxprmC464wMjKi40JHh27WzjOHPwgzxDaigwn4Z0EbSpA==-MIIElTCCAn2gAwIBAgIBCTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBMB4XDTE4MTEwMTEyMjk0NloXDTIwMTEwMjEyMjk0NlowaDELMAkGA1UEBhMCQ1oxDjAMBgNVBAgMBU51c2xlMQ8wDQYDVQQHDAZQcmFndWUxGTAXBgNVBAoMEEpldEJyYWlucyBzLnIuby4xHTAbBgNVBAMMFHByb2QzeS1mcm9tLTIwMTgxMTAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxcQkq+zdxlR2mmRYBPzGbUNdMN6OaXiXzxIWtMEkrJMO/5oUfQJbLLuMSMK0QHFmaI37WShyxZcfRCidwXjot4zmNBKnlyHodDij/78TmVqFl8nOeD5+07B8VEaIu7c3E1N+e1doC6wht4I4+IEmtsPAdoaj5WCQVQbrI8KeT8M9VcBIWX7fD0fhexfg3ZRt0xqwMcXGNp3DdJHiO0rCdU+Itv7EmtnSVq9jBG1usMSFvMowR25mju2JcPFp1+I4ZI+FqgR8gyG8oiNDyNEoAbsR3lOpI7grUYSvkB/xVy/VoklPCK2h0f0GJxFjnye8NT1PAywoyl7RmiAVRE/EKwIDAQABo4GZMIGWMAkGA1UdEwQCMAAwHQYDVR0OBBYEFGEpG9oZGcfLMGNBkY7SgHiMGgTcMEgGA1UdIwRBMD+AFKOetkhnQhI2Qb1t4Lm0oFKLl/GzoRykGjAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBggkA0myxg7KDeeEwEwYDVR0lBAwwCgYIKwYBBQUHAwEwCwYDVR0PBAQDAgWgMA0GCSqGSIb3DQEBCwUAA4ICAQAF8uc+YJOHHwOFcPzmbjcxNDuGoOUIP+2h1R75Lecswb7ru2LWWSUMtXVKQzChLNPn/72W0k+oI056tgiwuG7M49LXp4zQVlQnFmWU1wwGvVhq5R63Rpjx1zjGUhcXgayu7+9zMUW596Lbomsg8qVve6euqsrFicYkIIuUu4zYPndJwfe0YkS5nY72SHnNdbPhEnN8wcB2Kz+OIG0lih3yz5EqFhld03bGp222ZQCIghCTVL6QBNadGsiN/lWLl4JdR3lJkZzlpFdiHijoVRdWeSWqM4y0t23c92HXKrgppoSV18XMxrWVdoSM3nuMHwxGhFyde05OdDtLpCv+jlWf5REAHHA201pAU6bJSZINyHDUTB+Beo28rRXSwSh3OUIvYwKNVeoBY+KwOJ7WnuTCUq1meE6GkKc4D/cXmgpOyW/1SmBz3XjVIi/zprZ0zf3qH5mkphtg6ksjKgKjmx1cXfZAAX6wcDBNaCL+Ortep1Dh8xDUbqbBVNBL4jbiL3i3xsfNiyJgaZ5sX7i8tmStEpLbPwvHcByuf59qJhV/bZOl8KqJBETCDJcY6O2aqhTUy+9x93ThKs1GKrRPePrWPluud7ttlgtRveit/pcBrnQcXOl1rHq7ByB8CFAxNotRUYL9IF5n3wJOgkPojMy6jetQA5Ogc8Sm7RG6vg1yow==
 
 
+/root/anaconda-ks.cfg
+initial-setup-ks.cfg
+original-ks.cfg        [anəˈkändə]  水蟒  kickstart 启动
+
+
+查看文件系统类型
+    cat /etc/fstab
+
+    lsblk -f               #显示块设备
+    blkid /dev/sda3        #打印查找块设备属性
+    
+    df -T -h               #只显示已挂载的,不显示未挂载的
+    file -sL /dev/sda3    #标识文件类型 -s标志启用读取块或字符文件， -L启用以下符号链接
+
+    parted && print list   #parted分区软件
+    fsck -N /dev/sdb1      #打印和检查fs
+    mount  | grep ^/dev
+
+resize2fs更改文件系统的大小
+
+
+ag advanced grep
+fzf  
+mycli             #mysql彩色客户端
+shellchekc  a.sh  #检查shell语法
+
+axel -n 20 $addr    多线程下载
+lynx  --dump http://www.baidu.com  终端浏览器
+tig git https://www.jianshu.com/p/e4ca3030a9d5
+multitail
+script/scriptreplay  终端会话录制并回放
+top htop glances
+
+zeal  dash
+everything listary
+Mockoon
+chocolatey homebrew  
+
+
+https://blog.csdn.net/u010625000/article/details/44455023
+
+
+ag
+    安装
+        apt search silver
+        apt search silver | grep search
+        apt insall silversearcher-ag
+
+
+fzf  fuzzy find 模糊查询 媲美vim的CtrlP插件
+    安装
+        apt install fzf 
+
+        git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+        cd ~/.fzf && git pull && ./install
+
+    使用
+        keybinding bash zsh fish
+            Ctrl-T  查找粘贴目录下的文件名或目录名到命令行
+                vi Ctrl-T
+                cd Ctrl-T
+            Ctrl-R  查找粘贴选中的历史命令到命令行
+                Ctrl-R  再按一次则在时间和相关性之间排序历史命令
+            Ctrl-c  切换目录 == cd  + Ctrl-T
+        autocomplete bash zsh
+            kill -9/15 <tab>  然后tab或shift-Table选中
+
+            vi $path/**<Tab>   vim $(fzf)
+            cd $path/**<Tab>   cd $(find * -type d | fzf) 
+
+            ssh **<tab>
+            telnet **<tab>
+
+            unset **<TAB>
+            export **<TAB>
+            unalias **<TAB>
+
+        git分支
+	        git checkout $(git branch -r | fzf)
+
+        预览窗口  fzf --preview 'cat {}'
+
+    快捷键 在输出交换窗口
+        键盘 Ctrl-j/k/n/p   单选模式Enter选中     多选模式-m下Tab和shift-Table选中
+        鼠标 滚轮滚动        单选模式双击选中      多选模式-m下Shift-Click或shift-scroll多选
+
+
+
+
+
+
+
+
+
+apt install alien #可以在rpm dpkg deb之间转换
+alien *.rpm
+alien -r *.deb
+
+*.rpm
+*.src.rpm  包含未编译的原始代码,所以可以修改编译参数经过编译后才可以安装
+            rpmbuild --rebuild    *.rpm   #build binary package from <source package>
+            rpmbuild --recompile  *.rpm   #build through %install (%prep, %build, then install) from <source package> 
+
+rpm格式
+    Lead    公共
+    signature
+    header  软件包信息
+    archive 文件列表
+
+rpm -qil rpmdevtools
+
+rpmdev-setuptree                        #与rpmdev-wipetree刚好相反
+rpmdev-newspec -type python -o a.spec   #rpmdev-newspec --help 模板来自于/etc/rpmdevtools/spectemplate-*.spec 
+rpmlint a.spec  &&  rpmlint -i a.spec   #检查spec语法错误    rpmbuild -E '%{_bindir}' tos.spec
+rpmdev-newinit                 a.init   #制作服务控制脚本
+
+目录结构
+    SOURCES  *.tar.gz
+    SPECS    *.spec
+
+    BUILD               #config make
+    BUILDROOT           #make install 产生x86_64
+
+    RPMS    *.rpm       #将BUILDROOT打包
+    SRPMS   *.src.rpm   #将BUILDROOT打包
+
+rpmbuild
+    常用选项
+        --dbpath  ""             #默认值/var/lib/rpm
+        --root    ""             #根目录
+
+    编译前
+        --nobuild                 #检出spec语法
+
+    编译选项
+        -bp %prep                 #解压缩并patch
+        -bc       %build          #make
+        -bi              %install #install 
+
+        -bb                       #install之后只生成rpm          build binary package only from <specfile>        rpm
+        -bs                       #           只生成src.rpm   
+        -ba                       #                             build source and binary packages from <specfile> rpm src.rpm
+
+        --buildroot ""
+        --target i386 | i686 | x86_64
+        --rmsource                #在build之后删除src.rpm 
+        --rmspec                  #在build之后删除spec文件
+
+    编译后
+        --clean                  #删除build时的目录 BUILD/wget-1.14
+
+
+spec
+    定义变量  %define varname "xxx"
+    引用变量  %{var}
+    执行脚本  %( echo %{var} | sed 's///g' )
+
+
+    comments
+    tags 变量定义
+        包命名
+            Name               不能含空格
+            Version            不能含-
+            Release
+        描述  rpm -qpi *.rpm
+            %description:      若以空格开始则逐字显示; 若不是以空格开始则对其段落划分 在变量定义中唯一个以%开头的变量
+            Summary:  只能一行
+            CopyRight: GPL 
+            Lisence:  GPLv2 with exceptions
+            Distribution:    软件集合
+            Icon:            软件图标
+            Vendor:          组织机构
+            URL: 
+            Group:
+            Packager:    发包人的联系方式或公共的邮件列表
+        依赖 rpm -qpi  --requires
+            Provides     该包提供什么资源  既可以是一个真实存在的包,也可以只是一个虚拟的东西(仅仅是一个字符串)
+            Requires     该包依赖哪些包 不支持不等于
+                         = 1.2-2  >= > = <= < 
+            conficts     该包与哪些包冲突
+            serial       version之外的另外一种版本比较变量
+            autoreqprov  自动生成软件依赖的标志位autorequire/autoprovide 取值为yes或者no,也可用0或1表示 默认值为yes或1 一般不用操作
+        平台操作系统
+            ExcludeArch: sparc alpha   不能在某CPU平台
+            ExclusiveArch: aparc alpha 只能在某CPU平台
+            ExcludeOS:  linux irix     不能在某OS
+            ExclusiveOS: linux irix    只能在某OS
+        目录
+            prefix:  /opt  %files中声明为/opt/xx 在命令行的--prefix的优先级最高
+            BuildRoot:  %{_topdir}/%{name}-%{version}-root 
+        源码补丁
+            Source:    源代码名称和存储位置
+                Source:      #Source与Source0效果相同
+                Source1:
+                SourceN:
+            NoSource:  从源代码中忽略一个或多个文件
+            Patch:     标识源码的一个补丁文件
+                Patch0:
+                PatchN:
+            NoPatch:   忽略一个或多个补丁
+    script
+        编译时
+            %prep   为编译代码准备 1创建顶级目录 2解压源码到build目录 3如果有补丁的话打补丁
+
+            %build
+            %ifarch cond1 cond2
+                ./configure --with-ss=openssl
+            %ifnarch cond1 cond2
+            %ifos os1 os2 
+            %ifnos os1 os2
+                make RPM_OPT_FLAGS="$RPM_OPT_FLAGS -I . "
+            %else
+            %endif  
+
+            %install 
+            make install prefix=$RPM_BUILD_ROOT/usr 
+            mkdir -p $RPM_BUILD_ROOT/usr/foo 
+            install binname $RPM_BUILD_ROOT/usr/foo/bin
+
+            %clean 
+            [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+        安装/卸载时
+            %pre     第一个参数为1说明是初次安装,为2时是版本升级  hook默认使用bash来执行,但也可使用参数-p自定义
+                %pre -p /usr/bin/perl 
+                if ( $ARGV[0] == 1 ) {
+                    print "preparing for init install\n"
+                }
+                elsif ( $ARGV[0] == 2 ) {
+                    print "prepare to upgrade software\n"
+                }
+            %post    第一个参数为1说明是初次安装,为2时是版本升级
+            %preun   第一个参数为0说明是卸载,为1时是版本升级
+            %postun  第一个参数为0说明是卸载,为1时是版本升级
+
+            升级流程
+                执行新版本的%pre 
+                安装新版的文件列表
+                执行新版本的%post
+
+                检查所有其他rpm包的triggerin触发器,如果有被N的安装触发,就执行相应脚本
+                执行N的所有triggerin触发器
+                执行N的所有triggerun触发器
+
+                检查所有其他rpm包的triggerin触发器,如果有被N的卸载触发的,就执行相应的脚本
+
+                执行老版本的%preun
+                自动删除老版本中没有被新版本覆盖的文件
+                执行老版本的%postun
+        校验时          用rpm命令校验已安装的rpm时执行 rpm -qpVv *.rpm
+            %verifyscipt  因为rpm默认会校验文件列表,所以不用去校验,因此这儿可以做点自己想做的 默认不会执行%verifyscipt,除非使用verbose模式进行校验
+            echo "verify aaa" 
+        触发器Trigger   被一定的条件(如其他rpm安装或卸载)触发执行
+            B%triggerin A包安装时,如果B包已经安装,则触发该触发器
+            B%triggerun A包安装时,如果B包已经卸载,则触发该触发器
+            B%triggerpostun A包安装时,如果B包被卸载,则卸载完成后触发该触发器
+
+            eg:
+                %triggerin -p /usr/bin/perl -- ruby   #通过--符号指定被监控的包
+                # print "ruby already installed"
+    Macro 宏
+        %setup      解压缩源码  多数情况下不用任何选项
+            -n $name 设置编译目录名默认是name-version
+            -c $build_dir_name  创建build目录并进入该目录
+        %patch      给解压后的源码打补丁
+    files 文件列表指令Directives 设置与检查文件/目录/软件包的属性 rpm -qf /etc/x.conf
+        文件相关
+            %doc    用来标识一个文件是文档 安装后会被rpm数据库记录 默认安装目录是/usr/doc 可以通过修改rpmrc中的defaultdocdir变量的值来修改
+            %config 用来标识一个文件是配置文件 设置了noplace属性后 rpm在升级时就不会被覆盖 在卸载时会被保存为x.save  rpm -qp *.rpm --configfiles
+                %config(noreplace) /etc/x.conf
+            %attr   用来修改文件属性(默认权限 属主 属组)指令
+                %attr (755, root, root) foo.bar
+            %verify 校验指令
+        目录相关
+            %docdir /absolute-dir-path  用于指定配置文件目录
+            %dir    /absolute-dir-path  用于只将目录打包  默认将目录下的文件及文件夹打包
+
+        %package -n $new_sub_package_name 定义子包名,默认命名是"基础包-子包"格式
+
+
+
+全局配置      /etc/yum.conf                设置如何管理源repo
+源配置文件    /etc/yum.repos.d/*.repo      源的配置文件
+本地rpm数据库 /var/lib/rpm/_db.*           存储系统已安装了哪些rpm   /var/lib/yum
+本地缓存      /var/cache/yum/*             存储索引文件和rpm文件
+插件          /usr/lib/yum-plugins/fastestmirror.py       fastestmirror对每个mirror进行测速,然后根据连接速度排序站点速度,选择下载速度最快的站点下载
+插件配置文件   /etc/yum/pluginconf.d/fastestmirror.conf
+日志          /var/log/yum.log 
+
+
+rpmbuild -ba main.spec 
+yum install *.rpm 
+rpm -ql main 
+rpm -qi main 
+
+
+cd BUILD
+tar -zxvf $Source.tar.gz      #$Source来自*.spec中的Source
+%build                        #执行spec中的%build
+rm -rf   $Name-$Version &&    #Name和Version来自*.spec 
+mkdir -p $Name-$Version 
+%install                      #执行spec中的%install
+打包
+
+
+索引读写分离
+缓存
+镜像
+智能DNS和多机房容灾
+
+
+
+
 /dev   这个是真正的外部数据，系统会自动将cdrom安装到/dev
 /mnt   用户手动或系统自动挂载/dev到/mnt目录    固定存储        以前
 /media 用户手动或系统自动挂载/dev到/media目录  移动存储 如USB  后来   有桌面图标
