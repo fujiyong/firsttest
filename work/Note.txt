@@ -21,6 +21,9 @@ ipfs3	192.168.1.120	22	root	13622228504
 
 git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
 
+zsh操作指南
+http://www.skywind.me/blog/archives/2060
+
 
 
 alias | grep -E "b\."
@@ -512,6 +515,9 @@ spec
     定义变量  %define varname "xxx"
     引用变量  %{var}
     执行脚本  %( echo %{var} | sed 's///g' )
+    定义宏    %global date 2012-02-08
+
+    各种宏   cat /usr/lib/rpm/macros
 
 
     comments
@@ -560,7 +566,7 @@ spec
         编译时
             %prep   为编译代码准备 1创建顶级目录 2解压源码到build目录 3如果有补丁的话打补丁
 
-            %build
+            %build   #####最多进行到configure && make 绝对不可能make install
             %ifarch cond1 cond2
                 ./configure --with-ss=openssl
             %ifnarch cond1 cond2
@@ -570,14 +576,17 @@ spec
             %else
             %endif  
 
-            %install 
-            make install prefix=$RPM_BUILD_ROOT/usr 
-            mkdir -p $RPM_BUILD_ROOT/usr/foo 
-            install binname $RPM_BUILD_ROOT/usr/foo/bin
+            %install  ####这儿才可以make install
+            if [-d %{buildroot}]; then
+                rm -rf %{buildroot}                              ← 清空下安装目录，实际会自动清除
+            fi
+            %{__install} -Dp -m0755 contrib/init.d %{buildroot}%{_initrddir}/foobar          
+            make install prefix=$RPM_BUILD_ROOT/usr
+            %{__install} -d %{buildroot}%{_sysconfdir}/foobar.d/   #对make install的目录结构进行修正,务必修正好 这样在%files可以直接打包
 
             %clean 
             [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-        安装/卸载时
+        安装到文件系统前/从文件系统卸载时
             %pre     第一个参数为1说明是初次安装,为2时是版本升级  hook默认使用bash来执行,但也可使用参数-p自定义
                 %pre -p /usr/bin/perl 
                 if ( $ARGV[0] == 1 ) {
@@ -586,7 +595,9 @@ spec
                 elsif ( $ARGV[0] == 2 ) {
                     print "prepare to upgrade software\n"
                 }
+                添加group/user
             %post    第一个参数为1说明是初次安装,为2时是版本升级
+                systemctl reload nginx.service
             %preun   第一个参数为0说明是卸载,为1时是版本升级
             %postun  第一个参数为0说明是卸载,为1时是版本升级
 
@@ -634,6 +645,14 @@ spec
 
         %package -n $new_sub_package_name 定义子包名,默认命名是"基础包-子包"格式
 
+        eg
+            %files                   ######## 对%install中的目录进行摘选
+            %defattr (-,root,root,0755)                         ← 设定默认权限
+            %attr(755, root, root) %{_sbindir}/mysqld
+            %config(noreplace) /etc/my.cnf                      ← 表明是配置文件，noplace表示替换文件
+            %attr(644, root, root) %{_mandir}/man8/mysqld.8*    ← 分别是权限，属主，属组
+            %doc %{src_dir}/Docs/ChangeLog                      ← 表明这个是文档
+
 
 
 全局配置      /etc/yum.conf                设置如何管理源repo
@@ -671,6 +690,7 @@ mkdir -p $Name-$Version
 /dev   这个是真正的外部数据，系统会自动将cdrom安装到/dev
 /mnt   用户手动或系统自动挂载/dev到/mnt目录    固定存储        以前
 /media 用户手动或系统自动挂载/dev到/media目录  移动存储 如USB  后来   有桌面图标
+
 
 
 

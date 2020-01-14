@@ -104,6 +104,7 @@ type function  user_cmd builtin_cmd
 ```
 man bash                           # 查看命令行的快捷方式
 man hier                           # 查看文件系统的结构和含义
+man man                            # 查看帮助各部分的含义
 man test                           # 查看 posix sh 的条件判断帮助
 getconf LONG_BIT                   # 查看系统是 32 位还是 64 位
 kill -l                            # 查看有哪些信号
@@ -414,6 +415,8 @@ for opt in "$@"; do
       ;;
     --xdg)
       ;;
+    [1yY]*)
+      ;;
     *)
       echo "unknown option: $opt"
       help
@@ -700,7 +703,7 @@ set -o pipefail #the return value of a pipeline is the status of
 > ubuntu6.0默认是dash 比bash精简了很多指令 执行速度更快 也就少了一些功能的支持
 > 解决source命令没找到的方法
 > 方法1  代码头部添加#!/bin/bash 执行的时候使用source a.sh 或/bin/bash a.sh 或 ./a.sh
->       绝对不能sh a.sh 因为sh使用默认值dash 优先级高于a.sh的提示行,会覆盖掉a.sh的提示行
+>    绝对不能sh a.sh 因为sh使用默认值dash 优先级高于a.sh的提示行,会覆盖掉a.sh的提示行
 > 方法2  改变默认的shell为bash, sudo dpkg-reconfig bash
 > 
 > export OH=  等价于  export OH=""  等价于 javascript中的undefined
@@ -715,16 +718,17 @@ set -o pipefail #the return value of a pipeline is the status of
 > 	$badCmd | $(some cmd has something to do with preCmd)
 > 情景4   #这条组合命令的返回值等于后一个命令的返回值
 > 	$badCmd || $(some cmd has nothing to do with preCmd) 
+> 	$badCmd || :
 > 
 > #添加path
 > if [[ ! "$PATH" == */root/.fzf/bin* ]]; then
->   export PATH="${PATH:+${PATH}:}/root/.fzf/bin"
+> 	export PATH="${PATH:+${PATH}:}/root/.fzf/bin"
 > fi
 > 
 > help() {
 > cat << EOF
 > usage: $0 [OPTIONS]
->     --help               Show this message
+>  --help               Show this message
 > EOF
 > }
 > 
@@ -1655,25 +1659,33 @@ ufw        deny   from $ip
 ufw        deny   from $ip/24   #子网掩码方式
 ```
 
-#  services/units
-|                    | SysVInit                                     | systemd                              |
-| ------------------ | -------------------------------------------- | ------------------------------------ |
-| pid==1的进程名     | init                                         | systemd                              |
-| 查看默认运行级别   | 1.runlevel   2.who -r 3.cat /etc/inittab     | /systemd/system/default.target       |
-| 编写脚本目录       | cat /etc/init.d/redis.service                | /lib/systemd/system/redis.service    |
-| 设置运行级别       | 见PS 1                                       | 见PS 2                               |
-| 重新载入使脚本生效 |                                              | systemctl daemon-reload              |
-| 查看安装了哪些服务 | chkconfig --list                             | systemctl list-unit-files            |
-| 设置开机启动       | chkconfig --add/--del  $service  on/off      | systemctrl enable/disable $service   |
-| 查看是否开机启动   | chkconfig --list  $service                   | systemctl is-enabled $service        |
-| 查看哪些服务在运行 | service --status-all \| grep                 | systemctl list-unit -t service -a    |
-| 直接从脚本执行     | /etc/init.d/redis.service start/stop/restart |                                      |
-| 启动/停止/重启     | service $service start/stop/restart          | systemctl start/stop/restart $servic |
+#  units资源/services
+
+systemd-analyze 系统启动耗时
+
+systemd-analyze blame每个服务的启动耗时
+
+|                    | SysVInit                                     | systemd                                                     |
+| ------------------ | -------------------------------------------- | ----------------------------------------------------------- |
+| pid==1的进程名     | initd                                        | systemd                                                     |
+| 查看默认运行级别   | 1.runlevel   2.who -r 3.cat /etc/inittab     | /systemd/system/default.target                              |
+| 编写脚本目录       | cat /etc/init.d/redis.service                | /lib/systemd/system/redis.service                           |
+| 脚本快捷方式       | cat /etc/rc5.d/*                             | /etc/systemd/system/mult-*                                  |
+| 设置运行级别       | 见PS 1                                       | 见PS 2                                                      |
+| 重新载入使脚本生效 |                                              | systemctl daemon-reload  && systemctl restart redis.service |
+| 查看安装了哪些服务 | chkconfig --list                             | systemctl list-unit-files                                   |
+| 设置开机启动       | chkconfig --add/--del  $service  on/off      | systemctl enable/disable $service                           |
+| 查看是否开机启动   | chkconfig --list  $service                   | systemctl is-enabled $service                               |
+| 查看哪些服务在运行 | service --status-all \| grep                 | systemctl list-unit -t service -a                           |
+| 直接从脚本执行     | /etc/init.d/redis.service start/stop/restart |                                                             |
+| 启动/停止/重启     | service $service start/stop/restart          | systemctl start/stop/restart $service                       |
 PS:
 
-​	1. ln -s /etc/init.d/$servived /etc/rc.d/rc3.d/S100$service
+​	1. ln -s /etc/init.d/\$servived /etc/rc.d/rc3.d/S100$service
 
-​	2.  ln -s /lib/systemd/system/redis.service /etc/systemd/system/multi-user.target.wants/redis.service 
+ 2. ln -s /lib/systemd/system/redis.service /etc/systemd/system/multi-user.target.wants/redis.service
+
+    systemctl enable/disable 的区别就是在两者之间建立链接 
 
 ##  SysVInit
 
@@ -1746,8 +1758,8 @@ systemctl [option][cmd]  cmd
              list-sockets 
              list-timers
              list-dependencies [unit] [--reverse]  #--reverse 会反向追踪是谁在使用这个unit
-             **start/stop/reload/restart/kill/status/is-active/show  $unit**                            #service start/stop
-       	 \#Unit File Commands
+             **start/stop/reload/restart/kill/status/is-active/is-failed/show  $unit** #service start/stop/status
+   \#Unit File Commands
         	**list-unit-files**              #根据/lib/systemd/system/目录内的文件列出所有的unit  chkconfig --list
         	**enable/disable/is-enabled/mask/unmask  $unit**                                              #chkconfig --add/--del
         	get-default #系统的默认运行级别在/etc/systemd/system/default.target文件中指定
@@ -1758,14 +1770,26 @@ systemctl [option][cmd]  cmd
 
 ### unit-file
 
-systemctl list-unit-files
+systemctl list-unit-files 返回4中状态
+
+​		enabled  已建立链接
+
+​		disabled  没有建立链接
+
+​		static       该服务的配置文件没有install部分,无法执行,只能作为其他配置文件的依赖
+
+​         masked  该服务的配置文件禁止建立链接
 
 systemctl is-enabled \$service  #查看服务是否开机启动
                                                      \#若返回static, 则表示不可以自己启动,只能被其他enable的unit唤醒
-systemctl enable       \$service
-systemctl disable      \$service
+systemctl enable       \$service  #建立链接
+systemctl disable      \$service   #
 systemctl mask	     \$service   #注销
 systemctl unmask     \$service   #取消注销
+
+systemctl cat nginx.service  #快速查看unit的配置文件  man systemctl 最后 systemd.unit(5)  
+
+​                                                  \# 查看unit配置文件格式  man 5 systemd.unit
 
 ###  unit
 
@@ -1777,6 +1801,9 @@ systemctl status        \$service  #active inactive
                                                      \#active(exited)只执行一次就退出 
                                                      \#active(waiting)等待比如打印    
 systemctl is-active  \$service
+
+systemctl is-failed  \$service
+
 systemctl show       \$service  #列出配置
 
 ```
@@ -2308,6 +2335,9 @@ ip -f inet address show  | grep -A 1 -E "[[:digit:]]+\: eth0:" | tail -1 | awk -
 ```
 curl -o curl.output -v http://xx.html
 	-POST
+	
+curl -fsSL http://www.baidu.com
+wget -qO-  http://www.baidu.com
 ```
 
 ##  scp/rsync
@@ -2716,6 +2746,7 @@ uname -a
 lsb_release -a     #yum search lsb而不是yum search lsb_release
     查看版本CentOS Redhat Ubuntu
 hostname
+hostnamectl
 ```
 
 ##  系统启动
