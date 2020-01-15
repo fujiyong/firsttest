@@ -45,8 +45,8 @@ bb
 EOF
 
 命令自动完成
-    compgen 
-        -c #有哪些可用命令complete
+    compgen --help
+        -c #有哪些可用命令complete    compgen -c | sort > comp.txt
         -b #所有bash内置命令
         -k #所有bash关键字
         -A #所有函数
@@ -64,6 +64,12 @@ man bash | col -bx > bash.txt
 ```
 
 # bash
+
+所有命令
+
+comgen --help
+
+
 
 ##  命令
 
@@ -1739,6 +1745,8 @@ service --status-all            #运行状态[+] 表示正在运行   [-]停止�
 
 ##  systemd
 
+https://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-part-two.html
+
 systemctl [option][cmd]  cmd
   option
         -t,--type=TYPE：          #可以过滤某个类型的 unit
@@ -2482,6 +2490,17 @@ dumpe2fs /dev/hda1   #dump ext2 file sysem 查看superblock信息和每个blockg
 目的
 	读写效率  分区写
 	安全     镜像
+RAID
+RAID0	
+	2块磁盘  strip模式
+	优点:  效率最高
+	缺点:  不安全
+RAID1 
+	2块磁盘  mirror模式
+	优点:  安全
+	缺点:  效率低 容量以小的为准且容量减半
+RAID 1+0 4块磁盘  先RAID1再RAID0
+RAID 0+1 4块磁盘  先RAID0在RAID1
 ```
 
 ##  lvm
