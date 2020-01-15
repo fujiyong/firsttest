@@ -1911,7 +1911,7 @@ systemctl set-default TARGET.target
 
 - -qd   $pkgName  #document 列出该软件所有的帮助文档（List only documentation files） 
 
-- **-qf**    $filename   #file 根据文件名查询属于哪个已安装的包 List file in package
+- **-qf**    $full-path-filename   #file 根据文件名查询属于哪个已安装的包 List file in package
 
   ​				\# yum whatprovidesd \`which sshd`
 
@@ -2995,9 +2995,30 @@ docker exec  "$cmd"
 
 # FAQ
 
-## ls无色 vi无色 vim才有色 echo有色
+##  src.rpm dev  rpm区别
 
 ```
+源码包src.rpm             rpm2cpio $pkgName.src.rpm | cpio -div 解压为一个tar.gz
+开发包dev       .h和lib   readline-devel.x86_64
+运行包rpm       lib和exe  readline.x86_64
+
+yum search readline
+rpm -ql readline-devel.x86_64  #Files needed to develop programs 
+							   #which use the readline library
+rpm -ql readline.x86_64	       #A library for editing typed command lines
+
+yum search libstdc++  && yum install -y libstdc++-docs && man std::string
+
+命令行中vi和emacs的快捷键
+yum search readline  && yum install readline-devel.x86_64 && man readline
+```
+
+## 登录无色 ls无色 vi无色 vim才有色 echo有色
+
+```
+ubuntu有时候shell登录无色,那是因为.bashrc中的颜色未生效
+解决方法就是在~/.bash_profile添加代码 [ -f ~/.bashrc ] && source ~/.bashrc
+
 alias ls='ls --color=auto '
 alias grep='grep --color=auto '
 alias egrep='egrep --color=auto '
