@@ -86,6 +86,14 @@ export PS1="[\u@\h \W $(getGitBranchFuncName) ]$\n$" #man bash 搜索PS1,根据�
 ~/.bashrc                                    #executed by bash(1) for non-login shells
 /etc/bashrc                   # System-wide .bashrc file for interactive bash(1) shells.
 ~/.bash_logout
+
+交互式shell:    命令行式
+非交互式shell   执行脚本式
+
+登录shell       需要用户名密码登录或--login登录
+			   执行logout/exit退出shell
+非登录shell     不需要用户名密码登录或--login登录  如在命令行执行bash命令 在KDE或GNODE打开Terminal
+               执行exit退出shell
 ```
 
 ###  内置命令
@@ -233,7 +241,12 @@ env    表示当前用户的环境的变量     env | sort
     $*  #参数数组
     $?  # 查看最近一条命令的返回码
     $-  # set选项 or those set by the shell itself (such as the -i option)
+        ########### /bin/bash -o更容易看出
         # 可以从help set得知shell的当前选项
+        #	echo $-  返回himBH
+      # Hexpand history 就是可以使用!!/!n来操作~/.bash_history 但前提命令行字符串中无!符号,否则''
+      # m monitor job  就是C-z 和 fg这些 
+      # B brace expand 就是mkdir -p ./{a,b}
     $$  # 查看当前 shell 的进程号
     $!  # 查看最近调用的后台任务进程号
     $_  
@@ -1671,20 +1684,20 @@ systemd-analyze 系统启动耗时
 
 systemd-analyze blame每个服务的启动耗时
 
-|                    | SysVInit                                     | systemd                                                     |
-| ------------------ | -------------------------------------------- | ----------------------------------------------------------- |
-| pid==1的进程名     | initd                                        | systemd                                                     |
-| 查看默认运行级别   | 1.runlevel   2.who -r 3.cat /etc/inittab     | /systemd/system/default.target                              |
-| 编写脚本目录       | cat /etc/init.d/redis.service                | /lib/systemd/system/redis.service                           |
-| 脚本快捷方式       | cat /etc/rc5.d/*                             | /etc/systemd/system/mult-*                                  |
-| 设置运行级别       | 见PS 1                                       | 见PS 2                                                      |
-| 重新载入使脚本生效 |                                              | systemctl daemon-reload  && systemctl restart redis.service |
-| 查看安装了哪些服务 | chkconfig --list                             | systemctl list-unit-files                                   |
-| 设置开机启动       | chkconfig --add/--del  $service  on/off      | systemctl enable/disable $service                           |
-| 查看是否开机启动   | chkconfig --list  $service                   | systemctl is-enabled $service                               |
-| 查看哪些服务在运行 | service --status-all \| grep                 | systemctl list-unit -t service -a                           |
-| 直接从脚本执行     | /etc/init.d/redis.service start/stop/restart |                                                             |
-| 启动/停止/重启     | service $service start/stop/restart          | systemctl start/stop/restart $service                       |
+|                                  | SysVInit                                                     | systemd                                                      |
+| -------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| pid==1的进程名                   | initd                                                        | systemd                                                      |
+| 查看默认运行级别                 | 1.runlevel   2.who -r 3.cat /etc/inittab                     | /systemd/system/default.target systemctl get-default         |
+| 编写脚本目录                     | cat /etc/init.d/redis.service                                | /lib/systemd/system/redis.service                            |
+| 脚本快捷方式                     | cat /etc/rc5.d/*                                             | /etc/systemd/system/mult-*                                   |
+| 设置运行级别                     | 见PS 1                                                       | 见PS 2                                                       |
+| 重新载入使脚本生效               |                                                              | systemctl daemon-reload  && systemctl restart redis.service  |
+| 查看安装了哪些服务并开机启动     | chkconfig --list                                             | systemctl list-unit-files                                    |
+| 设置开机启动                     | chkconfig [--add/--del]  $service  on/off                    | systemctl enable/disable $service                            |
+| 查看是否开机启动                 | chkconfig --list  $service                                   | systemctl is-enabled/status $service                         |
+| 查看哪些服务在运行               | service --status-all \| grep                                 | systemctl list-unit -t service -a                            |
+| 直接从脚本执行                   | /etc/init.d/redis.service start/stop/restart                 |                                                              |
+| 启动/停止/重启/在运行才重启/状态 | service $service start/stop/restart/condrestart/reload/status | systemctl start/stop/restart/try-restart /reload/status $service |
 PS:
 
 ​	1. ln -s /etc/init.d/\$servived /etc/rc.d/rc3.d/S100$service
@@ -1749,7 +1762,7 @@ https://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-part-two.html
 
 systemctl [option][cmd]  cmd
   option
-        -t,--type=TYPE：          #可以过滤某个类型的 unit
+        -t,--type=TYPE：          #可以过滤某个类型的 unit    查看所有类型systemctl -t help
             automount
             freedesktop
             mount
@@ -1812,7 +1825,7 @@ systemctl is-active  \$service
 
 systemctl is-failed  \$service
 
-systemctl show       \$service  #列出配置
+systemctl show       \$service  #列出配置     systemctl -p MainPID show ssh.service
 
 ```
 查看运行级别 who -r 或 runlevel
@@ -2121,7 +2134,7 @@ apt-get
 	-u                          #显示软件更新列表
 	-y                          #对所有的询问选择是
 
-apt-get -d                   package   仅下载不安装
+apt-get -d                   package   仅下载不安装  --download-only
 
 apt-get install              package=version  安装包
 apt-get install -f           package  强制安装
@@ -2164,6 +2177,7 @@ apt-get check                         检查是否有损坏的依赖
 |  | rpm  -qR   $pkgName |  |
 |  | yum deplist openssh-server | apt depends openssh-server |
 | 反查pkg的依赖 | yum provides rssh | apt rdepends rssh |
+|查询change log|rpm -q $pkgName --history|apt changelog openssh-server|
 
 #  Tool
 
@@ -2475,6 +2489,11 @@ df  /   #重点找到磁盘名而已 例如/dev/hdc2中的磁盘名是/dev/hdc �
 	
 dumpe2fs /dev/hda1   #dump ext2 file sysem 查看superblock信息和每个blockgroup信息
 	-h  #只查看header部分,即superblock信息 
+	
+	
+	
+查看分区大小        gdisk -l /dev/vda
+查看分区大小及挂载点 lsblk
 ```
 
 ##  quote
@@ -2501,6 +2520,11 @@ RAID1
 	缺点:  效率低 容量以小的为准且容量减半
 RAID 1+0 4块磁盘  先RAID1再RAID0
 RAID 0+1 4块磁盘  先RAID0在RAID1
+RAID5    3块磁盘支持一块磁盘坏  读优写劣 计算同位检验码Parity
+RAID6          支持2块磁盘怀
+RAID10
+硬件	/dev/sd[a-p]
+软件  /dev/md[0-]
 ```
 
 ##  lvm
