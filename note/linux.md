@@ -265,7 +265,7 @@ env    表示当前用户的环境的变量     env | sort
  	echo $var
 ```
 
-##  数值(( ))
+##  数值(( ))/bc
 
 ```
 计算
@@ -278,7 +278,8 @@ env    表示当前用户的环境的变量     env | sort
     [ num1 -le num2 ]            # 等价于 if (( num1 <= num2 ))
     [ num1 -gt num2 ]            # 等价于 if (( num1 >  num2 ))
     [ num1 -ge num2 ]            # 等价于 if (( num1 >= num2 ))
-小数比较使用awk
+小数比较使用awk或bc
+bc  echo "1+2" | bc
 ```
 
 ##  字符串[[ ]]
@@ -1238,7 +1239,18 @@ nmap [-sU] [-Pn] $ip-range [-p$port-range]
 
 ##  ps
 
+```
+axjf
+```
+
 ##  top
+
+```
+-d 间隔时间 默认5秒
+-p pid
+?
+P CPU M Mem N PID T cpu time+ k kill
+```
 
 ##  mpstat
 
@@ -2701,6 +2713,8 @@ disown {pid|jid}  将进程从后台任务列表（jobs）移除
 wait              等待所有后台进程任务结束
 ```
 
+
+
 ##  网络
 
 ```
@@ -2743,6 +2757,8 @@ nmap -O -sV 10.0.0.12              # 探测主机服务和操作系统版本
 ##   信号
 
 ```
+man 7 signal
+
 trap cmd sig1 sig2        # 在脚本中设置信号处理命令
 trap "" sig1 sig2         # 在脚本中屏蔽某信号
 trap - sig1 sig2          # 恢复默认信号处理行为
@@ -2899,6 +2915,39 @@ uucp,news.crit                                          /var/log/spooler
 ```
 
 ##  logwatch
+
+## SELinux
+
+```
+Policy: 政策 下面包含很多具体的规则rule
+	targeted  针对网络服务限制多 针对本机限制少 是默认的政策
+	minimum   针对选择的进程来保护 由target修改而来
+	mls       完整的限制
+安全性文本security context
+	身份标识Identity
+		unconfined_u
+		system_u
+	角色Role
+		object_r
+		system_r
+	类型Type	
+		type
+		domain
+
+模式Mode  在(enforcing|permissive)与(disable)切换之间,必须重启电脑
+	enforcing
+	permissive 宽容的 仅显示警告信息
+	disable
+查看模式 getenforce   #cat /etc/selinux/config
+设置模式 setenforce  0Permissive模式  1Enforceing模式  #不能通过命令设置disable模式
+
+查看状态 sestatus     #cat /etc/selinux/config
+	#SELinux status:enabled        是否启用
+	#Current mode: enforing        启用的模式
+	#Loaded policy name: targeted  启用的政策
+	
+查看某个政策里哪些规则 getsebool -a $policyName
+```
 
 #  docker
 
@@ -3059,7 +3108,8 @@ yum search readline  && yum install readline-devel.x86_64 && man readline
 ## 登录无色 ls无色 vi无色 vim才有色 echo有色
 
 ```
-ubuntu有时候shell登录无色,那是因为.bashrc中的颜色未生效
+ubuntu登录无色,那是因为.bashrc中的颜色未生效
+默认shell是dash,不是bash, 所以默认不存在.bash_profile. 如果使用.bash_profile,记得使.bashrc生效
 解决方法就是在~/.bash_profile添加代码 [ -f ~/.bashrc ] && source ~/.bashrc
 
 alias ls='ls --color=auto '
