@@ -1375,21 +1375,21 @@ iptraf -i eth0 //某端口统计
 
 - 用户/组
 
-  所有用户 /etc/passwd 所有组 /etc/group 所有密码 /etc/shadow
+  查看所有用户 /etc/passwd 所有组 /etc/group 所有密码 /etc/shadow
 
-  某一用户属于哪些组  id  $user 中的groups字段
+  查看某一用户属于哪些组  id  $user 中的groups字段
 
-  某组有哪些用户
+  查看某组有哪些用户
 
-  groupmems [opt]  [-g [root]]
+  ​	groupmems [opt]  [-g [root]]
 
-  ​	-a $user #add 添加用户
+  ​		-a $user #add 添加用户
 
-  ​	-d $user #del 删除用户
+  ​		-d $user #del 删除用户
 
-  ​	-p            #purge 删除整个组成员
+  ​		-p            #purge 删除整个组成员
 
-  ​	-l              #列举组成员
+  ​		-l              #列举组成员
 
 - su
 
@@ -1492,6 +1492,8 @@ ls   默认按名称排序
 				
    -h  大小以人类可读形式
    -R 递归
+   
+ls -lsh 第一列为因为占块所占的大小 size为实际数据的大小
 
 cp 
     -r   
@@ -2385,44 +2387,87 @@ rsync -avzh   --verbose  -h进度条
 ##  分区及加载
 
 ```
+/dev         这个是真正的外部数据，系统会自动将cdrom安装到/dev
+/mnt         用户手动或系统自动挂载/dev到/mnt目录    固定存储        以前
+/media/cdrom 用户手动或系统自动挂载/dev到/media目录  移动存储 如USB  后来   有桌面图标
+
 磁盘  磁盘名是hda中的最后一个a
 				       某根IDE数据线第一块Master  某根IDE数据线第二块Slave
 	主板插槽1primary	/dev/hda    			 /dev/hdb
 	主板插槽2second     /dev/hdc    			 /dev/dhc
 	
-	/dev         这个是真正的外部数据，系统会自动将cdrom安装到/dev
-	/mnt         用户手动或系统自动挂载/dev到/mnt目录    固定存储        以前
-	/media/cdrom 用户手动或系统自动挂载/dev到/media目录  移动存储 如USB  后来   有桌面图标
-	
+	磁盘名
+		IDE实体硬盘 /dev/hd[a-p] 
+        SCSI/SATA/USB实体磁盘 /dev/sd[a-p]
+        虚拟磁盘 /dev/vd[a-p]
+        RAID   /dev/md[0-128]
+        LVM    /dev/$vgname/$lvname
 
-一块磁盘可以分区 分区名是hda1中的最后一个1
+分区partition	一块磁盘可以分区 分区名是hda1中的最后一个1
 	分区类型
 		Primary Partition 主分区
 		Extend  Partition 扩展分区
 		logic   Partition 逻辑分区
+	分区表格式
+		MBR(Master Boot Record 主要开机记录区) 为兼容Windows的MSDOS
+		GPT(GUID partition table)
 		
 	由于硬盘的限制,主分区primary和扩展分区最多只能有4个
 	由操作系统的限制, 一块磁盘最多可以有一个扩展Extend分区 
 	逻辑分区只能由扩展分区而来,扩展分区名从数字5开始,最大根据操作系统不同而不同,一般是16或64两种情况
 	只能格式化主分区和扩展分区,不能格式化扩展分区
-
+	
 	经典方案 P+P+P+E (3P+E)   P+E
 	
 文件系统类型
     ext2/3/4 由于ext3 ext4多了日志的记录,所以系统复原会比较快  已过时
     swap     并不会使用到目录树的挂载, 所以并不需要指定挂载点
-    xfs      centos预设的, 格式化好几T的空间速度快
+    xfs      centos7预设的, 格式化好几T的空间速度快
     vfat     linux/windows都支持  如果windows和linux在硬盘中共存,为了数据交换,可以设置为这个
+    
+    linux通过操作linux VFS(virtual filesystem switch)抽象层来操作不同的实际的文件系统
 
-查看文件系统类型
+	查看文件系统类型
     cat /proc/filessystem                     内存已加载的文件系统
     ls -l /lib/modules/$(uname -r)/kernel/fs  这个版本系统可支持的
+    
+    传统一个分区只能格式化为一种文件系统.但由于LVM/RAID,
+    一个分区通过LVM可以格式化为多个文件系统;
+    多个分区通过LVM/RAID可以合成一个文件系统. 
+    所以现在说一个挂载点的文件系统类型
+    
+ex2/3/4 静态分配
+    block 1K 2K 4K
+	blockgroup1
+        superblock  记录文件系统的整体信息 包括inode/data的总量使用量剩余量 文件系统的格式
+                    挂载时间 最后一次写入数据时间 一个fsck时间 是否挂载
+        filesystemdescription
+        		每个blockgroup的起止的block号 每个区段(super/inodebitmap/databitmap)的起止号
+        inodeblockbitmap
+        datablockbitmap
+        inodeblock
+        	ls -l (文件的模式 owner/group size ctime/atime/mtime setUID 文件内容的指向)
+        	每个inode大小固定128B/256B
+        	每个文件仅占用一个inode节点
+        	12个直接指向 1间接 1双间接 1三间接
+xfs 动态分配
+	data section (类似于meta ext4的blockgroup)
+	log section (类似于ext的 log )
+	realtime section
 ```
 
-### 分区
+### 分区fdisk/gdisk/parted
 
 ```
-fdisk -l 只能列出硬盘的分区表、容量大小以及分区类型，但看不到文件系统类型
+先通过lsblk/blkid找到磁盘,再用parted /dev/x print找到分区表PartitionTable的类型为MBR还是GPT
+
+fdisk  适用于分区表类型MBR
+gdisk  适用于分区表类型GPT
+parted 通用
+
+fdisk -l /dev/vda       只能列出硬盘的分区表、容量大小以及分区类型，但看不到文件系统类型
+gdisk -l /dev/vda       查看分区大小
+parted   /dev/vda print
 
 1 使用df查看磁盘名 如 /dev/hda
 2 使用命令
@@ -2436,24 +2481,37 @@ fdisk -l 只能列出硬盘的分区表、容量大小以及分区类型，但�
   Command (m for help): l  #list known partion space
   Command (m for help): n  #增加一个分区
   Command (m for help): d  #删除一个分区
-  
-3 partprob  #分区生效 让系统识别probe partition  否则只能重启生效
+3 partprob -s  #分区生效 让系统cat /proc/partitions识别(probe)到分区(partition)  否则只能重启生效
 ```
 
-###  格式化
+###  格式化mkfs
 
 ```
 mkfs [opt]  $partitionName  #格式化分区并设定分区的文件系统类型 /dev/hda4
 	-t	[ext2 ext2 xfs ]    #type 设定文件系统类型
+	
+blkid    查看分区的id和类型
+lsblk    查看分区大小
+	RM 可否移除   SIZE容量   RO 是否Readonly TYPE disk磁盘part分区只读rom
+lsblk -f 查看分区类型
+
+当为ext2/3/4
+        superblock和filesystemdescription都可以通过命令dumpe2fs查看ext类型的,xfs的不可以
+        dumpe2fs /dev/hda1   #dump ext2/3/4 filesystem
+	    	-h  #只查看header部分,即superblock信息
+当为xfs 查看superblock等meta信息
+	xfs_info /dev/vda2
 ```
 
-###  检查
+###  检查e2fsck/xfs_repair
 
 ```
-fsck  检验磁盘
+e2fsck  /dev/hda4	确定inode/superBlock等meta 与 datablock的一致性
+                  	ext3/4的日志式journaling文件系统保证meta与数据的一致性
+xfs_repair /dev/hda4
 ```
 
-### 挂载
+### 挂载mount
 
 ```
 mount     #查询系统中已挂载的设备
@@ -2474,17 +2532,16 @@ fdisk -l //查看系统中已经识别的硬盘  U盘一般为sdb1
 mount -t vfat /dev/sdb1 /mnt/usb/ #vfat指的是fat32文件系统，单个文件不超过4GB
                             #Linux默认不支持NTFS文件系统的 可以下载ntfs-3g软件安装，
                             #但是ntfs格式只能是只读的 //一般为移动硬盘
+ 
+开机挂载
+/etc/fstab  #fs  table
+/etc/mtab   #mount table
 ```
 ###  查看战果
 
 ```
-block 1K 2K 4K
-blockgrooup1
-	superblock
-	filesystemdescription
-	inodeblockbitmap
-	datablockbitmap
-	inodeblock
+ls -li #第一列为inode号码 若该inode号自身包含文件名 若为目录 则该inode指向的block包含该目录名
+ls -sh #第一列为块容量 total为block_count*blockSize
 
 du
 	 默认不会列出当前目录下单个文件的大小，尽管最后表示当前目录的.会统计
@@ -2492,27 +2549,38 @@ du
 	 -Sh 不包括子目录的统计， 更准备 因为目录已经统计过一次了
 	 -sh 
 	
-
-df  /   #重点找到磁盘名而已 例如/dev/hdc2中的磁盘名是/dev/hdc 是不含数字的， 数字是3分区                    
+df  /   #重点找到磁盘名而已 例如/dev/hdc2中的磁盘名是/dev/hdc 是不含数字的， 数字是3分区             
 	-T  增加文件类型列
 	-h   
 	-a  列出所有的文件系统  包括特殊的/proc  基本特殊的文件系统都不会占用硬盘空间
 	-i  查看inode，默认为data
-	
-dumpe2fs /dev/hda1   #dump ext2 file sysem 查看superblock信息和每个blockgroup信息
-	-h  #只查看header部分,即superblock信息 
-	
-	
-	
-查看分区大小        gdisk -l /dev/vda
-查看分区大小及挂载点 lsblk
 ```
 
-##  quote
+##  swap
+
+分区方式
+
+```
+gdisk && partprobe && lsblk && 格式化mkswap /dev/vda6
+swapon /dev/vda6  #类似于mount  swapoff /dev/vda6
+#查看free 或swapon -s更清晰
+echo "/dev/vda6 swap swap defaults 0 0" >> /etc/fstab #设置开机挂载
+```
+
+建立文件的方式
+
+```
+dd if=/dev/zero of=/tmp/swap bs=1M count=128 && mkswap /tmp/swap
+swapon /tmp/swap
+echo "/tmp/swap swap swap defaults 0 0" >> /etc/fstab #设置开机挂载
+```
+
+##  quota配额
 
 ```
 限制某目录大小 某用户使用空间大小  某组使用空间大小  
 超过waterLowerLevel警告 waterHighLevel禁止写入 在这两者之间有个存活期
+xfs_quota
 ```
 
 ##  raid
@@ -2537,6 +2605,24 @@ RAID6          支持2块磁盘怀
 RAID10
 硬件	/dev/sd[a-p]
 软件  /dev/md[0-]
+
+mdadm --create /dev/md[0-9] --auto=yes --level=[015] --chunk=NK 
+	  --raid-devicds=N --spare-devices=N /dev/vda{5,6,7}
+
+查看
+mdadm --detail /dev/md[0-9]
+cat /proc/mdstat
+
+格式化及挂载 开机挂载
+mkfs.xfs -f -d su=256k,sw=3 -r extsize=768k /dev/md0
+mkdir /srv/raid && mount /dev/md[0-9] /srv/raid
+
+mdadm --manage /dev/md[0-9] 
+	--add    /dev/vda5  #往lvm中添加
+	--remove /dev/vda5  #往lvm中减少
+	--fail   /dev/vda7  #设定错误有问题,然后remove
+	
+关闭RAID
 ```
 
 ##  lvm
@@ -2888,7 +2974,7 @@ finger {user}   # 显示某用户信息，包括 id, 名字, 登陆状态等
 id {user}       # 查看用户的 uid，gid 以及所属其他用户组
 ```
 
-##  crontab
+##  at/crontab/anacron
 
 ##  syslog
 
@@ -2947,6 +3033,9 @@ Policy: 政策 下面包含很多具体的规则rule
 	#Loaded policy name: targeted  启用的政策
 	
 查看某个政策里哪些规则 getsebool -a $policyName
+查看规则限制什么      yum install setools-console
+                   seinfo  #统计状态
+                   sesearch [-A] [-s $subject] [-t object]
 ```
 
 #  docker
