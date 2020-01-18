@@ -1871,6 +1871,12 @@ systemctl get-default  #系统的默认运行级别在/etc/systemd/system/defaul
 systemctl set-default TARGET.target
 ```
 
+##  journalctl
+
+```
+默认日志都在内存中
+```
+
 #  包管理
 
 ##  源码包安装 
@@ -2628,7 +2634,23 @@ mdadm --manage /dev/md[0-9]
 ##  lvm
 
 ```
-管理调整分区的容量大小
+PV阶段physical volume
+	pvcreate /dev/vda{5,6,7,8}
+	pvscan
+	pvdisplay /dev/vda5
+VG大磁盘阶段volume group
+	vgcreate  $VGName $PVList   #与vgremove相反
+	vgscan
+	vgdisplay $VGName
+	vgextend  $VGName $PV       #与vgreduce相反
+LV分区阶段logical
+	lvcreate -L 200G -n $lvName $vgName  #与lvremove相反
+	lvscan
+	lvdisplay $lvName
+	lvextend  $lvreduce
+	lvresize  -L +500M $lvName
+文件系统阶段:格式化挂载
+	mkfs.xfs /dev/$lv-fullName && mkdir /srv/lvm && mount
 ```
 
 #  za
@@ -3248,5 +3270,11 @@ stty echo     #打开回显。
 ```
 telnet 127.0.0.1 $port  #OK
 telnet $ip       $port  #Fail ip为为127.0.0.1
+```
+
+##   由于修改配置文件而启动服务
+
+```
+man  rsyslog.conf   && #定位到最后可得知是rsyslogd这个服务  systemctl restart rsyslog
 ```
 
