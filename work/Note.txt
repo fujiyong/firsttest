@@ -1501,6 +1501,85 @@ sudo [ -b ] [ -p prompt ] [ -u username/#uid] -s
 
 
 
+分区 
+	fdisk    MBR
+	gdisk    GPT
+	parted 
+	
+	
+	ls -lsh 第一列为因为占块所占的大小 size为实际数据的大小
+
+lsblk  查看分区
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://www.jianshu.com/p/d7c9cef525bc
+
+
+https://blog.csdn.net/yhc166188/category_7937752.html
+https://blog.csdn.net/yhc166188/article/details/82795177
+
+
+cleos wallet create [-n $walletName]  [--to-console | -f ~/$passwordFileName]  #会在~创建文件夹eos-wallet,默认的钱包名为default.wallet  
+#cleos create key [--to-console | -f $keyFileName]  #产生public/private key 
+#cleos wallet import -n $walletName --private-key $privKey
+cleos wallet create_key -n $walletName 
+cleos wallet list  #钱包名列表
+#cleos wallet open -n $walletName
+cleos wallet unlock -n $walletName --password $password
+cleos wallet keys  #列举公钥
+cleos wallet private-keys #列举私钥
+
+
+#建立新账户12位字符 12345abcdefghijklmnopqrstuvwxyz
+# 抵押0.001EOS用于网络，0.02EOS用于CPU，购买3k内存（约0.0465EOS）可满足新账户转账最低资源需求
+cleos system newaccount --stake-net '0.001 EOS' --stake-cpu '0.02 EOS' --buy-ram-kbytes 3 <自动分配的账户名> <新注册账户名> <你的公钥>
+
+
+##查看账户
+#概要信息（可用资源、投票等）
+cleos get account <账户名> 
+cleos get table eosio  <账户名>  userres
+# 查看账户抵押信息
+cleos system listbw <账户名> 
+cleos get table eosio <账户名>  delband
+# 查看账户余额
+cleos get currency balance eosio.token  <账户名> 
+cleos get table eosio.token <账户名>  accounts
+
+
+##转账
+cleos transfer <转出账户名>  <转入账户名>  '0.0001 EOS' 'memo'
+
+##竞拍短名（少于12字符的短账户名需竞拍，每24小时只成交一个。目前只能出价，主网激活14天后才正式交易）
+# 查询短名出价情况
+cleos system bidnameinfo  <短名> 
+# 参与竞拍
+cleos system bidname <本人账户名>  <短名>  '0.0001 EOS'
+
+
 
 
 
