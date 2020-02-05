@@ -1534,7 +1534,7 @@ lsblk  查看分区
 
 
 
-
+http://ddrv.cn/a/342647
 https://www.jianshu.com/p/d7c9cef525bc
 
 
@@ -1578,6 +1578,117 @@ cleos transfer <转出账户名>  <转入账户名>  '0.0001 EOS' 'memo'
 cleos system bidnameinfo  <短名> 
 # 参与竞拍
 cleos system bidname <本人账户名>  <短名>  '0.0001 EOS'
+
+
+
+
+
+nmcli connection show
+nmcli connection show eth0
+nmcli connection modify eth0 \
+connection.autoconnect yes \
+ipv4.method manual \
+ipv4.address $ip/$netmask \
+ipv4.gateway $gateway \
+ipv4.dns $dns
+nmcli connection modify eth0 connection.autoconnect yes ipv4.method auto
+nmcli connection up eth0
+
+hostnamectl
+hostnamectl set-hostname $hostname  #cat /etc/hostname
+
+timedatectl
+timedatectl list-timezone
+timedatectl set-timezone  "Asia/Shanghai"
+timedatectl set-time "2020-02-05 11:01"    # date && hwclock -w
+timedatectl set-ntp 
+ntpdate tock.stdtime.gov.tw && hwclock -w
+
+localectl
+localectl set-locale LANG=en-US.utf8
+
+
+
+dmidecode -t [1|4|9|17]  #1SYS 4CPU 9PCI 17MEM
+
+dd if=/dev/sda of=/dev/sdb #不必格式化，速度较慢
+find / -print | cpio -covB > /dev/back &&  cpio -iduv < /dev/back
+xfsdump 
+xfsrestore
+tar --exclude --exclude /proc -jcvp -f back.tar.bz2 /
+
+tar --exclude --exclude /proc -N ‘2020-02-05’ -jcvp -f back.tar.bz2 /
+rsync -av $src $dst
+
+locate updatedb生效
+man    mandb生效
+tmpwatch 删除暂存文件
+
+systemctl enabled/restart/status atd
+at $time
+>echo "hhh" > /dev/tty1  #at环境的默认输出都到/var/spool/mail PATH也会变，所以使用绝对路径
+>sync                    #多指令
+>sync
+>shutdown -h now
+>ctrl-d  #显示为EOT
+时间格式$time
+	HH:MM  04:00
+	HH:MM YYYY-MM-DD 04:00 2020-02-20
+	HH:MM[am|pm] [Month] [Date]  04pm July 30
+	HH:MM[am|pm] + number [minutes|houres|days|weeks]  ex>now+5munutes
+atq       #at -l  列出有哪些任务
+at -c $jobNumber #列出job具体内容
+atrm $jobNumber #at -d  删除任务job
+
+batch 没时间限制的在CPU不忙的情况下执行 是一个shell脚本，本质上就是at
+
+
+systemctl restart crond
+cron  /var/spool/cron/$user文件中 日志在/var/log/cron
+	-u  $user
+	-e  #edit */5 3,6 3-6 
+	-l  #list all items
+	-r  #remove all items
+minute hour day month week action
+
+如何查找怪异进程：找crontab或怪异进程的父进程pid，然后kill -9 $ppid
+
+help
+help help 
+help echo 
+man man各帮助说明 man 7 hier文件系统目录说明
+man bash
+man test
+man 3 readline查看快捷键绑定 
+
+man -a signal 
+man 7 signal       
+kill -l
+stty -a 
+
+ctrl-c sigint 2
+ctrl-z sigsup 
+ctrl-s sigstop 19
+
+ctrl-s 发送stop信号，未放弃fg控制权 ctrl-q 发送start信号
+& ctrl-z 发送suspend信号 放弃前台控制权，放入后台 不接受输入，不能ctrl-c， 可以使用bg/fg
+jobs -l # -表示最近最后倒数第二个 +表示最近最后一个 只能管理自身这个bash pid直接产生的后台进程， 间接产生的都管理不了
+kill -9 %{$jobNumber} %{$jobNumer}   #eg kill -9 %1
+fg %{$jobNumber}
+bg %{jobNumber}  将前台进程由于ctrl-z状态为暂停变成后台进程运行，自动添加了一个&
+
+ps axjf
+top 
+	-d $intervalSeconds  #默认3秒刷新一次
+	-b -n $displayNumber > a.txt 
+	-p $pid
+    ?/h 显示按键帮助
+	P CPU M Mem N PID T Time+ 排序默认CPU
+pstree 
+	-A  线
+	-u  在括号中显示用户
+	-p  在括号中显示pid
+free -hw
 
 
 
