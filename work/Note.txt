@@ -1656,7 +1656,7 @@ minute hour day month week action
 help
 help help 
 help echo 
-man man各帮助说明 man 7 hier文件系统目录说明
+man man各帮助说明 man 7 hier文件系统目录说明   man runlevel  chkconfig是perl脚本
 man bash
 man test
 man 3 readline查看快捷键绑定 
@@ -1689,15 +1689,45 @@ pstree
 	-u  在括号中显示用户
 	-p  在括号中显示pid
 free -hw
+fuser -v $file/$dir #eg .
+
+systemctl 
+	disable 实质是删除链接
+	mask    实质就是链接指空     ln -s /dev/null /etc/systemd/system/$service
+	unmask  实质就是删除指空链接 rm /etc/systemd/system/$service
+	
+	get-default 
+	set-default multi-user.target 
+	isoloate graphical.target #切换到target  操作隔离等级使用isolate而不是start/stop
+	poweroff #操作等级的快捷方式
+	reboot
+	suspend    #未关机 当唤醒时从内存中读取数据
+	hibernate  #数据保存到硬盘然后关机， 当唤醒时从硬盘读取数据
+	rescue     #root无法登录
+	emergency  #允许root登录
+	
+	list-dependencies [$target]            #target默认为get-default获取， target中有哪些unit
+	list-dependencies [$target] --reverse  #有哪些unit依赖这个target
+	list-dependencies $service             #service依赖哪些unit
+	list-dependencies $service --reverse  #有哪些unit依赖这个service
 
 
 
 
 
-
-
-
-
-
+tmux  ctrl-b q  #显示pane数字
+             x  #kill pane
+			 m  #mark current pane 加粗
+			 o  #select next pane
+			 ;  #last pane
+			 
+			 c  #create window
+			 &  #kill current window
+			 p  #pre window
+			 n  #next window
+			 l  #last windows 
+			 '  #输入windows index
+			 w  #choose window
+			 0-9 #choose window
 
 
