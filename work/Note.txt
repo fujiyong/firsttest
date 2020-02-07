@@ -1519,7 +1519,9 @@ lsblk  查看分区
 
 
 apt install build-essential
-yum group install dev-tools
+yum groupinstall DevelopmentTools        #若软件需要开发工具
+yum groupinstall KernelSourceDevelopment #若软件需要图形接口
+yum groupinstall "XSoftwareDevelopment"  #若按照的软件教旧
 
 
 
@@ -1763,6 +1765,22 @@ lsusb [-t]#以tree形式列出usb
 smartctl -t short /dev/sda  #检测磁盘坏道和寿命 t short for test /dev/sda物理磁盘名
 smartctl -a       /dev/sda  #a short for all display all info  self-monitoring analysis and report technology system 
 
+
+tar.gz == tgz
+tar.bz2       #(bzip2)
+xz
+
+#patch因为不是源码的全部，而是diff出来的， 所以体积小 便于下载存储
+patch -p$number < a.patch #给源码打补丁即diff文件 然后重新make && make install
+#ldconfig 预先加载so到内存中以便加速访问
+echo "/usr/lib/mmysqlclid" >> /etc/ld.so.conf.d/mmysql.conf #配置哪些so需要预先加载
+ldconfig [-f /etc/ld.so.conf] [-C /etc/ld.so.cache]  #加载配置文件中定义
+ldconfig -p #打印已加载的so
+ldd [-v|-d|-r] $exe | $lib.so  #load dependency
+	-v #列出所有内容信息
+	-d #重新将有丢失的link点show出来
+	-r #显示将elf有关的错误
+pldd $pid #正在运行的程序      #process load dependencies
 
 tmux  ctrl-b q  #显示pane数字
              x  #kill pane
