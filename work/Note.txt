@@ -1518,6 +1518,8 @@ lsblk  查看分区
 
 
 
+apt install build-essential
+yum group install dev-tools
 
 
 
@@ -1525,8 +1527,9 @@ lsblk  查看分区
 
 
 
-
-
+https://wiki.ubuntu.org.cn/%E9%A6%96%E9%A1%B5
+https://wiki.ubuntu.org.cn/Qref/Apps
+https://wiki.ubuntu.org.cn/UbuntuSkills
 
 
 
@@ -1580,8 +1583,8 @@ cleos system bidnameinfo  <短名>
 cleos system bidname <本人账户名>  <短名>  '0.0001 EOS'
 
 
-
-
+atop htop 
+bash -c "echo a.sh | at now"
 
 nmcli connection show
 nmcli connection show eth0
@@ -1692,9 +1695,17 @@ free -hw
 fuser -v $file/$dir #eg .
 
 systemctl 
+	daemon-reload 
 	disable 实质是删除链接
 	mask    实质就是链接指空     ln -s /dev/null /etc/systemd/system/$service
 	unmask  实质就是删除指空链接 rm /etc/systemd/system/$service
+	
+	
+	show ssh #查看服务的配置文件
+	/usr/lib/systemd/a.service/               #存放a服务的配置文件 
+	/etc/systemd/system/a.service.d/a.conf
+	/etc/systemd/system/a.service.d/wants/    #存放a服务启动后需要启动的服务脚本
+	/etc/systemd/system/a.service.d/requires/ #存放a服务启动前需要启动的服务脚本
 	
 	get-default 
 	set-default multi-user.target 
@@ -1711,8 +1722,46 @@ systemctl
 	list-dependencies $service             #service依赖哪些unit
 	list-dependencies $service --reverse  #有哪些unit依赖这个service
 
+客户端命令行 man 1 logger
+客户端API    man 3 syslog
+服务端       rsyslog.service rsyslogd /etc/rsyslog.conf
 
 
+/var/log/boot.log 本次启动
+/var/log/dmesg
+
+/var/log/lastlog 所有账号最近一次登录
+/var/log/wtmp 正确登录
+/var/log/faillog 错误登录
+/var/log/secure  所有涉及账号密码登录 包括系统的login程序 图形接口登录gdm程序 su sudo ssh telnet
+
+/var/log/messages 
+/var/log/cron
+
+logger -p $serviceName.$loglevel "$msg"
+logrotate -vf /etc/logrotate.conf  #-v尝试进行一次详细的lograte  -f强制进行一次logrotate
+journalctl [-nrpf] [--since TIME] [--until TIME] _optional
+	-n 5   #最近几条 类似于head -n 5
+	-r     #反向输出 类似于ls -rt 
+	-p err #优先级
+	-f     #类似于tail -f 
+	TIME   #today tomorrow "2020-02-05 12:00:00"
+	_SYSTEMD_UNIT=a.service #只显示a.service 
+	_COMM=bash              #只显示与命令有关的
+	_PID=pid                #只显示pid有关的
+	SYSLOG_FACILITY=[0-23]  #使用syslog.h中的服务序号
+logwatch 是一分析syslog的工具  是一perl脚本
+mail     #读取邮件发送邮件 mail -s ”$subject" $user < $mail_content.txt
+
+dmidecode -t $type
+	1  #SYS
+	4  #CPU
+	9  #主版插槽
+	17 #MEM
+lspci [-v|-vv] #列出pci接口
+lsusb [-t]#以tree形式列出usb
+smartctl -t short /dev/sda  #检测磁盘坏道和寿命 t short for test /dev/sda物理磁盘名
+smartctl -a       /dev/sda  #a short for all display all info  self-monitoring analysis and report technology system 
 
 
 tmux  ctrl-b q  #显示pane数字
