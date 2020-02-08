@@ -1526,6 +1526,7 @@ yum groupinstall "XSoftwareDevelopment"  #若按照的软件教旧
 rpm --help
 #安装
 rpm -ivh $pkg [opts]
+	--prefix       #类似于config --prefix=
 	--nodeps #不管依赖性
 	--replacefiles #覆盖文件
 	--replacepkgs  #重新安装
@@ -1533,11 +1534,14 @@ rpm -ivh $pkg [opts]
 	--test         #检查是否可以安装， 一般用于查看依赖性
 	--justdb       #更新数据库信息
 	--nosignature  #省略签名
-	--prefix       #类似于config --prefix=
 #更新
 rpm -Uvh $pkg      #以前没有安装则现在安装 有则更新
 rpm -Fvh $pkg      #以前没有安装则不安装 有则更新
+#删除
+rpm -e $pkg 
 #查询
+rpm --provides     #查询依赖
+rpm --whatprovides #反查询依赖
 rpm -qa            #已安装软件
 rpm -q  $pkg       #查询是否安装
 rpm -q  $pkg
@@ -1553,6 +1557,28 @@ rpm -Va          #验证所有的pkg
 rpm -V  $pkg     #验证某个已安装的pkg， 只有修改过才会列出来
 rpm -Vf $ab-file #验证已安装包的某个文件
 rpm -Vp a.rpm    #验证某个安装包
+#
+rpm --rebuild  #
+rpmbuild --rebuild *.src.rpm    #仅编译到/root/rpmbuild/RPMS/x86_64/*.rpm
+pmbuild --recompile *.src.rpm   #编译并安装
+
+
+yum install -y --installroot=  #安装到指定目录
+yum remove    $pkg
+yum list                 #rpm -qa 
+yum list pam*            #已安装和可安装
+yum list updates         #可供升级
+yum search all $pkg 
+yum info       $pkg 
+yum provides   $ab-file  #rpm -qf yum provides passwd
+
+yum grouplist
+yum groupinfo    $groupName
+yum groupinstall $groupName
+yum groupremove  $groupName
+
+yum repolist all #列举仓库
+yum clean [packages|headers|all]
 
 
 
@@ -1828,6 +1854,43 @@ ldd [-v|-d|-r] $exe | $lib.so  #load dependency
 	-d #重新将有丢失的link点show出来
 	-r #显示将elf有关的错误
 pldd $pid #正在运行的程序      #process load dependencies
+
+
+SELinux  cat /etc/selinux/config 
+DAC(Discretionary Access Control)自主式访问控制 依据进程的拥有者与文件资源的rwx权限来决定有无存取能力
+MAC(Madatory Access Control)委任式控制          设定进程和文件资源的权限
+
+主体(Subject|process) <------policy---securityContext---rwx---->目标(Object|filesystem)
+##是否启动SE
+getenforce        #获取SE模式级别  enforcing|1强制模式  permissive|0 宽容模式   disable 
+setenforce [0|1]  #设置SE模式级别
+##policy政策,是rule规则的集合  (targeted minimum mls三个主要的政策)
+sestatus   #policy
+	-v  #校验/etc/sestatus.conf中的文件与进程的安全性文本内容
+	-b  #政策中的规则rule是否启动（0|1)
+seinfo  #规则统计
+	-A #all
+	-u #about user
+	-r #role
+	-t #type
+	-b #bool
+getsebool -a                 #列出所有规则名ruleName及其值on/off
+getsebool $ruleName          #查看某规则值on/off
+setsebool [-P] $ruleName 0|1 #persist  否则重启失效
+semanager boolean -l |grep $ruleName  #查看规则rule的当前stateValue 默认值defaultValue 描述description
+sesearch [-A] [-s $subjectType] [-t objectType] [-b $ruleName]
+	-A --allow 
+	-s NAME, --source=NAME
+	-t NAME, --target=NAME
+	-b NAME, --bool=NAME
+sesearch -A -b $ruleName     #查看规则内容
+##securityContext安全性文本 格式user_id:role:typeForFilesystem_OR_DomainForProcess:rest...
+ls -Z
+ps -eZ  #查看第一个字段中的第三小字段domain值，若是unconfined_t则是不受限的，否则就是受限的
+chcon [-R] [-u user] [-r role] [-t type] $file #改变change file se context  R short for recursive
+restorecon [-Rv] $file|dir                     #恢复restore se context 
+
+
 
 tmux  ctrl-b q  #显示pane数字
              x  #kill pane
