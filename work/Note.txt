@@ -1523,8 +1523,36 @@ yum groupinstall DevelopmentTools        #若软件需要开发工具
 yum groupinstall KernelSourceDevelopment #若软件需要图形接口
 yum groupinstall "XSoftwareDevelopment"  #若按照的软件教旧
 
-
-
+rpm --help
+#安装
+rpm -ivh $pkg [opts]
+	--nodeps #不管依赖性
+	--replacefiles #覆盖文件
+	--replacepkgs  #重新安装
+	--force        #强制安装 等价于replacefiles 和 replacepkgs 
+	--test         #检查是否可以安装， 一般用于查看依赖性
+	--justdb       #更新数据库信息
+	--nosignature  #省略签名
+	--prefix       #类似于config --prefix=
+#更新
+rpm -Uvh $pkg      #以前没有安装则现在安装 有则更新
+rpm -Fvh $pkg      #以前没有安装则不安装 有则更新
+#查询
+rpm -qa            #已安装软件
+rpm -q  $pkg       #查询是否安装
+rpm -q  $pkg
+	l            #list 所有文件及其路径
+	i            #info
+	c            #在/etc下的configure file 
+	d            #document 与man有关
+	R            #依赖文件 required
+rpm -qf $absolute-file #查询属于哪个安装包 由于list是绝对路径， 所以这儿也是绝对路径
+rpm -q[licdR]p $pkg #查询当前rpm pkg
+#验证pkg自安装后是否被修改过
+rpm -Va          #验证所有的pkg
+rpm -V  $pkg     #验证某个已安装的pkg， 只有修改过才会列出来
+rpm -Vf $ab-file #验证已安装包的某个文件
+rpm -Vp a.rpm    #验证某个安装包
 
 
 
@@ -1658,13 +1686,32 @@ minute hour day month week action
 
 如何查找怪异进程：找crontab或怪异进程的父进程pid，然后kill -9 $ppid
 
+
+
+$cmder --help || type $cmder || help $cmder
+info -aw $cmder  #查看是否有man和info手册
+whatis $cmd && man -a $cmd #查询man手册
+info -awk $cmder           #查询info手册
+
 help
 help help 
 help echo 
+man -h #man的输出其实是less快捷键操作  默认忽略大小写
 man man各帮助说明 man 7 hier文件系统目录说明   man runlevel  chkconfig是perl脚本
+man -a intro
+man -k printf #在cmdname及其short description部分匹配搜索keyword
+man -K printf #全局搜索keyword
+man -w printf #where 说明printf 手册的位置  /usr/share/man
+cd $(dirname $(man -w man)) && ls -1 #查看man 1 有哪些命令
 man bash
 man test
 man 3 readline查看快捷键绑定 
+info -h
+info info
+info -a printf #search all
+info -k printf #search keyword
+info -w nano   #where 说明nano手册的位置  /usr/share/info
+cd $(dirname $(info -w nao)) && ls -l #查看info有哪些手册
 
 man -a signal 
 man 7 signal       
