@@ -1511,6 +1511,9 @@ sudo [ -b ] [ -p prompt ] [ -u username/#uid] -s
 
 lsblk  查看分区
 
+echo $mypassword | passwd --stdin $user #对用户$user设置密码$passwd
+curl ftp://$user:$passwd@$host//root #//etc中的第一个/是分隔符
+
 
 
 
@@ -1877,21 +1880,81 @@ seinfo  #规则统计
 getsebool -a                 #列出所有规则名ruleName及其值on/off
 getsebool $ruleName          #查看某规则值on/off
 setsebool [-P] $ruleName 0|1 #persist  否则重启失效
-semanager boolean -l |grep $ruleName  #查看规则rule的当前stateValue 默认值defaultValue 描述description
+semanage boolean -l |grep $ruleName  #查看规则rule的当前stateValue 默认值defaultValue 描述description
 sesearch [-A] [-s $subjectType] [-t objectType] [-b $ruleName]
 	-A --allow 
 	-s NAME, --source=NAME
 	-t NAME, --target=NAME
 	-b NAME, --bool=NAME
-sesearch -A -b $ruleName     #查看规则内容
+sesearch -A -b $ruleName     #查看规则内容 一个rule可能有多条item
 ##securityContext安全性文本 格式user_id:role:typeForFilesystem_OR_DomainForProcess:rest...
 ls -Z
 ps -eZ  #查看第一个字段中的第三小字段domain值，若是unconfined_t则是不受限的，否则就是受限的
-chcon [-R] [-u user] [-r role] [-t type] $file #改变change file se context  R short for recursive
-restorecon [-Rv] $file|dir                     #恢复restore se context 
+chcon [-R] [-u user] [-r role] [-t type] [-v] $file #改变change file se context  R short for recursive
+chcon [-R] [-v] --reference=$范例文件 $file|dir     #参考范例文件一样设置
+restorecon [-Rv] $file|dir                          #恢复restore se context 
+semanage {login|user|port|interface|translation|fcontext} -l | grep -E "^/etc|^/etc/cron" #list
+semanage fcontext -{a|d|m} [-frst] file_spec                 #add|delete|modify
+#eg semanage fcontext -a -t system_cron_spool_t "/srv/mycron(/.*)?"
+#   semanage fcontext -l | grep "^/srv/mycron"
+yum install setroublshoot setroubleshoot-server
+systemctl restart auditd  #由audit服务启动setroubleshoot
 
 
 
+
+quota配额
+作用对象
+	组group          #group与project/dir从文件系统/etc/fstab上就互斥
+	非root用户       #四海之内莫非王土 root对所有硬盘都有使用权
+	project/dir      #ext文件系统只能针对挂载点，xfs可以针对具体目录
+	                 #inode(限制文件数量) block(限制文件夹大小， 单位可以kMG)
+					 #有soft和hard之分 类似于低水位和高水位
+xfs_quota -x -c "print"  #查看支持quota的挂载点moutpoint -xExpertMode cCmder
+xfs_quota -x -c "disable|enable|off|remove -ugp"  #启用关闭quota
+xfs_quota -x -c "state"  #查看quota是否启动
+#设置user或group或project的block的软硬值 inode的软硬值
+xfs_quota -x -c "limit [-ugp] [useName|groupName|prjectName] b[soft|hard]=$N1 i[soft|hard]=$N2" [$mountPoint] 
+#设置user或group的宽限时间graceTime
+xfs_quota -x -c "timer [-ug] [useName|groupName] [-bir] $Ndays" [$mountPoint]  
+#查看设置项uUser gGroup pProject block inode humanreadable
+xfs_quota -x -c "report -u|g|p -bih" [$mountPoint]
+
+echo "$userDefinedRandomID:$absoutPathDir" >> /etc/projects
+echo "$prjectName:$userDefinedRandomID" >> /etc/projid
+xfs_quota -x -c "project -s $projectName"#初始化project
+xfs_quota -x -c "limit -p $prjectName bhard=1000M bsoft=100M" /mountPoint
+
+设定流程	        xfs                                   ext
+设置文件/etc/fstab  usrquota/grpquota/prjquota            usrquota/grpquota
+配置文件                                                  quotacheck 
+启动关闭quota       xfs_quota -c "disable|enable -ugp"    quotaon|quotaoff
+启动关闭状态        xfs_quota -c "status"
+设置user/group      xfs_quota -c "limit "                 edquota|setquota
+设置project         xfs_quota -c "limit "
+设置grace时间       xfs_quota -c "timer "                 edquota
+查看设置项          xfs_quota -c "report"                 repquota|quota
+发送警告给用户                                            warnquota
+
+
+mount | grep quota #查看fs支持哪些quota
+mount -a #挂在所有配置在/etc/fstab中的配置的文件系统
+unmount $mountPoint|device 
+
+
+命令
+	locate quota | grep bin 等价于 locate *quota* | grep bin  说明支持正则locate $includeCharacters
+	locate quota #只要绝对路径名中包含字符串都显示 根据文件名查找比find快多了
+	whereis quota 不支持 whereis *quota* 说明whereis不支持正则
+	whereis nano  #只查找bin /usr/share参考文档和脚本  man/info文档
+	小结: locate $reg-fileName && whereis $noReg-fileName
+
+
+疑问
+1 如何由应用bin得知serviceName
+
+
+grep | 尽可能多 ?+*只是前一个单位(单个字符或小括号或中括号为单位)
 tmux  ctrl-b q  #显示pane数字
              x  #kill pane
 			 m  #mark current pane 加粗
