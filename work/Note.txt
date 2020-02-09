@@ -1717,31 +1717,6 @@ minute hour day month week action
 
 
 
-$cmder --help || type $cmder || help $cmder
-info -aw $cmder  #查看是否有man和info手册
-whatis $cmd && man -a $cmd #查询man手册
-info -awk $cmder           #查询info手册
-
-help
-help help 
-help echo 
-man -h #man的输出其实是less快捷键操作  默认忽略大小写
-man man各帮助说明 man 7 hier文件系统目录说明   man runlevel  chkconfig是perl脚本
-man -a intro
-man -k printf #在cmdname及其short description部分匹配搜索keyword
-man -K printf #全局搜索keyword
-man -w printf #where 说明printf 手册的位置  /usr/share/man
-cd $(dirname $(man -w man)) && ls -1 #查看man 1 有哪些命令
-man bash
-man test
-man 3 readline查看快捷键绑定 
-info -h
-info info
-info -a printf #search all
-info -k printf #search keyword
-info -w nano   #where 说明nano手册的位置  /usr/share/info
-cd $(dirname $(info -w nao)) && ls -l #查看info有哪些手册
-
 man -a signal 
 man 7 signal       
 kill -l
@@ -1950,6 +1925,88 @@ unmount $mountPoint|device
 	小结: locate $reg-fileName && whereis $noReg-fileName
 
 
+
+
+
+ 
+ 
+
+
+
+	
+严格执行
+type $symbol
+help $cmder #若type返回$symbol is shell buildin(: pwd) or keyword(for) 
+$cmder --help   #防止man和info会提供太详细而不归类的文档
+whatis $cmder   #获取描述，得知大致功能
+whereis $cmder  #得知bin/source/man&info位置
+man -[1-9] $cmder
+info $cmder     #若whereis返回值中有info位置
+
+#终极大杀器，查看安装的官方文档/usr/share/doc/下的README
+locate $keyword | grep share 
+
+man -k $keyword  #man short description搜索
+man -K $keyword  #man手册全局搜索
+info -k $keyword #index搜索
+info -a $keyword #info手册全局搜索
+
+
+help
+help help
+help echo 
+help \(\(
+
+经典命令
+enable
+
+
+man -h        #man的输出其实是less快捷键操作  默认忽略大小写
+man -k printf #在cmdname及其short description部分匹配搜索keyword
+man -K printf #全局搜索keyword
+man -w printf #where 说明printf 手册的位置  /usr/share/man
+cd $(dirname $(man -w man)) && ls -1 #查看man1有哪些命令
+
+#经典文档
+man bash
+man test
+
+#粗略文档，一扫而过
+man man
+man 3 readline  #查看快捷键绑定
+man intro       #chkconfig是perl脚本
+man 7 asscii    #128
+man 7 armscii-8 #256
+
+#各级别
+man man         #帮助系统各级别说明 
+man 7 hier      #文件系统目录说明  
+man runlevel    #
+
+man 7 boot
+
+#查看文档快捷键
+
+
+info -h
+info -a printf #search all
+info -k printf #search index
+info -w nano   #where 说明nano手册的位置  /usr/share/info
+cd $(dirname $(info -w nao)) && ls -l #查看info有哪些手册
+
+#经典文档
+info info
+
+#查看文档快捷键
+
+ 
+
+
+
+
+
+	
+	
 疑问
 1 如何由应用bin得知serviceName
 

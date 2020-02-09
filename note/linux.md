@@ -74,8 +74,7 @@ comgen --help
 ##  命令
 
 ```
-cat /etc/shells   #查看系统支持的shell
-chsh -l           #等价cat /etc/shells
+chsh -l           #查看系统支持的shell,等价于cat /etc/shells
 echo $SHELL       #查看使用哪种shell  env | grep SHELL
 chsh -s /bin/bash #更改默认shell
 export PS1="[\u@\h \W $(getGitBranchFuncName) ]$\n$" #man bash 搜索PS1,根据提示搜索PROMPTING
@@ -2047,11 +2046,11 @@ Client根据本地的配置文件/etc/yum.repo.d/*.repo中指定的server端下�
 
 主要用于对已下载到本地和已安装的软件包进行管理 
 
-/etc/dpkg/dpkg.cfg              dpkg包管理软件的配置文件【Configuration file with default options】
+/etc/dpkg/dpkg.cfg              dpkg包管理软件的配置文件[Configuration file with default options]
 
-/var/log/dpkg.log                dpkg包管理软件的日志文件【Default log file (see /etc/dpkg/dpkg.cfg(5) 】
+/var/log/dpkg.log                dpkg包管理软件的日志文件[Default log file (see /etc/dpkg/dpkg.cfg(5)]
 
-/var/lib/dpkg/available       存放系统所有安装过的软件包信息【List of available packages.】
+/var/lib/dpkg/available       存放系统所有安装过的软件包信息[List of available packages.]
 
 /var/lib/dpkg/status            存放系统现在所有安装软件的状态信息和控制信息
 
