@@ -1921,14 +1921,19 @@ unmount $mountPoint|device
 	locate quota | grep bin 等价于 locate *quota* | grep bin  说明支持正则locate $includeCharacters
 	locate quota #只要绝对路径名中包含字符串都显示 根据文件名查找比find快多了
 	whereis quota 不支持 whereis *quota* 说明whereis不支持正则
-	whereis nano  #只查找bin /usr/share参考文档和脚本  man/info文档
+	whereis nano  #只查找bin 源文件*.h /usr/share参考文档和脚本  man/info文档
 	小结: locate $reg-fileName && whereis $noReg-fileName
 
 
 
 
+vi中     30%跳到文件行数的30%
+shell中  ctrl-u 取消当前命令
+zgrep
 
- 
+ipcs   #inter process communication show
+ipcmk  #ipc make
+ipcrm  #ipc rm
  
 
 
@@ -1945,7 +1950,7 @@ info $cmder     #若whereis返回值中有info位置
 
 #终极大杀器，查看安装的官方文档/usr/share/doc/下的README
 locate $keyword | grep share 
-
+#死马当活马医
 man -k $keyword  #man short description搜索
 man -K $keyword  #man手册全局搜索
 info -k $keyword #index搜索
@@ -1964,26 +1969,59 @@ enable
 man -h        #man的输出其实是less快捷键操作  默认忽略大小写
 man -k printf #在cmdname及其short description部分匹配搜索keyword
 man -K printf #全局搜索keyword
-man -w printf #where 说明printf 手册的位置  /usr/share/man
+man -w printf #where 说明printf手册的位置  
 cd $(dirname $(man -w man)) && ls -1 #查看man1有哪些命令
+
+#经典命令
+manpath -g | tr : \\n
+man2html /usr/share/man/man7/ip.7.gz > ip.html
+
 
 #经典文档
 man bash
 man test
+man 7 signal    #查看信号安全signal-safe函数functions man 7 pthreads
+man 7 tcp udp
+man 7 time   #real proces hard/soft/HZ/jiffies/epoch
+
+#进程间通讯
+man 7 svipc     #system v(古罗马数字5) interprocess communication mechanisms
+                #msg sem shm
+man 7 sem_overview semver
+man 7 shm_overview
+man 7 mq_overview
+man 7 pipe
+man 7 fifo
+
 
 #粗略文档，一扫而过
 man man
+man 7 man man-pages       #man文档的格式
+man 2 syscalls  #查看系统调用system call
 man 3 readline  #查看快捷键绑定
 man intro       #chkconfig是perl脚本
-man 7 asscii    #128
-man 7 armscii-8 #256
+man 7 asscii armscii-8       #128 256
+man 7 bash-buildins builtins #help参考手册
+man 7 boot bootparam bootup  #linux启动流程图
+man 7 charsets 
+man 7 environ   #environ 全局变量
+man 7 standards #c有哪些标准
+man 7 glibc     #http://www.gnu.org/software/libc/ git clone git://sourceware.org/git/glibc.git && cd glic && git checkout master
+man 7 glob regex     #文件名/路径通配符globbing，区别于正则表达式 ?任意单个字符 *任意长度(包括0)的任意字符
+man 7 nmcli-examples
+man 7 posixoptions #查看posix api
+man 7 suffixes units    #查看文件后缀 磁盘容量单位KMGTPEZY
+man 7 symlink
+man 7 systemd.index #列举systemd有哪些内容 
+man 7 systemd.special #列举systemd各target service的含义
+man 7 utf8 url(查看转义 lynx man2html)
+man 7 arp imcp
 
 #各级别
 man man         #帮助系统各级别说明 
-man 7 hier      #文件系统目录说明  
+man 7 hier file-hierarchy     #文件系统目录说明  
 man runlevel    #
 
-man 7 boot
 
 #查看文档快捷键
 
@@ -2002,6 +2040,10 @@ info info
  
 
 
+apt-cache madison nginx              #查看有哪些版本
+ap-cache  show    nginx | grep -i version  
+apt-get install -s $pkgName=$version #模拟安装指定版本 apt-get install nginx=1.14.2-1~xenial
+apt-cache policy nginx               #查看已安装的版本号
 
 
 
