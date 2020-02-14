@@ -1513,7 +1513,7 @@ lsblk  查看分区
 
 echo $mypassword | passwd --stdin $user #对用户$user设置密码$passwd
 curl ftp://$user:$passwd@$host//root #//etc中的第一个/是分隔符
-
+python3 -m http.server 8000 | python2.7 -m SimpleHTTPServer 8000 # 就以当前目录为根目录建立一http server
 
 
 
@@ -1930,6 +1930,28 @@ unmount $mountPoint|device
 vi中     30%跳到文件行数的30%
 shell中  ctrl-u 取消当前命令
 zgrep
+apt install speedtest-cli | pip3 install speedtest-cli  speedtest  #测试的是speedtest.net 
+npm install --global fast-cli  fast #默认下载 fast -u #上行        #netflix提供
+apt install iperf  #测试局域网window/linux/mac CS模型
+server： iperf -s 
+cli：    iperf -c $serverIP
+
+mkdir /swapfile
+cd /swapfile
+dd if=/dev/zero of=swap bs=1G count=1
+mkswap -f swap 
+swapon swap
+
+sysctl -a #打印所有的kernal变量
+taskset   #set/display cpu亲和性
+time timeout watch
+busybox tar --help
+curl ipconfig.co   #curl ifconfig.me
+
+
+
+
+
 
 ipcs   #inter process communication show
 ipcmk  #ipc make
@@ -1942,6 +1964,10 @@ ipcrm  #ipc rm
 严格执行
 type $symbol
 help $cmder #若type返回$symbol is shell buildin(: pwd) or keyword(for) 
+alias | grep $symbol
+declare -f $symbol
+declare -p | grep $symbol  
+busybox $cmder --help
 $cmder --help   #防止man和info会提供太详细而不归类的文档
 whatis $cmder   #获取描述，得知大致功能
 whereis $cmder  #得知bin/source/man&info位置
@@ -1980,6 +2006,7 @@ man2html /usr/share/man/man7/ip.7.gz > ip.html
 #经典文档
 man bash
 man test
+man 2 syscalls  #查看系统调用system call
 man 7 signal    #查看信号安全signal-safe函数functions man 7 pthreads
 man 7 tcp udp
 man 7 time   #real proces hard/soft/HZ/jiffies/epoch
@@ -1996,8 +2023,8 @@ man 7 fifo
 
 #粗略文档，一扫而过
 man man
+man 1 busybox
 man 7 man man-pages       #man文档的格式
-man 2 syscalls  #查看系统调用system call
 man 3 readline  #查看快捷键绑定
 man intro       #chkconfig是perl脚本
 man 7 asscii armscii-8       #128 256
@@ -2047,6 +2074,64 @@ apt-cache policy nginx               #查看已安装的版本号
 
 
 
+
+xargs -t  cmder #对传递过来的都执行一次命令cmder
+
+
+
+
+
+变量种类
+	declare|set
+		shell-buildina: HISTSIZE  
+						#export | grep HIS为空，说明不是通过export的
+		env|export:     export userVarName=userVarValue
+		                #在打印与设置变量功能是等价的
+		                #但help export /usr/bin/env
+		命令行临时:      shellVarName=shellVarValue
+函数
+	declare|set
+
+>varName=varValue         #用户在命令行中设定shell变量
+                          #从declare | grep varName
+                          #等价于declare -- varName=varValue
+>export | grep varName    #在这个session中没有显示
+>env    | grep varName    #在这个session中没有显示
+>set    | grep varName    #在这个session中有显示        ？？？？？？
+
+>export varName
+>export | grep varName    #在这个session中有显示
+>env    | grep varName    #在这个session中有显示
+
+>exit
+>login
+
+>export | grep varName    #在这个session中没有显示
+>env    | grep varName    #在这个session中没有显示
+>set    | grep varName    #在这个session中没有显示
+
+typeset == declare等价 从字面就可以看出设置set类型type
+declare	  #普通的变量定义(varName=)没有附加属性
+	作用1 打印, 后不接varName和functionName  
+		declare      #显示所有变量和函数 与set效果相同
+		declare -p   #显示变量及其属性
+		declare -f   #显示函数
+		declare -f $funcName
+	作用2 声明为某类型变量 附加额外属性， 否则默认都是字符串变量即使v= 也是空字符
+		declare [+/-] [rxai] varName=varValue  #可以组合使用
+			- 具有某属性，如整型  +取消某属性
+			r readonly
+			x 指定变量会export为环境变量，可供非shell调用
+			i integer
+			a array
+			A map
+
+			eg
+			declare -a arr='([0]="a" [1]="b" [2]="c")' #声明数组变量
+			declare -ar                                #可组合使用
+
+	
+	
 	
 	
 疑问
@@ -2070,3 +2155,111 @@ tmux  ctrl-b q  #显示pane数字
 			 0-9 #choose window
 
 
+
+https://blog.51cto.com/7424593/2174156
+
+GET http://$ip/v1/versions
+{
+	"code":200,
+	"description":"",
+	"data":{
+		"windows":["1.0","2.0"],
+		"linux":["1.0","2.0"],
+		"android":["1.0","2.0"]
+	}
+}
+
+GET http://$ip/v1/hosts
+{
+	"code":200,
+	"description":"fail reason",
+	"data":{
+		"windows":[$ip,$ip],
+		"linux":[$ip,$ip],
+		"android":[$ip,$ip]
+	}
+}
+
+POST http://$ip/api/v1/deploy              #部署节点
+{
+	"ip": "192.168.1.8",                   #部署节点机器ip
+	"os": "windows|linux|android",         #部署节点的操作系统
+	"deployLocation":"/data/ipfs",         #部署位置
+	"deployVersion":"1.0",                 #部署版本
+}
+
+{
+	"code": 200,
+	"reason": "fail reeson",
+	"data":{
+		"nodeid":1,                        #返回节点id
+	}
+}
+
+
+POST http://$ip/api/v1/start?nodeid=1       #启动节点
+{
+	"code":200,
+	"reason":"fail reason",
+	"data":{}
+}
+
+
+POST http://$ip/api/v1/stop?nodeid=1        #停止节点
+{
+	"code":200,
+	"reason":"fail reason",
+	"data":{}
+}
+
+
+POST http://$ip/api/v1/restart?nodeid=1     #重启节点
+{
+	"code":200,
+	"reason":"fail reason",
+	"data":{}
+}
+
+
+GET http://$ip/api/v1/nodesstatus           #查询所有节点状态
+{
+	"code": 200,                            #http返回码
+	"reason": "failed reason",              #失败原因
+	"data": [
+		{
+			"ip": "192.168.1.8",
+			"runningStatus":2,              #运行状态stop:0 launching running:2
+			"deployLocation": "/data/ipfs", #部署位置
+			"deployVersion": "1.0",         #部署版本
+			"diskspace":"100M",             #占用磁盘空间
+		},
+		{
+
+		}
+	]
+}
+
+GET htttp://$ip/api/v1/nodestatus?nodeid=1   #查询单节点状态
+{
+	"code":200,
+	"reason":"",
+	"data":{
+		"runningStatus":2,
+		"deployLocation": "/data/ipfs",
+		"deployVersion": "1.0",
+		"diskspace":"100M",
+	}
+}
+
+POST　http://$ip/api/ipfs/v1/updatenode?nodeid=1
+{
+	"os":2,
+	"preDeployLocation":"",
+	"preDeployVersion":"",
+	"deployLocation":"",
+	"deployVersion":"1.0"
+}
+
+{
+	
+}

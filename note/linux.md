@@ -93,6 +93,24 @@ export PS1="[\u@\h \W $(getGitBranchFuncName) ]$\n$" #man bash 搜索PS1,根据�
 			   执行logout/exit退出shell
 非登录shell     不需要用户名密码登录或--login登录  如在命令行执行bash命令 在KDE或GNODE打开Terminal
                执行exit退出shell
+			   
+			   
+中文man手册
+apt install manpages-zh
+
+wget https://github.com/man-pages-zh/manpages-zh/archive/v1.6.3.3.tar.gz
+tar -zxvf v1.6.3.3.tar.gz
+rm -f v1.6.3.3.tar.gz
+cd manpages-zh-1.6.3.3
+autoreconf --install --force
+./configure
+make && make install
+
+wget  https://src.fedoraproject.org/repo/pkgs/man-pages-zh-CN/manpages-zh-1.5.1.tar.gz/13275fd039de8788b15151c896150bc4/manpages-zh-1.5.1.tar.gz
+./configure --disable-zhtw  --prefix=/usr/local/zhman
+make && make install
+echo "alias cman='man -M /usr/local/zhman/share/man/zh_CN' " >> ~/.bash_profile
+source ~/.bash_profile
 ```
 
 ###  内置命令
@@ -559,6 +577,11 @@ done
 
 #菜单选择
 select name [in list]; do 
+	echo "your input is $REPLY"
+	echo "you choose result is $name"
+	if [ $name == "apple" ]; then 
+		break
+	fi
 	case $name in 
         pattern1 )
             statements ;;
@@ -713,6 +736,8 @@ set -o pipefail #the return value of a pipeline is the status of
                 #       failCmd | echo "aa"
                 #       echo "bbb"
                 #为了使管道错误就不执行下面一行命令代码而退出,需要设置该选项
+bash -c "echo 'a'; exit 1" | bash -c "echo 'b'; exit 2;" | bash -c "echo 'c'; exit 3"
+echo $?
 ```
 ##  经验
 
@@ -2697,6 +2722,14 @@ info $cmd
 	s|/  reg search 按s或/进行正则搜索
     h    help  帮助
     q    quit  退出
+	
+	__________
+	    |_____
+		|__u__
+		      |_____
+		      |__p__
+			  |===b/e/===tab===回车
+			  |__n__
 ```
 
 ##  查找四天王which find  whereis locate
