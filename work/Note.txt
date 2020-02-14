@@ -2028,7 +2028,7 @@ man 7 man man-pages       #man文档的格式
 man 3 readline  #查看快捷键绑定
 man intro       #chkconfig是perl脚本
 man 7 asscii armscii-8       #128 256
-man 7 bash-buildins builtins #help参考手册
+man 7 bash-builtins builtins #help参考手册
 man 7 boot bootparam bootup  #linux启动流程图
 man 7 charsets 
 man 7 environ   #environ 全局变量
@@ -2079,16 +2079,25 @@ xargs -t  cmder #对传递过来的都执行一次命令cmder
 
 
 
+set  -o
+echo $-          #shell默认选项
+echo $SHELLOPTS  #set -o为on的选项
 
+declare/typeset set env/export 
 
 变量种类
 	declare|set
 		shell-buildina: HISTSIZE  
-						#export | grep HIS为空，说明不是通过export的
+						#export | grep HIS
+						#为空且在各session中存在，说明不是通过export的
 		env|export:     export userVarName=userVarValue
 		                #在打印与设置变量功能是等价的
 		                #但help export /usr/bin/env
 		命令行临时:      shellVarName=shellVarValue
+
+	使用unset取消set export env定义的变量
+	使用readonly重新设置变量的属性，之后该变量就不能unset
+	使用local在function中设置属性
 函数
 	declare|set
 
