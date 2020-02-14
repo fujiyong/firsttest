@@ -716,8 +716,14 @@ axel -n 20 $addr    多线程下载
 tig git https://www.jianshu.com/p/e4ca3030a9d5
 multitail
 script/scriptreplay  终端会话录制并回放
-top htop glances
-lynx  终端浏览器
+top htop glances atop
+lynx  elinks 终端浏览器
+tldr  too long don't read  #查看命令常用语法     https://www.yangxingzhen.com/
+busybox top --help         #查看命令简短说明
+man中文参考手册
+cmder 
+zeal/dash 帮助手册      
+
 
 
 
@@ -1947,6 +1953,7 @@ taskset   #set/display cpu亲和性
 time timeout watch
 busybox tar --help
 curl ipconfig.co   #curl ifconfig.me
+tldr $cmder 
 
 
 
@@ -1967,7 +1974,8 @@ help $cmder #若type返回$symbol is shell buildin(: pwd) or keyword(for)
 alias | grep $symbol
 declare -f $symbol
 declare -p | grep $symbol  
-busybox $cmder --help
+tldr $cmder 
+busybox $cmder --help   #tar top
 $cmder --help   #防止man和info会提供太详细而不归类的文档
 whatis $cmder   #获取描述，得知大致功能
 whereis $cmder  #得知bin/source/man&info位置
@@ -2079,6 +2087,8 @@ xargs -t  cmder #对传递过来的都执行一次命令cmder
 
 
 
+shopt           #set/unset shell options
+
 set  -o
 echo $-          #shell默认选项
 echo $SHELLOPTS  #set -o为on的选项
@@ -2124,7 +2134,8 @@ declare	  #普通的变量定义(varName=)没有附加属性
 	作用1 打印, 后不接varName和functionName  
 		declare      #显示所有变量和函数 与set效果相同
 		declare -p   #显示变量及其属性
-		declare -f   #显示函数
+		declare -F   #显示所有函数名
+		declare -f   #显示所有函数及其定义
 		declare -f $funcName
 	作用2 声明为某类型变量 附加额外属性， 否则默认都是字符串变量即使v= 也是空字符
 		declare [+/-] [rxai] varName=varValue  #可以组合使用
@@ -2145,6 +2156,9 @@ declare	  #普通的变量定义(varName=)没有附加属性
 	
 疑问
 1 如何由应用bin得知serviceName
+
+
+systemctl start sysstat && sar #Ubuntu默认没启动 sed 's/false/true/' /etc/default/sysstat 
 
 
 grep | 尽可能多 ?+*只是前一个单位(单个字符或小括号或中括号为单位)
