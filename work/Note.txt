@@ -1951,11 +1951,48 @@ swapon swap
 sysctl -a #打印所有的kernal变量
 taskset   #set/display cpu亲和性
 time timeout watch
+
+curl ipconfig.co  #curl ifconfig.me
+
 busybox tar --help
-curl ipconfig.co   #curl ifconfig.me
+cman中文手册
 tldr $cmder 
 
-
+readline 
+	查看绑定 bind -p
+	配置文件 /etc/inputrc ~/.inputrc格式 
+		keyname: $function-name   #keyname为Control- RUBOUT- (就是delete) ESC  RET|RETURN SPA|SPACE TAB
+		keyname: "$macro"         #macro 就是字符串
+		"keyseq": $function-name  #keyseq为 \C-(control) \M-(esc) \e(alt) \\ \" \'
+		"keyseq": "$macro"
+	增量搜索 
+		开始反向增量搜索 ctrl-r  #reverse 结合fzf屌爆了
+		开始正向增量搜索 ctrl-s  #search
+		取消增量搜索 ctrl-g
+		确定增量搜索 esc ctrl-j 更喜欢esc \n
+	非增量搜索
+		反向非增量搜索 M-p
+		正向非增量搜索 M-n
+	Moving 在一行中移动
+		c-a 行首
+		c-e 行尾
+		c-f forward-char
+		c-b backward-char
+		M-f forward-word 
+		M-b backward-word
+		c-l clear screen
+	Change
+		ctrl-d 删除一个字符
+		backspace 删除前一个字符
+		M-u   wordUppercase
+		M-l   wordLowercase
+		M-c   wordCapatical
+		
+	history 在历史所有命令中
+		M-< 历史的第一行
+		ctrl-p prep 可重复按
+		ctrl-n next 可重复按(适用于先重复按ctrl-p多次，然后再回过来)
+		M-> 历史的最后一行
 
 
 
@@ -1965,22 +2002,32 @@ ipcmk  #ipc make
 ipcrm  #ipc rm
  
 
-
+dpkg -L tldr | sed -n '2,$p' | xargs ls -ld | awk /^d/ ''   #行首非目录怎么表示     ???
 
 	
+    ________________type________________
+	|       |        |         |       |
+  alias  declare  builtins   PATH   scriptName
 严格执行
-type $symbol
-help $cmder #若type返回$symbol is shell buildin(: pwd) or keyword(for) 
-alias | grep $symbol
-declare -f $symbol
-declare -p | grep $symbol  
-tldr $cmder 
-busybox $cmder --help   #tar top
-$cmder --help   #防止man和info会提供太详细而不归类的文档
-whatis $cmder   #获取描述，得知大致功能
-whereis $cmder  #得知bin/source/man&info位置
-man -[1-9] $cmder
-info $cmder     #若whereis返回值中有info位置
+type 
+	type $symbol
+alias
+	alias $symbol
+declare
+	declare -f $symbol
+	declare -p $symbol
+builtins  #若type返回$symbol is shell buildin(pwd) or keyword(for)
+	help $cmder 
+PATH
+	whatis $cmder   #获取描述，得知大致功能
+	whereis $cmder  #得知bin/source/man&info位置
+		busybox $cmder --help   #bman busy    man tar top
+		cman $cmder             #cman chinese man 
+		tldr $cmder             #sman simple  man
+		
+		$cmder --help   #防止man和info会提供太详细而不归类的文档
+		man -[1-9] $cmder
+		info $cmder     #若whereis返回值中有info位置
 
 #终极大杀器，查看安装的官方文档/usr/share/doc/下的README
 locate $keyword | grep share 
@@ -2087,6 +2134,9 @@ xargs -t  cmder #对传递过来的都执行一次命令cmder
 
 
 
+可执行搜索顺序 函数 builtin-cmds PATH script
+
+
 shopt           #set/unset shell options
 
 set  -o
@@ -2094,6 +2144,14 @@ echo $-          #shell默认选项
 echo $SHELLOPTS  #set -o为on的选项
 
 declare/typeset set env/export 
+
+export 向子进程导出的
+为什么需要export
+>declare -p k1  #显示未定义
+>k1=v1
+>echo $k1                #打印v1
+>/bin/bash -c "echo $k1" #打印v1
+>echo "echo $k1" > a.sh && chmod u+x a.sh; /bin/bash a.sh #打印为空
 
 变量种类
 	declare|set
