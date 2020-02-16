@@ -14,7 +14,7 @@ google youtube  fujiyong2000@gmail.com  sr
 ipfs1	192.168.1.106	22	root	13622228504
 ipfs2	192.168.1.178	22	root	13622228504
 ipfs3	192.168.1.120	22	root	13622228504
-以太坊1	120.79.97.248	22	root	Svdsdev2019*$()
+以太坊1	120.79.97.248	22	root	SuperVDS*2020@2805
 以太坊2	120.78.173.134	22	root	Svdsdev2019*$()
 以太坊3	39.108.104.133	22	root	Svdsdev2019*$()
 测试机  192.168.1.128  root/orangepi  orangepi  
@@ -705,7 +705,7 @@ original-ks.cfg        [anəˈkändə]  水蟒  kickstart 启动
 
 cal [[[day] month] year]
 
-
+tmux 配置管理工具oh my tmux  set -g mouse off改为on
 ag advanced grep
 fzf  vim $(fzf)        fuzzy finder
 	 cd $(find * -type d | fzf) 
@@ -2234,6 +2234,16 @@ tmux  ctrl-b q  #显示pane数字
 			 '  #输入windows index
 			 w  #choose window
 			 0-9 #choose window
+			 
+			 - _     #水平竖直切分出pane
+			 hjkl    #切换pane 
+			 c-h c-l #切换窗口
+			 HJKL    #resize pane
+			 c       #create window
+			 +       #pane -> window
+			 x       #kill pane
+			 &       #kill window
+			 
 
 
 
