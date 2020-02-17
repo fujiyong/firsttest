@@ -24,6 +24,8 @@ git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
 zsh操作指南
 http://www.skywind.me/blog/archives/2060
 
+S*vds%%2020*()02191848$
+
 
 
 alias | grep -E "b\."
@@ -723,6 +725,13 @@ busybox top --help         #查看命令简短说明
 man中文参考手册
 cmder 
 zeal/dash 帮助手册      
+
+keepalived 高可用的保证工作在347层
+Layer3： 发送ICMP报文，查看ip是否能ping通
+Layer4： 查看端口port是否能telnet通
+Layer：  根据用户自定义的协议检查是否正常  
+
+haproxy 重点在proxy
 
 
 
@@ -2010,7 +2019,7 @@ dpkg -L tldr | sed -n '2,$p' | xargs ls -ld | awk /^d/ ''   #行首非目录怎�
   alias  declare  builtins   PATH   scriptName
 严格执行
 type 
-	type $symbol
+	type -t $symbol   #alias function keyword builtin file 
 alias
 	alias $symbol
 declare
@@ -2217,6 +2226,11 @@ declare	  #普通的变量定义(varName=)没有附加属性
 
 
 systemctl start sysstat && sar #Ubuntu默认没启动 sed 's/false/true/' /etc/default/sysstat 
+pkill nginx
+echo "" >> /etc/crontab
+service crond restart
+service keepalived restart 
+
 
 
 grep | 尽可能多 ?+*只是前一个单位(单个字符或小括号或中括号为单位)
