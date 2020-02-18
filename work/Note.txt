@@ -2368,3 +2368,148 @@ POST　http://$ip/api/ipfs/v1/updatenode?nodeid=1
 {
 	
 }
+
+
+
+
+redis
+
+rdb方式(真实数据)
+人工主动执行命令  save 阻塞执行
+                  bgsave 后台执行
+配置被动执行命令  save 900 1 
+
+aof方式(真实命令list/set/zset/hash64个元素)
+增量
+	什么时候人工主动执行?????????
+	配置被动执行aof命令        appendfsync always|everysecond|no  #执行fsync或fdatasync的频率
+		操作append_to_buf
+全量  
+	人工主动执行rewriteaof命令 bgrewriteaof
+		操作append_to_rewrite_buf
+		pid=fork();
+		if pid > 0 {
+			execute_cmd
+			append_to_buf          -----> old.aof
+			append_to_rewrite_buf  -----> new.aof
+		} else if pid == 0 {
+		}
+	什么时候全量自动执行rewrieaof??????????????
+
+
+replicate 
+slaveof $master_ip $master_port
+slaveof none
+info replication  offset lag最后一次主从通讯到现在的时间   类似于client list中idle字段
+
+Master                                            slave
+		   <-----ping ----------------------------
+		   ------pong ---------------------------->
+		   <-----auth $master_auth_passwd----------   slave配置文件中masterauth字段 也就是master配置文件中的requirepasswd 要一致  输入master密码
+		   <-----replconf listening-port $port-----   向master报告自己的listen port
+	       <-----psync $master_id offset --------     向master报告自己的replication offset
+	bgsave
+			-----send rdb  offset -------->              状态同步
+			-----send replication backlog中的命令 ---->  命令传播cmder prograte
+			<----replconf ack $offset --------------      headbeat
+
+
+sentinel
+在sentinel中使用raft协议选举sentinel leader
+>slave of none
+>slave of $master_ip $master_port
+
+
+cluser  #gossip协议(检查节点是否断线和故障转移) 节点只能使用0号数据库
+redis-cli -c $ip $port
+>cluster meet $ip $port  #将节点加入cluster
+>cluster nodes           #查看cluster nodes 
+>cluster addslots 1 2 3 4 ... 1000  #分配好slot才可称为上线
+>get $key                #MOVED错误 这个slot根本就不在我这儿
+
+#迁移slot
+>cluster setslot $slotNumber importing $sourceID #通知target准备接收slot
+
+>cluster setslot $slotNumber migrating $targetID #通知source准备迁移migrate slot
+>cluser getkeysinslots $slotNumber $count 
+>cluser migrate $targetIP $targetPort $keyName 0 $timeout #从source迁移key
+>cluster setslot $slotNumber node $targetID   #通知cluster中的节点slot迁移到了$targetID
+ASK错误                  #本来这个slot是在我这儿 但我正搬家呢
+>asking
+
+>cluster replicate $nodeID
+
+
+Master                Slave
+	                  slaveof $master_ip $master_port
+	     <----sync----	   
+(bgsave)
+
+hotkey
+bigkey
+
+3.2
+bitmap
+geohash
+4.0
+boomfilter
+unlink替换del flushdb flushall
+redis-cell 漏斗限流
+mix-persistence
+psync2
+memory 
+swapdb
+5.0 
+stream
+
+
+pipe
+pubsub
+tx
+lua
+sort (list set zset)
+	sort 
+		alpha asc/desc 
+		by *_id 
+		limit offset cout
+		get *_name
+		store $new_key  #默认是暂时排序 
+bitmap getbit
+
+slow
+monitor
+info
+
+
+obdump -c -x #-c ascii -x hex
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>cluster info 
+>set msg "dfd"          #返回MOVED错误，redirected to slot $slot at $ip:$port
+>cluster keyslost $key  #返回key属于哪个slot
+>cluster getkeysinslots $slotNumber $keysCount #返回槽号slotNumber中keyCount个key
+
+
+	
