@@ -724,7 +724,8 @@ tldr  too long don't read  #查看命令常用语法     https://www.yangxingzhe
 busybox top --help         #查看命令简短说明
 man中文参考手册
 cmder 
-zeal/dash 帮助手册      
+zeal/dash 帮助手册
+cloc 统计代码
 
 keepalived 高可用的保证工作在347层
 Layer3： 发送ICMP报文，查看ip是否能ping通
@@ -2373,6 +2374,10 @@ POST　http://$ip/api/ipfs/v1/updatenode?nodeid=1
 
 
 redis
+百度redis 命令参考  doc.redisfans.com  redisdoc.com
+
+
+>object idletime $key #lru时间
 
 rdb方式(真实数据)
 人工主动执行命令  save 阻塞执行
@@ -2400,7 +2405,7 @@ aof方式(真实命令list/set/zset/hash64个元素)
 replicate 
 slaveof $master_ip $master_port
 slaveof none
-info replication  offset lag最后一次主从通讯到现在的时间   类似于client list中idle字段
+info replication   #offset lag最后一次主从通讯到现在的时间   类似于client list中idle字段
 
 Master                                            slave
 		   <-----ping ----------------------------
@@ -2425,7 +2430,7 @@ redis-cli -c $ip $port
 >cluster meet $ip $port  #将节点加入cluster
 >cluster nodes           #查看cluster nodes 
 >cluster addslots 1 2 3 4 ... 1000  #分配好slot才可称为上线
->get $key                #MOVED错误 这个slot根本就不在我这儿
+>get $key                ########MOVED错误 这个slot根本就不在我这儿
 
 #迁移slot
 >cluster setslot $slotNumber importing $sourceID #通知target准备接收slot
@@ -2434,10 +2439,16 @@ redis-cli -c $ip $port
 >cluser getkeysinslots $slotNumber $count 
 >cluser migrate $targetIP $targetPort $keyName 0 $timeout #从source迁移key
 >cluster setslot $slotNumber node $targetID   #通知cluster中的节点slot迁移到了$targetID
-ASK错误                  #本来这个slot是在我这儿 但我正搬家呢
+##########ASK错误                  #本来这个slot是在我这儿 但我正搬家呢
 >asking
 
 >cluster replicate $nodeID
+
+
+>cluster info 
+>set msg "dfd"          #返回MOVED错误，redirected to slot $slot at $ip:$port
+>cluster keyslost $key  #返回key属于哪个slot
+>cluster getkeysinslots $slotNumber $keysCount #返回槽号slotNumber中keyCount个key
 
 
 Master                Slave
@@ -2475,41 +2486,67 @@ sort (list set zset)
 		get *_name
 		store $new_key  #默认是暂时排序 
 bitmap getbit
-
-slow
+client list/kill 
+slowlog
 monitor
 info
 
 
+watch $key1 $key2   #让服务器登记这个client要求在接下来的这段时间内服务器不能对这些key进行修改
+multi               #begin 标记tx的开始
+exec/discard        #commit 准备执行 首先检查watched key是否被修改，若被修改过，则直接返回错误
+                    #discard 只能位于最后，不能位于中间  非rollback 表示放弃不执行
+unwatch $key1 $key2 #让服务器取消登记
+
+Atomic     原子性  不支持   遇见错误,也会继续往下执行
+Consitence 一致性  
+	什么是一致？       只有对比才可发现是否一致。那么对比什么呢？ 数据库
+	一致的标准时什么？ 数据符合数据库标准的定义和标准，无无效或非法数据。
+	
+lua
+redis-cli --eval "a.lua"
+>script    load "return 0;"
+>eval      "return 0" 0  
+>evalsha   $hash $argCount $arg1 ...
+>script    exists $hash1 $hash2
+>script    kill    #lua_time_limit 还需要用户手动发起命令script kill或shutdown nosave
+>script    flush
+
+lua原生函数库
+	base/core:  assert error pairs tostring pcall and so on,但loadfile因为安全被删
+	string:     find format len reverse and so on
+	table:      insert remove sort concat and so on
+	math:       因为安全删掉原版的randomseed random    
+	debug：     sethook gethook getinfo setmetable getmetable
+	cjson       decode encode
+	struct      pack unpack
+	cmsgpack    pack unpack
+redis封装的
+	全局变量
+		用户不能自定义全局变量，只能get/set由redis定义的全局变量
+	函数  
+		redis.call                  #eval "return redis.call('SMEMBERS', KEYS[1])" 1 sname  使用辅助函数__redis__compare__helper排序
+		redis.pcall                 #若出现错误使用__redis__err__helper排序
+		redis.status_reply  
+		redis.error_reply
+		redis.log(redis.LOG_DEBUG)  #VERBOSE NOTICE WARNING
+		math.randomseed($seedValue) #修改版的randomseed,相同的seed产生相同的随机数  改变种子,参数默认值为0,返回空 
+		math.random($var)           #修改版的random,返回随机数
+		redis.sha1hex               #计算sha值
+		__redis__err_helper         #辅助函数作用于redis.pcall打印具有行号的错误日志 
+		__redis__compare_helper     #辅助函数作用于需要一致性的地方 smembers sunion sdiff smembers hkeys hvalues keys
+	
+
+	
+
+gdb -ex "set pagination 0" -ex "thread apply all bt" -batch -p $pid
 obdump -c -x #-c ascii -x hex
 
 
 
+https://blog.csdn.net/qq_38472380/article/details/81039058
+无人值守安装centos
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->cluster info 
->set msg "dfd"          #返回MOVED错误，redirected to slot $slot at $ip:$port
->cluster keyslost $key  #返回key属于哪个slot
->cluster getkeysinslots $slotNumber $keysCount #返回槽号slotNumber中keyCount个key
-
-
-	
+实验： 
+redis fork 查看内存是否倍增？？？？？？？？？？
