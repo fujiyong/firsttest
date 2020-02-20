@@ -424,6 +424,43 @@ install_item "tig"
 ############################### nginx #########################################
 install_item "nginx"
 ############################### mysql #########################################
+if [ -f $(which mysqld) || -f $(which mysql) ]; then
+	echo "mysql installed"
+else 
+	echo "start install mysql server"
+	if [[ $osType == ubuntu ]]; then
+		apt install -y mysql-server mysql mysql-devel
+	elif [[ $osType == centos ]]; then
+		yum install -y mysql-server mysql mysql-devel
+	end
+	/usr/sbin/groupadd mysql
+    /usr/sbin/useradd -r -g mysql -s /bin/false mysql
+
+	sed -i 's/bind-address=127.0.0.1/bind-address=0.0.0.0/' $(locate mysql.conf.d)
+	mysqld_safe --user=mysql --skip-grant-tables  >/dev/null 2>&1 &  #启动mysql
+
+	defaultmysqlpwd=`grep 'A temporary password' /usr/local/mysql/log/error.log | awk -F"root@localhost: " '{ print $2}'`
+	#echo $defaultmysqlpwd
+	#mysqladmin -uroot password 12345678
+	PSWD=`cat /root/.mysql_secret | awk -F ':' '{print substr($4,2,16)}'`
+	PSWD=` grep -v '^$' /root/.mysql_secret | awk -F ':' '{print substr($4,2,16)}'`
+	##PSWD=${PWD:1:16}
+	mysql -uroot -e "set password for 'root'@'localhost'=password('system')"
+	mysql -uroot -p12345678 <<EOF
+#若root的plugin='auth_socket'并不是本地密码，因此需要修改它
+SELECT user, plugin FROM mysql.user;
+SET GLOBAL validate_password_policy=0;
+SET GLOBAL validate_password_mixed_case_count=0;
+SET GLOBAL validate_password_number_count=3;
+SET GLOBAL validate_password_special_char_count=0;
+SET GLOBAL validate_password_length=3;
+grant all privileges on *.* to root@'%' identified by '12345678';
+UPDATE mysql.user SET authentication_string=PASSWORD('123'), plugin='mysql_native_password' WHERE user='root';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@''IDENTIFIED BY 'rootpassword' WITH GRANT OPTION;
+flush privileges;
+EOF
+	mysql -uroot -p12345678
+fi
 
 
 
