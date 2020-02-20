@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -eu
 
@@ -6,6 +6,7 @@ rc_root="${HOME}/.local/rc"
 if [ ! -d "$rc_root" ]; then
     mkdir -p "$rc_root"
 fi
+misc_file="${HOME}/.local/misc"
 
 colorForgRed="\e[31m"
 colorForgYellow="\e[33m"
@@ -267,6 +268,22 @@ export LESS_TERMCAP_so=$'\E[1m\E[33m\E[44m'
 EOF
 fi
 source_rc_file "$rc_file" ".mancolor_rc"
+########################### misc         #####################################
+rm -f $misc_file
+cat > $misc_file << EOF
+set -o vi
+function blines(){
+	blanklinesCount=50
+	if [ $# -gt 2 ]; then
+		blanklinesCount=$1
+	fi
+	for line in $(seq $blanklinesCount); do
+		echo ""
+	done
+	clear
+}
+EOF
+source_rc_file "$misc_file" ".misc"
 ########################### firewalld    ######################################
 enable_firewall
 
@@ -345,7 +362,6 @@ EOF
     source_rc_file "$rc_file" ".tldr_rc"
     rm -rf "$HOME/tldrbin"
     echo "installing tldr ends"
-    
 fi
 if [ -d $HOME/.tldr ]; then
     echo "dir .tldr exist and to update"
