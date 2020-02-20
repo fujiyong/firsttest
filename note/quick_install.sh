@@ -231,26 +231,29 @@ function install_chinese_support_pkg(){
 
 
 ############################## vi #############################################
-if [ -f "$HOME/.vimrc" ]; then
-    echo '~/.vimrc exists'
-else
-    echo '~/.vimrc not exist'
 cat > "$HOME/.vimrc" << EOF
-":help '\$item'
-set nu
+":h '\$item'
+set nocompatible
+syntax on
+set nu rnu
 set cul
+
 set is
 set hls
-syntax on
+set smartcase
+set showmatch
+
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set autoindent
+set smartindent
+set expandtab
 EOF
 fi
 ############################## color man ######################################
 rc_file=${rc_root}/man/.mancolor_rc
-if [ -f "$rc_file" ]; then
-    echo "rc file $rc_file exists"
-else
-    echo "rc file $rc_file not exist"
-    mkdir -p $(dirname $rc_file)
+mkdir -p $(dirname $rc_file)
 cat > "${rc_file}" << EOF
 export LESS_TERMCAP_mb=$'\E[1m\E[32m'
 export LESS_TERMCAP_mh=$'\E[2m'
@@ -269,7 +272,6 @@ EOF
 fi
 source_rc_file "$rc_file" ".mancolor_rc"
 ########################### misc         #####################################
-rm -f $misc_file
 cat > $misc_file << EOF
 set -o vi
 function blines(){
