@@ -2661,3 +2661,51 @@ https://www.zsythink.net/archives/2252
 
 
 D:\fjy\code\go\src\github.com\ethereum\go-ethereum\consensus\ethash\consensus.go
+
+
+
+
+
+mysql
+windows下是my.ini  linux下是my.cnf
+[mysqld]
+basedir=
+datadir=
+bind-addr=0.0.0.0  #不能是127.0.0.1
+port=3306
+character-set-server=utf8
+#skip-grant-tables  #忘记密码时使用
+default_authentication_plugin=mysql_native_password #默认的密码加密方式是caching_sha2_password，但很多gui客户端不支持默认加密方式，所以不能登录
+[mysql]
+default-character-set=utf8
+
+
+1. 初始化生成密码
+方式一 官方推荐方式
+mysqld --initialize --console #会初始化data目录并将password打印到控制台
+                              #如果不加console， 会写入日志/var/log/mysqld.log
+                              #a temporary password is generated for root@localhost: $passwd
+方式二
+mysql_install_db              #会在~/.mysql_secret中存放密码
+
+
+2. 启动
+mysqld_safe
+
+3.使用初始密码登录 修改密码并可远程登录
+mysql -uroot -p
+Enter password:   #输入上步的密码
+mysql>use mysql;
+mysql>set PASSWORD=PASSWORD("111111")
+mysql>ALTER USER "root"@"%" IDENTIFIED $加密方法 BY "111111"; #可以使用默认的加密方法
+mysql>select user, host, plugin, authentication_string from user; # plugin是密码的加密方式 authentication_string是密码加密后的字符串
+mysql>update user set host = '%' where user = 'root';  #mysql8.0需要修改加密方式，否则一般的gui client由于不支持某种加密方式而无法登录
+mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '111111' WITH GRANT OPTION;  
+      #on后面是$db.$table, 其中*表示任意  $user@$host,%表示任意ip都可以登录，默认是localhost
+mysql>CREATE USER 'user1'@'%' IDENTIFIED BY '123456';
+mysql>show grants for $user@$host
+mysql>flush privileges;
+
+任何时候出现错误都可以删掉数据目录的所有文件，重新再来  rm -rf /var/lib/mysql/* && chown -R mysql:mysql /var/lib/mysql
+mysqld --verbose --help 可以查看加载配置文件的顺序及默认值 mysqld --print-defaults 最后提示查看运行的mysqld的变量可以使用mysqladmin variables 
+mysql --help 可以查看加载配置文件的顺序及默认值 mysql --print-defaults
