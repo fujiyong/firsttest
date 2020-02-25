@@ -747,8 +747,11 @@ echo $?
 > ubuntu6.0默认是dash 比bash精简了很多指令 执行速度更快 也就少了一些功能的支持
 > 解决source命令没找到的方法
 > 方法1  代码头部添加#!/bin/bash 执行的时候使用source a.sh 或/bin/bash a.sh 或 ./a.sh
->    绝对不能sh a.sh 因为sh使用默认值dash 优先级高于a.sh的提示行,会覆盖掉a.sh的提示行
+> 绝对不能sh a.sh 因为sh使用默认值dash 优先级高于a.sh的提示行,会覆盖掉a.sh的提示行
 > 方法2  改变默认的shell为bash, sudo dpkg-reconfig bash
+> 
+> 
+> shell中的函数只能返回整数值 否则 numeric argument required
 > 
 > export OH=  等价于  export OH=""  等价于 javascript中的undefined
 > if [ $OH ]; then echo "1"; else echo "2"; fi
@@ -772,7 +775,7 @@ echo $?
 > help() {
 > cat << EOF
 > usage: $0 [OPTIONS]
->  --help               Show this message
+> --help               Show this message
 > EOF
 > }
 > 
@@ -1688,10 +1691,12 @@ sed IPV6=yes s/IPV6=yes/IPV6=no /etc/default/ufw #修改为不支持ipv6
 
 ufw disable/enable          #设置开机是否启动
 ufw default allow/deny      #设置默认策略, ufw默认不允许外部访问,但能访问外部
+systemctl status ufw | grep -i loaded | cut -d';' -f 2 | sed -e 's/^[ ]*//'
 
 ufw reload
 ufw reset
-ufw status verbose          #inactive
+ufw status verbose          #inactive !!!!!!!!!!!!!!!!!!!!
+ufw status verbose | grep -i status | cut -d: -f2 | sed -e 's/^[ ]*//'
 
 ufw logging on
 ufw logging low/medium/high #tail -f /var/log/ufw.log

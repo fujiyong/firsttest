@@ -2550,3 +2550,5 @@ https://blog.csdn.net/qq_38472380/article/details/81039058
 
 实验： 
 redis fork 查看内存是否倍增？？？？？？？？？？
+
+mysqld_safe  &  启动mysql的文本文件
