@@ -2585,8 +2585,9 @@ $(hostname)  cmd substitution       命令替换``  支持嵌套
 [[ ]]       test operator
                 字符串  -n -z =(偶尔亦可用==) !=    删掉\< \> 增加< >                  \<= \>=?
                 字符串(增加部分) 参考man grep
-                    == !=  pattern matching   模式匹配 匹配字符串或通配符,一定需要引号,否则当成文本字符串  如 [[ hello == hell? ]]
-                    =~     regular expression 正则匹配
+                    ==(偶尔亦可用=) !=  pattern matching   模式匹配 globbing 
+                                       匹配字符串或通配符,一定不需要引号,否则当成文本字符串  如 [[ hello == hell? ]]
+                    =~                 regular expression 正则匹配
                 整数           -gt -ge -eq -ne -lt -le
                 整数(增加部分)  + - * / %
                 文件
