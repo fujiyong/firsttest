@@ -13,7 +13,7 @@ google youtube  fujiyong2000@gmail.com  sr
 数据库	192.168.1.102	5432	postgres	pass@2018
 ipfs1	192.168.1.106	22	root	13622228504
 ipfs2	192.168.1.178	22	root	13622228504
-ipfs3	192.168.1.120	22	root	13622228504
+ipfs3	192.168.1.127	22	root	13622228504
 以太坊1	120.79.97.248	22	root	SuperVDS*2020@2805
 以太坊2	120.78.173.134	22	root	Svdsdev2019*$()
 以太坊3	39.108.104.133	22	root	Svdsdev2019*$()
@@ -2552,3 +2552,21 @@ https://blog.csdn.net/qq_38472380/article/details/81039058
 redis fork 查看内存是否倍增？？？？？？？？？？
 
 mysqld_safe  &  启动mysql的文本文件
+
+
+
+#https://blog.csdn.net/zxc024000/article/details/104168924
+ctrl-shift-p 输入remote-ssh:setting ->勾选show login termial
+ctrl-shift-p 输入remote-ssh:connect to host -> configure ssh host 
+
+左侧 remote explore 选择对应的目标,连接  在弹出的额终端窗口中输入密码
+左侧 remote explore 选择对应的目标,右击
+
+免密码登录
+    ssh-keygen -t rsa -b 4096         #产生的key位于 /c/Users/Administrator/.ssh/id_rsa.pub
+    ssh-copy-id root@192.168.1.106
+    ssh root@192.168.1.106 -p22
+
+
+    
+
