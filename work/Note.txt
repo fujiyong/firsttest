@@ -2645,3 +2645,8 @@ ${var//pattern1/pattern2}  将var中所有匹配patter1的字符串替换为patt
 
 #正则匹配的条件  中间=~ 右边没有双引号""
 [[ $a  =~ z*   ]]
+
+
+
+https://stackoverflow.com/questions/3427872/whats-the-difference-between-and-in-bash/3427931#3427931
+https://www.zsythink.net/archives/2252
