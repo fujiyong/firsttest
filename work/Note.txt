@@ -2571,31 +2571,36 @@ ctrl-shift-p 输入remote-ssh:connect to host -> configure ssh host
 
 ( )          组命令                 group cmder            启动一个子shell执行,括号外不可使用括号内的变量 命令之间用";"分割, 最后一个可以没有";", 各命令与括号之间不必有空格
 (a b c)      init array             初始化数组
-$(hostname)  cmd substitution       命令替换``  支持嵌套   
+$(hostname)  cmd substitution       命令替换``  支持变量嵌套"$(echo "$x" | grep "aa")"  支持表达式的双引号嵌套而不用使用转义符"\" $(echo $x|grep aa)
 
 
 
-[ ]         数组下标
+[ ]         posix 具有移植性
+            数组下标
             正则表达式的字符范围  [a-z]
             test operator, 等价于test, 既是bash内置关键字也是可执行命令 左右都要有空格
                 字符串的操作符  -n -z =(偶尔亦可用==) !=    其他的需要转义, 如\< \>                   \<= \>=?
                 整数           -gt -ge -eq -ne -lt -le
                 文件
-                逻辑运算        -a  -o  !
-[[ ]]       test operator
-                字符串  -n -z =(偶尔亦可用==) !=    删掉\< \> 增加< >                  \<= \>=?
-                字符串(增加部分) 参考man grep
-                    ==(偶尔亦可用=) !=  pattern matching   模式匹配 globbing 
-                                       匹配字符串或通配符,一定不需要引号,否则当成文本字符串  如 [[ hello == hell? ]]
-                    =~                 regular expression 正则匹配
-                整数           -gt -ge -eq -ne -lt -le
-                整数(增加部分)  + - * / %
-                文件
-                逻辑          && ||  !
-(( ))       integer arithmetic expansion, 类似于let,但比let强
-            整数 只要括号中的运算符表达式符合C语言运算规则,都可以放在$((exp))中,甚至是三目运算符
-                + - * / %
+                逻辑运算        -a  -o  !  不支持()改变优先级
+[[ ]]       test operator   
+                bash extension bash扩展  不具移植性
+                字符串  不用使用""以便防止字符串变量切割
+                    仍然保留一部分   -n -z =(偶尔亦可用==) !=                      \<= \>=?
+                    新增部分 参考man grep
+                        < >                取代\< \>
+                        ==(偶尔亦可用=) !=  pattern matching   模式匹配 globbing 
+                                           匹配字符串或通配符,一定不需要引号,否则当成文本字符串  如 [[ hello == hell? ]]
+                        =~                 regular expression 正则匹配
+                文件  同[]
+                逻辑          && ||  !  支持()改变优先级
+(( ))       integer arithmetic expansion, 类似于let,但比let强  
+            bash extension bash扩展 不具移植性
+            整数 
+                完全取代[]中整数操作
+                只要括号中的运算符表达式符合C语言运算规则,都可以放在$((exp))中,甚至是三目运算符  
                 >= > == != < <=  
+                + - * / %
                 ++ --     前后缀 
                 **        幂 
                 << >>     左右位移  
@@ -2603,7 +2608,8 @@ $(hostname)  cmd substitution       命令替换``  支持嵌套
              重定义变量值  如a=5; ((a++)) #$a为6
              算术运算比较   双括号中的变量可以不使用$前缀. 括号内支持多个用逗号分隔的符合C语言运算规则的表达式 
                            for((i=0;i<10;i++))   for i in `seq 0 10` for in {0..10}
-             逻辑运算      如if (($i))  if (($i<5))  
+             逻辑运算      && || ! 支持()改变优先级 如if (($i))  if (($i<5))  
+             不支持文件操作
 $(( ))      进制转换      将(2,8,16)转换成10进制, 如echo $((16#5f)) #16进制转为10进制结果为95
              
 
@@ -2651,3 +2657,7 @@ ${var//pattern1/pattern2}  将var中所有匹配patter1的字符串替换为patt
 
 https://stackoverflow.com/questions/3427872/whats-the-difference-between-and-in-bash/3427931#3427931
 https://www.zsythink.net/archives/2252
+
+
+
+D:\fjy\code\go\src\github.com\ethereum\go-ethereum\consensus\ethash\consensus.go
