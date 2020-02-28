@@ -69,7 +69,15 @@ man bash | col -bx > bash.txt
 
 comgen --help
 
+##  选项
 
+```
+shopt            #set/unset shell options
+
+set  -o          #set -o的值
+echo $-          #shell默认选项
+echo $SHELLOPTS  #set -o为on的选项
+```
 
 ##  命令
 
@@ -155,6 +163,74 @@ stty -a                            # 查看发送信号的快捷键
 ```
 
 ## 变量
+
+```
+declare/typeset set env/export 
+
+export 向子进程导出的
+为什么需要export
+>declare -p k1  #显示未定义
+>k1=v1
+>echo $k1                #打印v1
+>/bin/bash -c "echo $k1" #打印v1
+>echo "echo $k1" > a.sh && chmod u+x a.sh; /bin/bash a.sh #打印为空
+
+变量种类
+	declare|set
+		shell-buildina: HISTSIZE  
+						#export | grep HIS
+						#为空且在各session中存在，说明不是通过export的
+		env|export:     export userVarName=userVarValue
+		                #在打印与设置变量功能是等价的
+		                #但help export /usr/bin/env
+		命令行临时:      shellVarName=shellVarValue
+
+	使用unset取消set export env定义的变量
+	使用readonly重新设置变量的属性，之后该变量就不能unset
+	使用local在function中设置属性
+函数
+	declare|set
+
+>varName=varValue         #用户在命令行中设定shell变量
+                          #从declare | grep varName
+                          #等价于declare -- varName=varValue
+>export | grep varName    #在这个session中没有显示
+>env    | grep varName    #在这个session中没有显示
+>set    | grep varName    #在这个session中有显示        ？？？？？？
+
+>export varName
+>export | grep varName    #在这个session中有显示
+>env    | grep varName    #在这个session中有显示
+
+>exit
+>login
+
+>export | grep varName    #在这个session中没有显示
+>env    | grep varName    #在这个session中没有显示
+>set    | grep varName    #在这个session中没有显示
+
+typeset == declare等价 从字面就可以看出设置set类型type
+declare	  #普通的变量定义(varName=)没有附加属性
+	作用1 打印, 后不接varName和functionName  
+		declare      #显示所有变量和函数 与set效果相同
+		declare -p   #显示变量及其属性
+		declare -F   #显示所有函数名
+		declare -f   #显示所有函数及其定义
+		declare -f $funcName
+	作用2 声明为某类型变量 附加额外属性， 否则默认都是字符串变量即使v= 也是空字符
+		declare [+/-] [rxai] varName=varValue  #可以组合使用
+			- 具有某属性，如整型  +取消某属性
+			r readonly
+			x 指定变量会export为环境变量，可供非shell调用
+			i integer
+			a array
+			A map
+
+			eg
+			declare -a arr='([0]="a" [1]="b" [2]="c")' #声明数组变量
+			declare -ar                                #可组合使用
+```
+
 ###  set
 
 ```
@@ -377,6 +453,7 @@ bc  echo "1+2" | bc
 	for ((i=1; i<=j; i++)); do  done
     for i in {1..10}
     for i in 192.168.1.{1..254}
+    for i in "${arr[@]}"          #遍历数组
     for i in "a" "b"              #枚举
     for i in /etc/*.conf          
     for i in $(seq 10)     #执行命令`` man seq   $(seq 5 -1 1)  start=5 step=-1 end=1
@@ -799,6 +876,128 @@ echo $?
 
 #  命令
 
+##  man/info 
+
+```
+    ________________type________________
+	|       |        |         |       |
+  alias  declare  builtins   PATH   scriptName
+严格执行
+type 
+	type -t $symbol   #alias function keyword builtin file 
+alias
+	alias $symbol
+declare
+	declare -f $symbol
+	declare -p $symbol
+builtins  # 若type返回$symbol is shell builtsin(pwd)   compgen -b
+	help $cmder 
+keywords  # 若type返回$symbol is shell keyword(for)    compgen -k
+    help $cmder
+PATH
+	whatis $cmder   #获取描述，得知大致功能
+	whereis $cmder  #得知bin/source/man&info位置
+		busybox $cmder --help   #bman busy    man tar top
+		cman $cmder             #cman chinese man 
+		tldr $cmder             #sman simple  man
+		
+		$cmder --help   #防止man和info会提供太详细而不归类的文档
+		man -[1-9] $cmder
+		info $cmder     #若whereis返回值中有info位置
+
+#终极大杀器，查看安装的官方文档/usr/share/doc/下的README
+locate $keyword | grep share 
+#死马当活马医
+man -k $keyword  #man short description搜索
+man -K $keyword  #man手册全局搜索
+info -k $keyword #index搜索
+info -a $keyword #info手册全局搜索
+
+
+help
+help help
+help echo 
+help \(\(   #否则会当做sub shell group cmder
+
+经典命令
+enable
+
+
+man -h        #man的输出其实是less快捷键操作  默认忽略大小写
+man -k printf #在cmdname及其short description部分匹配搜索keyword
+man -K printf #全局搜索keyword
+man -w printf #where 说明printf手册的位置  
+cd $(dirname $(man -w man)) && ls -1 #查看man1有哪些命令
+
+#经典命令
+manpath -g | tr : \\n
+man2html /usr/share/man/man7/ip.7.gz > ip.html
+
+
+#经典文档
+man bash
+man test
+man 2 syscalls  #查看系统调用system call
+man 7 signal    #查看信号安全signal-safe函数functions man 7 pthreads
+man 7 tcp udp
+man 7 time   #real proces hard/soft/HZ/jiffies/epoch
+
+#进程间通讯
+man 7 svipc     #system v(古罗马数字5) interprocess communication mechanisms
+                #msg sem shm
+man 7 sem_overview semver
+man 7 shm_overview
+man 7 mq_overview
+man 7 pipe
+man 7 fifo
+
+
+#粗略文档，一扫而过
+man man
+man 1 busybox
+man 7 man man-pages       #man文档的格式
+man 3 readline  #查看快捷键绑定
+man intro       #chkconfig是perl脚本
+man 7 asscii armscii-8       #128 256
+man 7 bash-builtins builtins #help参考手册
+man 7 boot bootparam bootup  #linux启动流程图
+man 7 charsets 
+man 7 environ   #environ 全局变量
+man 7 standards #c有哪些标准
+man 7 glibc     #http://www.gnu.org/software/libc/ git clone git://sourceware.org/git/glibc.git && cd glic && git checkout master
+man 7 glob regex     #文件名/路径通配符globbing，区别于正则表达式 ?任意单个字符 *任意长度(包括0)的任意字符
+man 7 nmcli-examples
+man 7 posixoptions #查看posix api
+man 7 suffixes units    #查看文件后缀 磁盘容量单位KMGTPEZY
+man 7 symlink
+man 7 systemd.index #列举systemd有哪些内容 
+man 7 systemd.special #列举systemd各target service的含义
+man 7 utf8 url(查看转义 lynx man2html)
+man 7 arp imcp
+
+#各级别
+man man         #帮助系统各级别说明 
+man 7 hier file-hierarchy     #文件系统目录说明  
+man runlevel    #
+
+
+#查看文档快捷键
+
+
+info -h
+info -a printf #search all
+info -k printf #search index
+info -w nano   #where 说明nano手册的位置  /usr/share/info
+cd $(dirname $(info -w nao)) && ls -l #查看info有哪些手册
+
+#经典文档
+info info
+
+#查看文档快捷键
+```
+
+
+
 ##  echo
 
 ```
@@ -948,6 +1147,10 @@ printf "dev%03d" $machine_num
 ```
 
 ##  xargs
+
+```
+xargs -t  cmder #对传递过来的都执行一次命令cmder
+```
 
 ##  find
 
@@ -3096,6 +3299,48 @@ Policy: 政策 下面包含很多具体的规则rule
                    seinfo  #统计状态
                    sesearch [-A] [-s $subject] [-t object]
 ```
+
+## readline
+
+```
+readline 
+	查看绑定 bind -p
+	配置文件 /etc/inputrc ~/.inputrc格式 
+		keyname: $function-name   #keyname为Control- RUBOUT- (就是delete) ESC  RET|RETURN SPA|SPACE TAB
+		keyname: "$macro"         #macro 就是字符串
+		"keyseq": $function-name  #keyseq为 \C-(control) \M-(esc) \e(alt) \\ \" \'
+		"keyseq": "$macro"
+	增量搜索 
+		开始反向增量搜索 ctrl-r  #reverse 结合fzf屌爆了
+		开始正向增量搜索 ctrl-s  #search
+		取消增量搜索 ctrl-g
+		确定增量搜索 esc ctrl-j 更喜欢esc \n
+	非增量搜索
+		反向非增量搜索 M-p
+		正向非增量搜索 M-n
+	Moving 在一行中移动
+		c-a 行首
+		c-e 行尾
+		c-f forward-char
+		c-b backward-char
+		M-f forward-word 
+		M-b backward-word
+		c-l clear screen
+	Change
+		ctrl-d 删除一个字符
+		backspace 删除前一个字符
+		M-u   wordUppercase
+		M-l   wordLowercase
+		M-c   wordCapatical
+		
+	history 在历史所有命令中
+		M-< 历史的第一行
+		ctrl-p prep 可重复按
+		ctrl-n next 可重复按(适用于先重复按ctrl-p多次，然后再回过来)
+		M-> 历史的最后一行
+```
+
+
 
 #  docker
 

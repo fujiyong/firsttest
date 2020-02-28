@@ -357,9 +357,6 @@ https://www.ibm.com/developerworks/cn/linux/l-lpic1-v3-102-5/index.html
 https://segmentfault.com/a/1190000011200461
 
 
-Goland正版授权
-812LFWMRSH-eyJsaWNlbnNlSWQiOiI4MTJMRldNUlNIIiwibGljZW5zZWVOYW1lIjoi5q2j54mIIOaOiOadgyIsImFzc2lnbmVlTmFtZSI6IiIsImFzc2lnbmVlRW1haWwiOiIiLCJsaWNlbnNlUmVzdHJpY3Rpb24iOiIiLCJjaGVja0NvbmN1cnJlbnRVc2UiOmZhbHNlLCJwcm9kdWN0cyI6W3siY29kZSI6IklJIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9LHsiY29kZSI6IkFDIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9LHsiY29kZSI6IkRQTiIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJQUyIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJHTyIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJETSIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJDTCIsImZhbGxiYWNrRGF0ZSI6IjIwMTktMDQtMjEiLCJwYWlkVXBUbyI6IjIwMjAtMDQtMjAifSx7ImNvZGUiOiJSUzAiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUkMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUkQiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUEMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUk0iLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiV1MiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiREIiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiREMiLCJmYWxsYmFja0RhdGUiOiIyMDE5LTA0LTIxIiwicGFpZFVwVG8iOiIyMDIwLTA0LTIwIn0seyJjb2RlIjoiUlNVIiwiZmFsbGJhY2tEYXRlIjoiMjAxOS0wNC0yMSIsInBhaWRVcFRvIjoiMjAyMC0wNC0yMCJ9XSwiaGFzaCI6IjEyNzk2ODc3LzAiLCJncmFjZVBlcmlvZERheXMiOjcsImF1dG9Qcm9sb25nYXRlZCI6ZmFsc2UsImlzQXV0b1Byb2xvbmdhdGVkIjpmYWxzZX0=-ti4tUsQISyJF/zfWxSHCr+IcYrX2w24JO5bUZCPIGKSi+IrgQ0RT2uum9n96o+Eob9Z1iQ9nUZ6FJdpEW5g0Exe6sw8fLrWMoLFhtCIvVgQxEEt+M7Z2xD0esmjP1kPKXZyc/i+NCxA2EO2Sec9uifqklBGP1L3xoENAw2QsIWBfttIe6EPWhbS8TIMMr2vF/S3HrN8To5Hj5lwD/t1GHgFK1uWrhsuifAiKcVzqogybzGiR1h2+yNYTMbKxP7uPCcdYMsIyrBNVRGA3IuEJgyGQTQlFbnVQoVUTGPW2tQxprmC464wMjKi40JHh27WzjOHPwgzxDaigwn4Z0EbSpA==-MIIElTCCAn2gAwIBAgIBCTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBMB4XDTE4MTEwMTEyMjk0NloXDTIwMTEwMjEyMjk0NlowaDELMAkGA1UEBhMCQ1oxDjAMBgNVBAgMBU51c2xlMQ8wDQYDVQQHDAZQcmFndWUxGTAXBgNVBAoMEEpldEJyYWlucyBzLnIuby4xHTAbBgNVBAMMFHByb2QzeS1mcm9tLTIwMTgxMTAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxcQkq+zdxlR2mmRYBPzGbUNdMN6OaXiXzxIWtMEkrJMO/5oUfQJbLLuMSMK0QHFmaI37WShyxZcfRCidwXjot4zmNBKnlyHodDij/78TmVqFl8nOeD5+07B8VEaIu7c3E1N+e1doC6wht4I4+IEmtsPAdoaj5WCQVQbrI8KeT8M9VcBIWX7fD0fhexfg3ZRt0xqwMcXGNp3DdJHiO0rCdU+Itv7EmtnSVq9jBG1usMSFvMowR25mju2JcPFp1+I4ZI+FqgR8gyG8oiNDyNEoAbsR3lOpI7grUYSvkB/xVy/VoklPCK2h0f0GJxFjnye8NT1PAywoyl7RmiAVRE/EKwIDAQABo4GZMIGWMAkGA1UdEwQCMAAwHQYDVR0OBBYEFGEpG9oZGcfLMGNBkY7SgHiMGgTcMEgGA1UdIwRBMD+AFKOetkhnQhI2Qb1t4Lm0oFKLl/GzoRykGjAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBggkA0myxg7KDeeEwEwYDVR0lBAwwCgYIKwYBBQUHAwEwCwYDVR0PBAQDAgWgMA0GCSqGSIb3DQEBCwUAA4ICAQAF8uc+YJOHHwOFcPzmbjcxNDuGoOUIP+2h1R75Lecswb7ru2LWWSUMtXVKQzChLNPn/72W0k+oI056tgiwuG7M49LXp4zQVlQnFmWU1wwGvVhq5R63Rpjx1zjGUhcXgayu7+9zMUW596Lbomsg8qVve6euqsrFicYkIIuUu4zYPndJwfe0YkS5nY72SHnNdbPhEnN8wcB2Kz+OIG0lih3yz5EqFhld03bGp222ZQCIghCTVL6QBNadGsiN/lWLl4JdR3lJkZzlpFdiHijoVRdWeSWqM4y0t23c92HXKrgppoSV18XMxrWVdoSM3nuMHwxGhFyde05OdDtLpCv+jlWf5REAHHA201pAU6bJSZINyHDUTB+Beo28rRXSwSh3OUIvYwKNVeoBY+KwOJ7WnuTCUq1meE6GkKc4D/cXmgpOyW/1SmBz3XjVIi/zprZ0zf3qH5mkphtg6ksjKgKjmx1cXfZAAX6wcDBNaCL+Ortep1Dh8xDUbqbBVNBL4jbiL3i3xsfNiyJgaZ5sX7i8tmStEpLbPwvHcByuf59qJhV/bZOl8KqJBETCDJcY6O2aqhTUy+9x93ThKs1GKrRPePrWPluud7ttlgtRveit/pcBrnQcXOl1rHq7ByB8CFAxNotRUYL9IF5n3wJOgkPojMy6jetQA5Ogc8Sm7RG6vg1yow==
-
 
 /root/anaconda-ks.cfg
 initial-setup-ks.cfg
@@ -1964,49 +1961,6 @@ time timeout watch
 
 curl ipconfig.co  #curl ifconfig.me
 
-busybox tar --help
-cman中文手册
-tldr $cmder 
-
-readline 
-	查看绑定 bind -p
-	配置文件 /etc/inputrc ~/.inputrc格式 
-		keyname: $function-name   #keyname为Control- RUBOUT- (就是delete) ESC  RET|RETURN SPA|SPACE TAB
-		keyname: "$macro"         #macro 就是字符串
-		"keyseq": $function-name  #keyseq为 \C-(control) \M-(esc) \e(alt) \\ \" \'
-		"keyseq": "$macro"
-	增量搜索 
-		开始反向增量搜索 ctrl-r  #reverse 结合fzf屌爆了
-		开始正向增量搜索 ctrl-s  #search
-		取消增量搜索 ctrl-g
-		确定增量搜索 esc ctrl-j 更喜欢esc \n
-	非增量搜索
-		反向非增量搜索 M-p
-		正向非增量搜索 M-n
-	Moving 在一行中移动
-		c-a 行首
-		c-e 行尾
-		c-f forward-char
-		c-b backward-char
-		M-f forward-word 
-		M-b backward-word
-		c-l clear screen
-	Change
-		ctrl-d 删除一个字符
-		backspace 删除前一个字符
-		M-u   wordUppercase
-		M-l   wordLowercase
-		M-c   wordCapatical
-		
-	history 在历史所有命令中
-		M-< 历史的第一行
-		ctrl-p prep 可重复按
-		ctrl-n next 可重复按(适用于先重复按ctrl-p多次，然后再回过来)
-		M-> 历史的最后一行
-
-
-
-
 ipcs   #inter process communication show
 ipcmk  #ipc make
 ipcrm  #ipc rm
@@ -2015,119 +1969,7 @@ ipcrm  #ipc rm
 dpkg -L tldr | sed -n '2,$p' | xargs ls -ld | awk /^d/ ''   #行首非目录怎么表示     ???
 
 	
-    ________________type________________
-	|       |        |         |       |
-  alias  declare  builtins   PATH   scriptName
-严格执行
-type 
-	type -t $symbol   #alias function keyword builtin file 
-alias
-	alias $symbol
-declare
-	declare -f $symbol
-	declare -p $symbol
-builtins  #若type返回$symbol is shell buildin(pwd) or keyword(for)
-	help $cmder 
-PATH
-	whatis $cmder   #获取描述，得知大致功能
-	whereis $cmder  #得知bin/source/man&info位置
-		busybox $cmder --help   #bman busy    man tar top
-		cman $cmder             #cman chinese man 
-		tldr $cmder             #sman simple  man
-		
-		$cmder --help   #防止man和info会提供太详细而不归类的文档
-		man -[1-9] $cmder
-		info $cmder     #若whereis返回值中有info位置
-
-#终极大杀器，查看安装的官方文档/usr/share/doc/下的README
-locate $keyword | grep share 
-#死马当活马医
-man -k $keyword  #man short description搜索
-man -K $keyword  #man手册全局搜索
-info -k $keyword #index搜索
-info -a $keyword #info手册全局搜索
-
-
-help
-help help
-help echo 
-help \(\(
-
-经典命令
-enable
-
-
-man -h        #man的输出其实是less快捷键操作  默认忽略大小写
-man -k printf #在cmdname及其short description部分匹配搜索keyword
-man -K printf #全局搜索keyword
-man -w printf #where 说明printf手册的位置  
-cd $(dirname $(man -w man)) && ls -1 #查看man1有哪些命令
-
-#经典命令
-manpath -g | tr : \\n
-man2html /usr/share/man/man7/ip.7.gz > ip.html
-
-
-#经典文档
-man bash
-man test
-man 2 syscalls  #查看系统调用system call
-man 7 signal    #查看信号安全signal-safe函数functions man 7 pthreads
-man 7 tcp udp
-man 7 time   #real proces hard/soft/HZ/jiffies/epoch
-
-#进程间通讯
-man 7 svipc     #system v(古罗马数字5) interprocess communication mechanisms
-                #msg sem shm
-man 7 sem_overview semver
-man 7 shm_overview
-man 7 mq_overview
-man 7 pipe
-man 7 fifo
-
-
-#粗略文档，一扫而过
-man man
-man 1 busybox
-man 7 man man-pages       #man文档的格式
-man 3 readline  #查看快捷键绑定
-man intro       #chkconfig是perl脚本
-man 7 asscii armscii-8       #128 256
-man 7 bash-builtins builtins #help参考手册
-man 7 boot bootparam bootup  #linux启动流程图
-man 7 charsets 
-man 7 environ   #environ 全局变量
-man 7 standards #c有哪些标准
-man 7 glibc     #http://www.gnu.org/software/libc/ git clone git://sourceware.org/git/glibc.git && cd glic && git checkout master
-man 7 glob regex     #文件名/路径通配符globbing，区别于正则表达式 ?任意单个字符 *任意长度(包括0)的任意字符
-man 7 nmcli-examples
-man 7 posixoptions #查看posix api
-man 7 suffixes units    #查看文件后缀 磁盘容量单位KMGTPEZY
-man 7 symlink
-man 7 systemd.index #列举systemd有哪些内容 
-man 7 systemd.special #列举systemd各target service的含义
-man 7 utf8 url(查看转义 lynx man2html)
-man 7 arp imcp
-
-#各级别
-man man         #帮助系统各级别说明 
-man 7 hier file-hierarchy     #文件系统目录说明  
-man runlevel    #
-
-
-#查看文档快捷键
-
-
-info -h
-info -a printf #search all
-info -k printf #search index
-info -w nano   #where 说明nano手册的位置  /usr/share/info
-cd $(dirname $(info -w nao)) && ls -l #查看info有哪些手册
-
-#经典文档
-info info
-
-#查看文档快捷键
+ 
 
  
 
@@ -2140,87 +1982,8 @@ apt-cache policy nginx               #查看已安装的版本号
 
 
 
-xargs -t  cmder #对传递过来的都执行一次命令cmder
 
 
-
-可执行搜索顺序 函数 builtin-cmds PATH script
-
-
-shopt           #set/unset shell options
-
-set  -o
-echo $-          #shell默认选项
-echo $SHELLOPTS  #set -o为on的选项
-
-declare/typeset set env/export 
-
-export 向子进程导出的
-为什么需要export
->declare -p k1  #显示未定义
->k1=v1
->echo $k1                #打印v1
->/bin/bash -c "echo $k1" #打印v1
->echo "echo $k1" > a.sh && chmod u+x a.sh; /bin/bash a.sh #打印为空
-
-变量种类
-	declare|set
-		shell-buildina: HISTSIZE  
-						#export | grep HIS
-						#为空且在各session中存在，说明不是通过export的
-		env|export:     export userVarName=userVarValue
-		                #在打印与设置变量功能是等价的
-		                #但help export /usr/bin/env
-		命令行临时:      shellVarName=shellVarValue
-
-	使用unset取消set export env定义的变量
-	使用readonly重新设置变量的属性，之后该变量就不能unset
-	使用local在function中设置属性
-函数
-	declare|set
-
->varName=varValue         #用户在命令行中设定shell变量
-                          #从declare | grep varName
-                          #等价于declare -- varName=varValue
->export | grep varName    #在这个session中没有显示
->env    | grep varName    #在这个session中没有显示
->set    | grep varName    #在这个session中有显示        ？？？？？？
-
->export varName
->export | grep varName    #在这个session中有显示
->env    | grep varName    #在这个session中有显示
-
->exit
->login
-
->export | grep varName    #在这个session中没有显示
->env    | grep varName    #在这个session中没有显示
->set    | grep varName    #在这个session中没有显示
-
-typeset == declare等价 从字面就可以看出设置set类型type
-declare	  #普通的变量定义(varName=)没有附加属性
-	作用1 打印, 后不接varName和functionName  
-		declare      #显示所有变量和函数 与set效果相同
-		declare -p   #显示变量及其属性
-		declare -F   #显示所有函数名
-		declare -f   #显示所有函数及其定义
-		declare -f $funcName
-	作用2 声明为某类型变量 附加额外属性， 否则默认都是字符串变量即使v= 也是空字符
-		declare [+/-] [rxai] varName=varValue  #可以组合使用
-			- 具有某属性，如整型  +取消某属性
-			r readonly
-			x 指定变量会export为环境变量，可供非shell调用
-			i integer
-			a array
-			A map
-
-			eg
-			declare -a arr='([0]="a" [1]="b" [2]="c")' #声明数组变量
-			declare -ar                                #可组合使用
-
-	
-	
-	
 	
 疑问
 1 如何由应用bin得知serviceName
@@ -2575,30 +2338,35 @@ $(hostname)  cmd substitution       命令替换``  支持变量嵌套"$(echo "$
 
 
 
-[ ]         posix 具有移植性
+[ ]         posix 具有移植性    /usr/bin/[ 由ubuntu16.04提供,但优先级没有bash中内置的高
             数组下标
             正则表达式的字符范围  [a-z]
             test operator, 等价于test, 既是bash内置关键字也是可执行命令 左右都要有空格
-                字符串的操作符  -n -z =(偶尔亦可用==) !=    其他的需要转义, 如\< \>                   \<= \>=?
+                字符串的操作符  -n -z =(亦可用bash extension符==) != 其他的需要转义以防止表示重定向, 如posix扩展\< \> ,不支持\<= \>=?
                 整数           -gt -ge -eq -ne -lt -le
                 文件
-                逻辑运算        -a  -o  !  不支持()改变优先级
+                逻辑运算        -a  -o  !  不支持()改变优先级,因为()在[]表示sub shell,所以如果需要改变优先级需转义\( \)
 [[ ]]       test operator   
                 bash extension bash扩展  不具移植性
-                字符串  不用使用""以便防止字符串变量切割
-                    仍然保留一部分   -n -z =(偶尔亦可用==) !=                      \<= \>=?
-                    新增部分 参考man grep
-                        < >                取代\< \>
+                字符串  不用使用""以便防止字符串变量切割 如x='a b'; [[ $x = a b ]]
+                    仍然保留一部分   -n -z =(亦可用bash extension符==) !=                      \<= \>=?
+                    新增部分 不区分大小写比较 shopt -s nocaseglob
+                          <            取代\<     由于[[ $a < $b ]] 不知是字符还是整数,所以[[ "x$a" < "x$b" ]]
+                          >            取代\>  
+                        ! $a > $b      表示不大于即<=含义
+                        ! $a < $b      表示不小于即>=含义
+                    新增部分 绝对不要用"" 否则失去意义 参考man grep
                         ==(偶尔亦可用=) !=  pattern matching   模式匹配 globbing 
                                            匹配字符串或通配符,一定不需要引号,否则当成文本字符串  如 [[ hello == hell? ]]
                         =~                 regular expression 正则匹配
+                整数  同[]    不支持>= > == != < <= 建议数值比较使用(())
                 文件  同[]
                 逻辑          && ||  !  支持()改变优先级
 (( ))       integer arithmetic expansion, 类似于let,但比let强  
             bash extension bash扩展 不具移植性
             整数 
                 完全取代[]中整数操作
-                只要括号中的运算符表达式符合C语言运算规则,都可以放在$((exp))中,甚至是三目运算符  
+                只要括号中的运算符表达式符合C语言运算规则,都可以放在$((exp))中,甚至是三目运算符 echo $(( 2 > 1  ? 1 : 2 )) 
                 >= > == != < <=  
                 + - * / %
                 ++ --     前后缀 
@@ -2620,6 +2388,21 @@ $(( ))      进制转换      将(2,8,16)转换成10进制, 如echo $((16#5f)) #
                 以,分割的离散文件列表  touch {a,d}.txt 结果为a.txt d.txt
                 以..分割的连续文件列表 touch {a..d}.txt 结果为a.txt b.txt c.txt d.txt
 ${}         refer to variables and avoid confusion over their name  如${var}const
+        
+
+                  [ ]       [[]]
+string            \<        <
+                  \>        >
+                  =         = ==
+                  !=        !=
+                      -n
+                      -z
+integer        -gt -lt -ge -le -eq -ne 
+condition         -a        &&
+                  -o        ||
+expression group  \(  \)    (  )
+pattern matching            = ==
+reg     matching            =~
 
 
 ${var:-string}     if ( var == null ) { return string} else { return var}                 为空返回默认值,否则返回原值
@@ -2629,7 +2412,7 @@ ${var:?string}     if ( var != null ) { return var } else { print string; exit 0
 
 ${var#pattern}            去掉左边最小匹配
 ${var##pattern}           去掉左边最大匹配
-${var%pattern}            去掉右边最小匹配
+${var%pattern}            去掉右边最小匹配  ${filename%.*}   echo $filename | sed 's/\.[^.]*$//'
 ${var%%pattern}           去掉右边最大匹配
 
 字符串切割
@@ -2709,3 +2492,50 @@ mysql>flush privileges;
 任何时候出现错误都可以删掉数据目录的所有文件，重新再来  rm -rf /var/lib/mysql/* && chown -R mysql:mysql /var/lib/mysql
 mysqld --verbose --help 可以查看加载配置文件的顺序及默认值 mysqld --print-defaults 最后提示查看运行的mysqld的变量可以使用mysqladmin variables 
 mysql --help 可以查看加载配置文件的顺序及默认值 mysql --print-defaults
+
+show open tables where in_use > 0;            #查看哪些表被锁住了
+select * from information_schema.innodb_trx;  #查看锁表的进程
+show processlist;
+kill $pid;
+
+
+
+man 7 glob 
+    globbing  wildcard pattern 通配符表达式, 一般只能匹配filenames
+        ?        any signal character 
+        *        any length string, including empty              diff from reg which zero or more copies of preceding things 
+        [aeiou]  离散的
+        [a-z]    连续的范围 
+        [!]      negation 对应正则中的^                           diff from reg which is ^
+        "[[?*\]" 双引号"[]"中的失去特殊含义,代表[ ? * \四个字符
+
+        特殊情况pathnames
+        /        pathname中不能由?和*代替, 也不能由[.-o]范围表示
+        .        以.为首的文件名不能由?和*代替, 所以rm -rf *并不能删除隐藏文件
+
+    reg expression 正则表达式 posix表达方式
+        [:alnum:]  [:alpha:]  [:blank:]  [:cntrl:]
+        [:digit:]  [:graph:]  [:lower:]  [:print:]
+        [:punct:]  [:space:]  [:upper:]  [:xdigit:]
+
+
+
+complete  $option   $word
+    -F $funcName        执行funcName,在funcName中生成COMPREPLY作为候选结果
+    -C $cmder           将执行cmder的结果作为候选的补全结果
+    -G $fileNamePattern 将匹配pattern的文件名作为候选结果
+    -W $wordlist        分割wordlist作为候选结果
+    -p [name]           列出所有的补全命令
+    -r [name]           删除某个补全命令 
+
+compopt [-o|+o option] [-DE] [name ...] 修改补全命令设置,只能在补全函数中使用,否则报错
+
+compgen 用来筛选生成 匹配单词的 候选补全结果
+
+内置补全变量
+    COMP_WORDS     数组,当前命令行中输入的所有单词
+    COMP_CWORD     整数,当前输入的单词在COMP_WORDS中的索引
+    COMPREPLY      数组,存放候选的补全结果
+    COMP_WORDBREAK 字符串,表示单词之间的分隔符
+    COMP_LINE      字符串,表示当前命令行输入的字符
+    COMP_POINT     整数,表示光标在当前命令行的哪个位置
