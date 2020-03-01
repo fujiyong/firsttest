@@ -2463,8 +2463,9 @@ locate mysql
 
 
 mysql
-windows下是my.ini  linux下是my.cnf  /etc/mysql/mysql.conf.d/mysqld.cnf
-[mysqld]
+windows下是my.ini  linux下是my.cnf  /etc/mysql/mysql.conf.d/mysqld.cnf  mysqld --verbose --help | grep defaults-file
+mysql.cnf是mysql各应用的集中配置的地方
+[mysqld]   #选项组
 basedir=
 datadir=
 bind-addr=0.0.0.0  #不能是127.0.0.1
@@ -2476,6 +2477,7 @@ default_authentication_plugin=mysql_native_password #默认的密码加密方式
 explicit_defaults_for_timestamp = true
 [mysql]
 default-character-set=utf8
+[mysqldump]
 
 任何时候出现错误都可以删掉数据目录的所有文件，重新再来  rm -rf /var/lib/mysql/* && chown -R mysql:mysql /var/lib/mysql
 mysqld --verbose --help 可以查看加载配置文件的顺序及默认值 mysqld --print-defaults 最后提示查看运行的mysqld的变量可以使用mysqladmin variables 
@@ -2483,21 +2485,29 @@ mysql            --help 可以查看加载配置文件的顺序及默认值 mysq
 
 1. 初始化生成密码
 方式一 官方推荐方式
-mysqld --initialize --console #会初始化data目录并将password打印到控制台
-                              #如果不加console， 会写入日志/var/log/mysqld.log
-                              #a temporary password is generated for root@localhost: $passwd
+mysqld --initialize --user=mysql #会初始化data目录并将password打印到控制台
+                                 #如果不加console， 会写入日志/var/log/mysqld.log
+                                 #a temporary password is generated for root@localhost: $passwd
 方式二
-mysql_install_db              #会在~/.mysql_secret中存放密码   man mysql_install_db得知已过时  
+mysql_install_db --user=mysql    #会在~/.mysql_secret中存放密码   man mysql_install_db得知已过时  
+                                 #创建data目录 mysql数据库(初始化授权表 访问控制) test数据库
 
 
 2. 启动
-mysqld_safe
+mysqld_safe --user=mysql &
 
 3.使用初始密码登录 修改密码并可远程登录， 实际就是设置mysql.user表
 mysql -uroot -p
 Enter password:   #输入上步的密码
 mysql>show databases;
 mysql>use mysql;
+mysql>SET PASSWORD FOR 'root'@'%' = PASSWORD('newpwd'); #方式一 使用环境变量方式 第一个password是环境变量 第二个是函数
+mysql>UPDATE mysql.user SET authentication_string = PASSWORD('newpwd') where user='root'; #方式二 使用sql语句
+mysqladmin -u root -h host_name password "newpwd"       #方式三 这种更方便
+
+mysql>ALTER USER "root"@"%" IDENTIFIED $加密方法 BY "111111" WITH GRANT OPTION; #可以使用默认的加密方法
+            #plugin是密码的加密方式 authentication_string是密码加密后的字符串
+			#mysql8.0需要修改加密方式，否则一般的gui client由于不支持某种加密方式而无法登录
 mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '111111' WITH GRANT OPTION; 
                           #on $db.$table TO $user@$host  其中*表示任意 %表示任意ip都可以登录，默认是localhost
 mysql>CREATE USER 'yy'@'%' IDENTIFIED BY '111111';     #这步只能查看infomation_schema
@@ -2505,13 +2515,10 @@ mysql>show grants for yy;
 mysql>show grants for yy@%;
 mysql>flush privileges;
 
-mysql>set PASSWORD=PASSWORD("111111")
-mysql>SET PASSWORD FOR 'root'@localhost = PASSWORD('123456');
-mysql>ALTER USER "root"@"%" IDENTIFIED $加密方法 BY "111111"; #可以使用默认的加密方法
-mysql>update user set host='%', authentication_string=password('123456') where user = 'root';  
-            #plugin是密码的加密方式 authentication_string是密码加密后的字符串
-			#mysql8.0需要修改加密方式，否则一般的gui client由于不支持某种加密方式而无法登录
+
       
+>help;  #最后提示
+>help contents;
 >help show;
 >help set;
 >help alter {database|table}
@@ -2544,6 +2551,7 @@ show tables;
 desc user;                
 show create table $tableName;
 drop table $tableName;
+show index from $tableName;
 
 
 mysqladmin -uroot -p111111 
@@ -2555,7 +2563,11 @@ mysqladmin -uroot -p111111
 	password  '$newPassword'
 	start-slave|stop-slave 
 
-mysql -uroot -p -N -e ""
+mysql -uroot -p -N -e " select * from user where user='root'; "
+--disable-column-names --skip-column-names --column-names=0
+--column-names --enable-column-names --column-names=1
+
+
 
 
 show open tables where in_use > 0;            #查看哪些表被锁住了
@@ -2570,8 +2582,34 @@ sysbench
 
 pxc集群Percona XtraDB Cluster
 
+mysqlimport
+LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n';
+
+mysqldump
+select 
+
+mysql < a.sql 
+mysql -t   #批模式下一般比较精简，为得到如交互模式格式的输出
+mysql -vvv #回显在批模式下所执行的语句
+mysql>source /root/a.sql
+mysql>.      /root/a.sql
 
 
+在not null其实可以插入0或"", 因为0或“” is NOT NULL
+group by NULL;  2个NULL视为相同
+order by $field asc; NULL排在最前，即NULL最小
+
+模式匹配
+标准SQL like '_'表示单个字符 '%'表示任意长度的字符串(包括0个字符)
+MySQL  vi sed grep  一般情况下(除^$外)，只要子匹配即可
+	REGEXP|RLIKE  NOT REGEXP|RLIKE    #类似于like not like
+
+mysql>select LAST_INSERT_ID();  #session级别的 亦可以使用CAPI mysql_insert_id()
+insert into $t values ($rowA) [,($rowB) ...] 
+
+mysql>ALTER TABLE tbl AUTO_INCREMENT = 100; #设auto列的初始值
+mysql> SELECT @min_price:=MIN(price),@max_price:=MAX(price) FROM shop;
+mysql> SELECT * FROM shop WHERE price=@min_price OR price=@max_price;
 
 
 
