@@ -485,3 +485,29 @@ fi
 # fi
 ################################ java #########################################
 ################################# npm #########################################
+#
+#
+#
+#
+#
+
+mysql.conf  有三个地方设置1配置文件2环境变量3命令行指定
+[mysql]
+user=root
+password=111111
+
+>show engines;
+>mysqld --chroot 影响LOAD DATA INFILE和SELECT ... INTO OUTFILE
+--log[=host_name.log] 日志链接和对文件的查询
+--log-bin[=host_name-bin] 更改数据
+--log-bin-index[=host_name-bin.index]
+--log-error[=host_name.err] 错误及启动消息
+--log-isam[=file] 更改myisam记录到该文件
+--log-queries-not-using-index
+--log-slow-queries[=file]
+--log-slow-admin-statements 记录optimize analyze alter到log-slow-query
+--long_query_time 默认值10秒
+
+set k=v          默认session
+set global k=v
+set sesseion k=v
