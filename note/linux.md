@@ -67,7 +67,11 @@ man bash | col -bx > bash.txt
 
 所有命令
 
-comgen --help
+compgen -c #查看所有命令
+compgen -a #查看所有别名
+compgen -b #查看内嵌命令
+compgen -k #查看所有关键字
+compgen -A function
 
 ##  选项
 
@@ -127,6 +131,7 @@ source ~/.bash_profile
 help                     #查看bash的语法, 比enable功能更强大
 help    ${builtin_cmd}   #查看bash的内置命令的帮助,类似于查看用户命令的帮助man {user_cmd}
 					     #help \(\(
+help variables           #内置shell变量
 					     
 enable                   #查看bash的所有内置命令, 或禁止某命令
 builtin ${builtin-cmd}   #忽略alias, 直接运行内置命令
@@ -827,8 +832,18 @@ echo $?
 > 绝对不能sh a.sh 因为sh使用默认值dash 优先级高于a.sh的提示行,会覆盖掉a.sh的提示行
 > 方法2  改变默认的shell为bash, sudo dpkg-reconfig bash
 > 
+> trap "rm -rf tmpdir" EXIT 无论正常或异常退出都会执行
+> trap err_func  ERR  
+> UserDefinedErrorVar=0
+> function err_func {
+> 	if [ $UserDefinedErrorVar -eq 100 ]; then
+> 	elif [$UserDefinedErrorVar -eq 100 ]; then
+> 	fi
+> }
 > 
-> shell中的函数只能返回整数值 否则 numeric argument required
+> shell中的函数只能返回整数值 否则 numeric argument required,如果需要获取值可以echo "aa"
+> function f(){ echo "aa"; return 0;}
+> $(f)
 > 
 > export OH=  等价于  export OH=""  等价于 javascript中的undefined
 > if [ $OH ]; then echo "1"; else echo "2"; fi
@@ -1312,6 +1327,7 @@ s #类似于vi中:s
         Ng  #从行内第N处开始
         
 sed -r 's/^[ \t]+(.*)[ \t]+$/\1/g'  #去掉收尾空格
+sed -e 's/<[^>]*>//g' foo.html      #去掉html标签
 
 
 sed 's/find/replace/' file         # 替换文件中首次出现的字符串并输出结果 
@@ -2611,7 +2627,11 @@ curl -o curl.output -v http://xx.html
 	-POST
 	
 curl -fsSL http://www.baidu.com
-wget -qO-  http://www.baidu.com
+wget -c -q -O - http://www.baidu.com
+	-b 下载大文件时后台下载 输出信息会保存到同目录的wget-log文件中,可以使用tail -f wget-log查看
+	-c continue 表示继续下载以前退出的 否则文件名在原来的文件名上再加1
+	-q 不打印header
+	-O 指定输出目的地 - 表示stdout
 ```
 
 ##  scp/rsync
@@ -3558,5 +3578,26 @@ telnet $ip       $port  #Fail ip为为127.0.0.1
 
 ```
 man  rsyslog.conf   && #定位到最后可得知是rsyslogd这个服务  systemctl restart rsyslog
+```
+
+##  清除shell cmd历史
+
+```
+#操作前可以不记录之后的命令
+export HISTSIZE=0
+
+[space]set +o history  #在export HISTCONTROL=ignorespace情况下,shell不会记录cmd到历史中
+#cmder1 cmder2........
+[space]set -o history  #这也是默认情况 即在命令前添加一个空格 shell就不会记录
+
+#操作后删除所有命令记录
+#cmder1 cmder2 ...
+history -cw
+
+#手动删除某条命令方式一
+num=$(history | grep $mycmd | cut -f 1)
+[space]history -d $num                    
+#手动删除某条命令方式二
+ctrl-p ctrl-p 找到希望删除的命令后ctrl-u     
 ```
 
