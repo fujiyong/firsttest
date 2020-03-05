@@ -286,6 +286,12 @@ function blines(){
 }
 EOF
 source_rc_file "$misc_file" ".misc"
+
+########################### history time format ###############################
+#echo 'HISTTIMEFORMAT="%F %T "' >> ~/.bashrc
+
+
+
 ########################### firewalld    ######################################
 enable_firewall
 

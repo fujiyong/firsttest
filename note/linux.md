@@ -841,6 +841,18 @@ echo $?
 > 	fi
 > }
 > 
+> while read line; do
+> 	echo $line
+> done < file.txt
+> 
+> for word in $line; do
+> 	echo $word
+> done
+> 
+> for((i=0;i<${#word};i++));do
+> 	echo ${word:i:1}
+> done
+> 
 > shell中的函数只能返回整数值 否则 numeric argument required,如果需要获取值可以echo "aa"
 > function f(){ echo "aa"; return 0;}
 > $(f)
@@ -1165,6 +1177,7 @@ printf "dev%03d" $machine_num
 
 ```
 xargs -t  cmder #对传递过来的都执行一次命令cmder
+     -d         #指定定界符 单行为空格 多行为\n
 ```
 
 ##  find
@@ -1226,6 +1239,7 @@ grep
 grep -A 5 "foo"   file            # 前5行         
 grep -B 5 "foo"   file            # 后5行
 grep -C 5 "foo"   file            # 前后5行
+grep -e "class" -e "vitural" file #多个匹配
 
 
 
@@ -1269,6 +1283,31 @@ arp -n | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4  #linux命令查询局域网内所�
 -u   #只显示没有重复的行
 ```
 
+##  tr
+
+```
+tr s d   #单字符转换
+tr "mul_src" "mul_dst"  #多字符转换
+tr -d '0-9'             #删除所有数字
+tr -s  ' '              #压缩重复出现的多余的空格,只保留第一个 sequence repeate
+tr -c  
+```
+
+##  paste
+
+```
+paste -s -d $delimiter file  #使用delimeter多行变一行
+paste     f1 f2              #两文件各自取一行组成新的一行
+paste -d '\n' f1 f2          #两文件轮流取行
+
+```
+
+##   join
+
+```
+
+```
+
 ##  cut
 
 ```
@@ -1287,6 +1326,8 @@ arp -n | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4  #linux命令查询局域网内所�
     cut -d';' -f2,10,12                # 截取用分号分隔的第二和第十列 第十二列内容
     cut -d' ' -f3-7                    # 截取空格分隔的三到七列
     cut -d' ' -f3
+取反
+	cut -f3 --complete
 ```
 
 ##  sed
@@ -1362,6 +1403,100 @@ netstat -n | awk '/^tcp/ {++tt[$NF]} END {for (a in tt) print a, tt[a]}'
 
 awk -v n=4 'NR == n {next} {print}' a.sh #去掉第4行 当行号等于4时执行next就是处理下一行
                                          #v表示外面变量赋值并传入里面
+                                         
+options
+	-F              #定义分隔符
+	-v awkV=$outV   #传递外部变量到awk outV=100; awk -v awkV=outV '{print $awkV;}'
+	
+	'program-text'  #当命令较短时,
+	-f program-file #当命令较长时,从文件$program-file而不是从cmdline, 可以有多个-f $file
+	
+	#a sequence of pattern {action} and user defined functions.
+	#前面的BEGIN expression,expression END属于pattern 后面的{action}
+	BEGIN{}
+	expression, expression {}
+	END{}
+	function $userFuncName(arg1, ..., argN){}  #可以先引用后定义
+	
+	#seq 100| awk 'NR==4,NR==6{print}'
+	#awk '/start_pattern/, /end_pattern/' filename
+
+if (expr) else statement
+while(expr) 
+do statement while (expr)
+for(opt_exp;opt_exp;opt_exp){}
+for(var in array) {statement}
+continue break
+
+数组
+一维数组
+	转化为关联数组,关联数组的下标为字符串 arr[1]  等价于 arr["1"]
+	判断存在 if (arr[exp]) { print "sub exist"} else { print "not exist" }
+	遍历    for(var in arr)
+	删除    delete arr[exp]删除某个元素  delete arr删除整个数组
+多维数组
+	for ( (i,j) in arr) print arr[i,j]   #SUBSEP
+
+正则匹配使用egrep
+exp  ~ /$reg/  {action}  #子正则匹配即可 //表示正则的起始
+exp !~ /$reg/  {action}  #!表示取反
+$0  ~  /$reg/  {action}  #
+       /$reg/  {action}  #与上面一个等价
+
+内置变量
+$0 $1 ... $NF #RS='\n' OFS   $0整行 
+ARGC    #mawk -f prg v=1 A t=hello B argc=5 argv[1]='v=1'
+ARGV
+CONVFMT 转化字符串为数值的默认值 默认值'%.6g'
+ENVIRON[var]=value
+FILENAME 文件名
+FNR      当前行在文件FILENAME中的行号
+FS       field separator
+NF       当前行有多少个field
+NR       当前行在所有文件中的行号
+OFMT     输出时格式化数值为字符串的默认值
+OFS      输出时field的分隔符
+ORS      输出时record的分隔符
+RLENGTH  length set by the last call to the built-in function, match().
+RS       输入时record的分隔符默认值\n
+RSTART   index set by the last call to match().
+SUBSEP    used to build multiple array subscripts, initially = "\034".
+
+内置函数
+	gsub(r,s,t) gsub(r,s) #将t中符合r的替换为s,返回替换次数 当t不存在时使用$0
+	index(s,t)            #返回t中s的位置,从1开始计数 0表示没有找到
+	lenght(s)
+	math(s,r)             #返回s中符合正则贪婪匹配r的位置,从1开始计数
+	split(s,A,r) split(s,A)  #将s中按照正则r分割并存放于数组A,返回数组元素数;r的默认值为FS
+	sprintf(fmt,exp-list)
+	sub(r,s,t) sub(r,s)  #至多一次替换
+	substr(s,i,n) substr(s,i)  #返回s[i:i+n]
+	tolower(s) toupper(s)
+	sin cos atan log int sqrt rand srand rand
+输入输出
+	print #等价与print $0 ORS
+	print exp1, exp2, ..., expN #输出exp1 OFS exp2 OFS ...
+	printf fmt, exp-list
+	
+	getline                 #从stdin保存到$0
+	getline var             #从stdin保存到var
+	getline     < file      #从file中输入保存到$0
+	getline var < file      #从file中输入保存到$var
+	command | getline       #使用/bin/sh执行command,通过管道传递到$0
+	command | getline var   #使用/bin/sh执行command,通过管道传递到$var
+	
+	close(exp)
+	fflush(exp)
+	system(exp)  #使用/bin/sh执行exp
+	
+	#echo | awk '{"grep root /etc/passwd" | getline cmdout; print cmdout }'
+	
+function
+	function name( args ) {  #一般传值调用,数组是引用传递 
+		return opt_exp; #不是必须有return
+	}
+	可以递归调用name(arg1,arg2), bash不可使用括号()
+	可以先引用后定义
 ```
 
 ## lsof
@@ -3005,6 +3140,13 @@ find     #按照ls -l的顺序
     -exec/ok $cmd {} \; #自定义动作 对搜索结果进行处理 使用\对;进行转义
 	                    #cmd不能用alias只能全称如 ls -l不能 ll
 						#有没有C语言的感觉 -exec ls -l {find / -t f} \;
+						
+	find . ! -name "*.txt" -print
+	find . ( -name "*.txt" -o -name "*.pdf" ) -print
+	find . -regex  ".*(.txt|.pdf)$"   #iregex 忽略大小写
+	
+						
+	
 
 ##数据库一般查询
 #whatis $cmd   使用whatis命令必须先sudo makewhatis(老版本)/mandb(新版本)建立数据库
@@ -3598,6 +3740,9 @@ history -cw
 num=$(history | grep $mycmd | cut -f 1)
 [space]history -d $num                    
 #手动删除某条命令方式二
-ctrl-p ctrl-p 找到希望删除的命令后ctrl-u     
+ctrl-p ctrl-p 找到希望删除的命令后ctrl-u    
+
+HISTTIMEFORMAT
+echo 'HISTTIMEFORMAT="%F %T "' >> ~/.bashrc
 ```
 
