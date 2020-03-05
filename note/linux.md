@@ -1297,15 +1297,16 @@ tr -c
 
 ```
 paste -s -d $delimiter file  #使用delimeter多行变一行
-paste     f1 f2              #两文件各自取一行组成新的一行
-paste -d '\n' f1 f2          #两文件轮流取行
-
+paste         file1 file2    #两文件各自取一行组成新的一行
+paste -d '\n' file1 file2    #两文件轮流取行
 ```
 
 ##   join
 
 ```
-
+join file1 file2  #根据file1的第一个字段和file2的第一个字段进行匹配,类似sql中的主键外键,组成新的一行
+join -t ','    file1 file2  #定义分隔符
+join -1 3 -2 1 file1 file2 #将file1的第3字段与file2的第1字段匹配
 ```
 
 ##  cut
