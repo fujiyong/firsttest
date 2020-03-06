@@ -52,8 +52,10 @@
 	./svds attach --datadir $HOME/svds-data 之后输入
 	personal.newAccount('111111')
 	输入exit可以退出console   
-	注意：括号中的是密码，请务必记住下方的字符串，该子串就是地址0xa74146b61c8452a7f707edf72be6bd81d7ef2111
-	这样就创建了一个用户为0xa74146b61c8452a7f707edf72be6bd81d7ef2111密码为111111的账户
+	注意：括号中的是密码，请务必记住下方的字符串，该子串就是地址0xefad4d37510a88d374a778824a7f1171bc0f032f
+	这样就创建了一个用户为0xefad4d37510a88d374a778824a7f1171bc0f032f密码为111111的账户
 6、最后一步就是在创建了账户的机器上挖矿了 
     ./svds attach --datadir $HOME/svds-data
     miner.start()
+
+ nohup ./svds --datadir $HOME/svds-data  --rpc --rpcaddr "0.0.0.0" --rpcapi "db,eth,net,web3,personal,admin,miner" --rpccorsdomain "*"  --nodiscover --networkid 1688  >> $HOME/svds-data/debug.log 2>&1 &
