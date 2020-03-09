@@ -1422,12 +1422,13 @@ options
 	#seq 100| awk 'NR==4,NR==6{print}'
 	#awk '/start_pattern/, /end_pattern/' filename
 
-if (expr) else statement
-while(expr) 
-do statement while (expr)
-for(opt_exp;opt_exp;opt_exp){}
-for(var in array) {statement}
-continue break
+程序结构
+    if (expr) else statement
+    while(expr) 
+    do statement while (expr)
+    for(opt_exp;opt_exp;opt_exp){}
+    for(var in array) {statement}
+    continue break
 
 数组
 一维数组
@@ -1439,29 +1440,29 @@ continue break
 	for ( (i,j) in arr) print arr[i,j]   #SUBSEP
 
 正则匹配使用egrep
-exp  ~ /$reg/  {action}  #子正则匹配即可 //表示正则的起始
-exp !~ /$reg/  {action}  #!表示取反
-$0  ~  /$reg/  {action}  #
-       /$reg/  {action}  #与上面一个等价
+    exp  ~ /$reg/  {action}  #子正则匹配即可 //表示正则的起始
+    exp !~ /$reg/  {action}  #!表示取反
+    $0  ~  /$reg/  {action}  #
+           /$reg/  {action}  #与上面一个等价
 
 内置变量
-$0 $1 ... $NF #RS='\n' OFS   $0整行 
-ARGC    #mawk -f prg v=1 A t=hello B argc=5 argv[1]='v=1'
-ARGV
-CONVFMT 转化字符串为数值的默认值 默认值'%.6g'
-ENVIRON[var]=value
-FILENAME 文件名
-FNR      当前行在文件FILENAME中的行号
-FS       field separator
-NF       当前行有多少个field
-NR       当前行在所有文件中的行号
-OFMT     输出时格式化数值为字符串的默认值
-OFS      输出时field的分隔符
-ORS      输出时record的分隔符
-RLENGTH  length set by the last call to the built-in function, match().
-RS       输入时record的分隔符默认值\n
-RSTART   index set by the last call to match().
-SUBSEP    used to build multiple array subscripts, initially = "\034".
+    $0 $1 ... $NF #RS='\n' OFS   $0整行 
+    ARGC    #mawk -f prg v=1 A t=hello B argc=5 argv[1]='v=1'
+    ARGV
+    CONVFMT 转化字符串为数值的默认值 默认值'%.6g'
+    ENVIRON[var]=value
+    FILENAME 文件名
+    FNR      当前行在文件FILENAME中的行号
+    FS       field separator
+    NF       当前行有多少个field
+    NR       当前行在所有文件中的行号
+    OFMT     输出时格式化数值为字符串的默认值
+    OFS      输出时field的分隔符
+    ORS      输出时record的分隔符
+    RLENGTH  length set by the last call to the built-in function, match().
+    RS       输入时record的分隔符默认值\n
+    RSTART   index set by the last call to match().
+    SUBSEP    used to build multiple array subscripts, initially = "\034".
 
 内置函数
 	gsub(r,s,t) gsub(r,s) #将t中符合r的替换为s,返回替换次数 当t不存在时使用$0
