@@ -725,20 +725,64 @@ log() {
 ##  输入输出重定向
 
 ```
-read [-p "prompt"] $line # 读取一行
-read [-p "prompt"] $v1 $v2 $n #将一行按照IFS分割赋值给各变量 若变量数小于切片数,则最后一个变量再获取其余值; 若变量数大于切片数,则多余变量值为空
+cat > a.file            #表示从键盘获取标准输入给cat,然后cat将输出重定向到a.file
+xxx
+#这里按下ctl+D离开
+
+##########代码块重定向
+命令行方式1 更易理解
+while read line < $file;do
+done
+命令行方式2
 while IFS= read -r -u13 line; do
 done 13 < "$(cmd)"
-
+文件方式3
 while IFS= read -r  line; do  #The -r option passed to read command prevents backslash 								  #		escapes from being interpreted
 							  #Add IFS= option before read command to prevent                                           #     leading/trailing whitespace from being trimmed 
 done < $file
 
+read [-p "prompt"] $line # 读取一行到变量line
+read [-p "prompt"] $v1 $v2 $n #将一行按照IFS分割赋值给各变量 若变量数小于切片数,则最后一个变量再获取其余值; 若变量数大于切片数,则多余变量值为空
+read -a $arr            # 读取一行到数组
+
 cmd1 | cmd2                        # 管道，cmd1 的标准输出接到 cmd2 的标准输入
-< file                             # 将文件内容重定向为命令的标准输入
+
+
+fd与>不能有空格 >与file之间可以有空格
+
+输出重定向
 > file                             # 将命令的标准输出重定向到文件，会覆盖文件
 >> file                            # 将命令的标准输出重定向到文件，追加不覆盖
 >| file                            # 强制输出到文件，即便设置过：set -o noclobber
+
+输入重定向
+< file                             # 将文件内容重定向为命令的标准输入 mysql < a.sql
+<< text                            # here doc
+<<< word                           # 将word字符串和后面的换行作为输入提供给命令行
+
+cmd <> file                        #以读写模式把文件file重定向到输入，文件file不会被破坏。
+                                   #仅当应用程序利用了这一特性时，它才是有意义的
+
+使用文件描述符的重定向
+cmd >&n                            # 将输出送到文件描述符n
+cmd m>&n                           # 将输出到文件描述符m的重定向到文件描述符n
+cmd >&-                            # 关闭标准输出
+cmd >&n-                         
+
+cmd <&n                            # 输入来自文件描述符
+cmd m<&n                           
+cmd <&-                            # 关闭标准输入
+cmd <&n-
+
+cmd 2>&1 1>file                    #三者等价
+cmd &> file                        #更简洁
+cmd >& file
+
+cmd 2>&1 1>>file                   #二者等价
+cmd &>>file                        #更简洁
+
+
+
 n>| file                           # 强制将文件描述符 n的输出重定向到文件
 <> file                            # 同时使用该文件作为标准输入和标准输出
 n<> file                           # 同时使用文件作为文件描述符 n 的输出和输入
@@ -754,6 +798,10 @@ n<&m                               # 文件描述符 n 被作为描述符 m 的�
 n>&-                               # 关闭作为输出的文件描述符 n
 n<&-                               # 关闭作为输入的文件描述符 n
 diff <(cmd1) <(cmd2)               # 比较两个命令的输出
+
+
+exec 以上命令都是在当前行输入输出重定向,但exec可使接下来都重定向
+exec 3<> File             # 打开"File"并且将fd 3分配给它
 ```
 
 ##  组合命令
@@ -761,6 +809,57 @@ diff <(cmd1) <(cmd2)               # 比较两个命令的输出
 ```
 ()
 {}
+```
+
+##  expect 语法与bash完全不同
+
+```
+#####telnet
+#!/usr/bin/expect -f
+set ip         [lindex $argv 0]   #获取第一个参数
+set userid     [lindex $argv 1]
+set mypassword [lindex $argv 2]
+set mycommand  [lindex $argv 3]
+
+set timeout 10
+spawn telnet $ip
+    expect "username:" {send "$userid\r"}
+    expect "password:" {send "$mypassword\r"}
+    expect "%"         {send "$mycommand\r"}
+    expect "%"         {set results $expct_out(buffer); send "exit\r"}
+    expect eof
+
+#####ftp
+#!/usr/bin/expect -f
+set ip         [lindex $argv 0]
+set userid     [lindex $argv 1]
+set mypassword [lindex $argv 2]
+
+set timeout 10
+spawn ftp $ip
+    expect "username:" {send "$userid\r"}
+    expect "password:" {send "$mypassword\r"}
+    expect "ftp>"      {send "bin\r"}
+    expect "ftp>"      {send "prompt\r"}        #关闭提示符
+    expect "ftp>"      {send "mget *\r"}        #下载所有文件
+    expect "ftp>"      {send "bye\r"}
+    expect eof
+
+#####ssh
+if { $argc != 2 }{
+	send_user "usage: ./expect $user $password"
+}
+for {set i 10} {$i<=12} {incr i}{    #类似于for(i:=10;i<12;i++)
+	set timeout 30
+	set ssh_user [lindex $argv 0]
+    set password [lindex $argv 1]
+    spawn  ssh  $username 192.168.0.1
+    expect  {
+        "*yes/no"     {send "yes\r"; exp_continue;}
+        "*password:"  {send "$password\r"}
+    } 
+}
+interact
 ```
 
 ##  调试
