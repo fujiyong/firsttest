@@ -2527,7 +2527,9 @@ mysql> SELECT * FROM shop WHERE price=@min_price OR price=@max_price;
 
 
 
-
+保护数据最简单的方法是使用''
+ ';drop database test'                  #
+ select * from t where id='12 or 1=1';  #没''则检出所有所有数据  mysql在数字列会自动将字符串转换为数字，非数字的自动舍弃。
 
 
 
