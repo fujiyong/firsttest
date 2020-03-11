@@ -469,16 +469,18 @@ env    表示当前用户的环境的变量     env | sort
 ##  数值let exp [] (( )) awk/bc
 
 ```
-计算
-    let number_var=$number_var+1 
-    number_var=`expr $number + 1`   # 兼容 posix sh 的计算，需要转义
-    i=((i+1))
-整数比较
-    [ num1 $opt num2]
-    if (( num1 $opt num2 ))      # == != < <= > >=
-小数比较计算使用awk或bc
+整数
+	计算
+        i=((i+1))
+        let number_var=$number_var+1 
+        number_var=`expr $number + 1`   # 兼容 posix sh 的计算，需要转义
+	比较
+        [ num1 $opt num2]
+        if (( num1 $opt num2 ))      # == != < <= > >=
+小数
+	计算比较都使用awk或bc
 	awk
-	bc  
+	bc 
 		echo "1+2" | bc
 		bc <<< "1+2"
 ```
@@ -2433,7 +2435,7 @@ systemctl status             firewalld
 firewall-cmd --stat
 firewall-cmd --list-all                 #检查防火墙状态
 
-firewall-cmd --zone=public --add-port=8080/tcp --permanent
+firewall-cmd --zone=public --add-port=30303/tcp --permanent
 firewall-cmd --zone=public --remove-port=80/tcp --permanent
 firewall-cmd --reload
 firewall-cmd --list-all
