@@ -2443,8 +2443,6 @@ https://www.zsythink.net/archives/2252
 
 
 
-D:\fjy\code\go\src\github.com\ethereum\go-ethereum\consensus\ethash\consensus.go
-
 
 
 5.1    2008-11
@@ -2676,130 +2674,9 @@ man 7 glob
         [:punct:]  [:space:]  [:upper:]  [:xdigit:]
 
 
-bash自动补全/etc/bash_completion.d
-complete  $option   $cur 补全命令
-    -C $cmder           将执行cmder的结果作为候选的补全结果
-    -G $fileNamePattern 将匹配pattern的文件名作为候选结果
-    -F $funcName        执行funcName,在funcName中生成COMPREPLY作为候选结果
-    -W $wordlist        分割wordlist作为候选结果
-    -p [name]           列出所有的补全命令
-    -r [name]           删除某个补全命令 
-    -A file             表示默认动作是补全文件名,也即是如果bash找不到补全的内容(如执行函数-F中COMPREPLY为空),就会默认以文件名进行补全
 
 
-compgen  筛选命令
-	根据$cur的值从候选列表中选择符合匹配单词的值并打印
-	eg. compgen -W "debug error error2 key perform run" -- "err" #打印补全当前单词error error2
 
-compopt [-o|+o option] [-DE] [name ...] 修改补全命令设置,只能在补全函数中使用,否则报错
-
-
-内置补全变量
-    COMP_WORDS     数组,当前命令行中输入的所有单词
-    COMP_CWORD     整数,当前输入的单词在COMP_WORDS中的索引,从1开始
-    COMPREPLY      数组,存放候选的补全结果
-    COMP_WORDBREAK 字符串,表示单词之间的分隔符
-    COMP_LINE      字符串,表示当前命令行输入的字符
-    COMP_POINT     整数,表示光标在当前命令行的哪个位置
-
-
-viewlog -s servicename -t logtype 
-中servicename为 /data/applog目录下的文件名，logtype为debug error key perform run中的一种。
-想实现的效果是：输入viewlog时可以自动补全出-t -s , 输入-s时可以自动补全出/data/applog下的文件，-t时则可以自动补全出debug error key perform run中的一种
-
- _viewlog()
-{
-    COMPREPLY=()      #说明是个数组
-
-    local cur prev opts
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    opts="-s -t"
-
-    #参数-s需要补全/data/applog目录下的服务
-    if [[ ${prev} == "-s" ]];then
-        local servicename=$(ls -l /data/applog | grep ^d | awk '{print $9}')
-        COMPREPLY=( $(compgen -W "${servicename}" -- ${cur}) )
-        return 0
-    fi
-    #-t的补全对象为"debug error key perform run"
-    if [[ ${prev} == "-t" ]];then
-    	local logtypes="debug error key perform run"
-        COMPREPLY=( $(compgen -W "debug error key perform run" -- ${cur}) )
-		return 0
-    fi
-
-    #只输入viewlog时，补全该命令可选的参数
-    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-}
-
-complete -F _viewlog viewlog
-
-
-_pandoc() {
-    local pre cur
- 
-    COMPREPLY=()
-    #pre="$3"
-    #cur="$2"
-    pre=${COMP_WORDS[COMP_CWORD-1]}
-    cur=${COMP_WORDS[COMP_CWORD]}
-    READ_FORMAT="native json markdown markdown_strict markdown_phpextra 
-    markdown_github textile rst html docbook opml mediawiki haddock latex"
-    WRITE_FORMAT="native json plain markdown markdown_strict 
-    markdown_phpextra markdown_github rst html html5 latex beamer context 
-    man mediawiki textileorg textinfo opml docbook opendocument odt docx 
-    rtf epub epub3 fb2 asciidoc slidy slideous dzslides revealjs s5"
- 
-    case "$pre" in
-    -f|-r )
-        COMPREPLY=( $( compgen -W "$READ_FORMAT" -- $cur ) )
-        return 0
-        ;;
-    -t|-w )
-        COMPREPLY=( $( compgen -W "$WRITE_FORMAT" -- $cur ) )
-        return 0
-    esac
- 
-    complete_options() {
-        local opts i
-        opts="-f -r -t -w -o --output -v --version -h --help"
-        for i in "${COMP_WORDS[@]}"
-        do
-            if [ "$i" == "-f" -o "$i" == "-r" ]
-            then
-                opts="$opts"" -R -S --filter -p"
-                break
-            fi
-        done
- 
-        for i in "${COMP_WORDS[@]}"
-        do
-            if [ "$i" == "-t" -o "$i" == "-w" ]
-            then
-                opts="$opts"" -s --template --toc"
-                break
-            fi
-        done
-        echo "$opts"
-    }
- 
-    case "$cur" in
-    -* )
-        COMPREPLY=( $( compgen -W "$(complete_options)" -- $cur) )
-        ;;
-    * )
-        COMPREPLY=( $( compgen -A file ))
-    esac
-}
-complete -F _pandoc pandoc
-
-
-compgen -c #查看所有命令
-compgen -a #查看所有别名
-compgen -b #查看内嵌命令
-compgen -k #查看所有关键字
-compgen -A function
 
 
 
@@ -2823,5 +2700,3 @@ git clone --depth=1 git://github.com:example/awesome-project
 git fetch --unshallow
 git pull --all
 
-
-http://www.92ysgs.com/index.php/vod/play/id/41654/sid/1/nid/1.html

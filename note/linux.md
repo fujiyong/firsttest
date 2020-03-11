@@ -44,16 +44,7 @@ aa
 bb
 EOF
 
-命令自动完成
-    compgen --help
-        -c #有哪些可用命令complete    compgen -c | sort > comp.txt
-        -b #所有bash内置命令
-        -k #所有bash关键字
-        -A #所有函数
-        #compgen -w "aa ab bb cc" --"a" #从"aa ab bb cc"中找出以"a"开始的单词
-    complete  -F $func	$cmd #当执行命令cmd时,该命令的参数由函数$func获取
-    compopt
-    	-o nospace
+
 
 man bash | col -bx > bash.txt
 方法1:转化为md
@@ -64,14 +55,6 @@ man bash | col -bx > bash.txt
 ```
 
 # bash
-
-所有命令
-
-compgen -c #查看所有命令
-compgen -a #查看所有别名
-compgen -b #查看内嵌命令
-compgen -k #查看所有关键字
-compgen -A function
 
 ##  选项
 
@@ -159,6 +142,128 @@ stty -a                            # 查看发送信号的快捷键
     C^Z  susp    //vi中途退出 fg重新回到vi
     C^S  stop    //查看日志tail -f时停止滚屏
     C^Q  start   //查看日志tail -f时重新滚屏
+```
+
+###  命令自动完成
+
+```
+bash自动补全/etc/bash_completion.d
+complete  $option   $cur 补全命令
+    -C $cmder           将执行cmder的结果作为候选的补全结果
+    -G $fileNamePattern 将匹配pattern的文件名作为候选结果
+    -F $funcName        执行funcName,在funcName中生成COMPREPLY作为候选结果
+    -W $wordlist        分割wordlist作为候选结果
+    -p [name]           列出所有的补全命令
+    -r [name]           删除某个补全命令 
+    -A file             表示默认动作是补全文件名,也即是如果bash找不到补全的内容(如执行函数-F中COMPREPLY为空),就会默认以文件名进行补全
+
+compgen  筛选命令
+	根据$cur的值从候选列表中选择符合匹配单词的值并打印
+	compgen --help
+    	-a #查看所有别名
+        -c #有哪些可用命令complete    compgen -c | sort > comp.txt
+        -b #所有bash内置命令
+        -k #所有bash关键字
+        -A #所有函数
+        #compgen -w "aa ab bb cc" --"a" #从"aa ab bb cc"中找出以"a"开始的单词
+        #compgen -W "error error2 key perform run" -- "err" #打印补全当前单词error error2
+
+compopt [-o|+o option] [-DE] [name ...] 修改补全命令设置,只能在补全函数中使用,否则报错
+    	-o nospace
+
+内置补全变量
+    COMP_WORDS     数组,当前命令行中输入的所有单词
+    COMP_CWORD     整数,当前输入的单词在COMP_WORDS中的索引,从1开始
+    COMPREPLY      数组,存放候选的补全结果
+    COMP_WORDBREAK 字符串,表示单词之间的分隔符
+    COMP_LINE      字符串,表示当前命令行输入的字符
+    COMP_POINT     整数,表示光标在当前命令行的哪个位置
+
+viewlog -s servicename -t logtype 中servicename为/data/applog目录下的文件名，logtype为debug error key perform run中的一种。
+想实现的效果是：输入viewlog时可以自动补全出-t -s, 输入-s时可以自动补全出/data/applog下的文件，-t时则可以自动补全出debug error key perform run中的一种
+
+ _viewlog()
+{
+    COMPREPLY=()      #说明是个数组
+
+    local cur prev opts
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    opts="-s -t"
+
+    #参数-s需要补全/data/applog目录下的服务
+    if [[ ${prev} == "-s" ]];then
+        local servicename=$(ls -l /data/applog | grep ^d | awk '{print $9}')
+        COMPREPLY=( $(compgen -W "${servicename}" -- ${cur}) )
+        return 0
+    fi
+    #-t的补全对象为"debug error key perform run"
+    if [[ ${prev} == "-t" ]];then
+    	local logtypes="debug error key perform run"
+        COMPREPLY=( $(compgen -W "debug error key perform run" -- ${cur}) )
+		return 0
+    fi
+
+    #只输入viewlog时，补全该命令可选的参数
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+}
+
+complete -F _viewlog viewlog
+
+
+_pandoc() {
+    local pre cur
+ 
+    COMPREPLY=()
+    #pre="$3"
+    #cur="$2"
+    pre=${COMP_WORDS[COMP_CWORD-1]}
+    cur=${COMP_WORDS[COMP_CWORD]}
+    READ_FORMAT="native mediawiki haddock latex"
+    WRITE_FORMAT="native json revealjs s5"
+ 
+    case "$pre" in
+    -f|-r )
+        COMPREPLY=( $( compgen -W "$READ_FORMAT" -- $cur ) )
+        return 0
+        ;;
+    -t|-w )
+        COMPREPLY=( $( compgen -W "$WRITE_FORMAT" -- $cur ) )
+        return 0
+    esac
+ 
+    complete_options() {
+        local opts i
+        opts="-f -r -t -w -o --output -v --version -h --help"
+        for i in "${COMP_WORDS[@]}"
+        do
+            if [ "$i" == "-f" -o "$i" == "-r" ]
+            then
+                opts="$opts"" -R -S --filter -p"
+                break
+            fi
+        done
+ 
+        for i in "${COMP_WORDS[@]}"
+        do
+            if [ "$i" == "-t" -o "$i" == "-w" ]
+            then
+                opts="$opts"" -s --template --toc"
+                break
+            fi
+        done
+        echo "$opts"
+    }
+ 
+    case "$cur" in
+    -* )
+        COMPREPLY=( $( compgen -W "$(complete_options)" -- $cur) )
+        ;;
+    * )
+        COMPREPLY=( $( compgen -A file ))
+    esac
+}
+complete -F _pandoc pandoc
 ```
 
 ###  空命令
@@ -357,7 +462,7 @@ env    表示当前用户的环境的变量     env | sort
 	
 变量定界符  主要是拼接字符串变量
 	local var="visitor"; 
-	${var}or        #visitor 拼接字符串,为了明确变量的边界,需要添加{}
+	${var}or        #visitor 拼接字符串,为了明确变量的边界,需要添加
    	${var}${var2}
  查看变量
  	echo $var
@@ -451,9 +556,219 @@ bc  echo "1+2" | bc
     !(patternlist)            # 不匹配
 ```
 
-##  数组
+##  数值字符串
+
+|                  | [ ]                     | [[]]                    | (())              |
+| ---------------- | ----------------------- | ----------------------- | ----------------- |
+| string           | \\<                     | <                       |                   |
+|                  | \\>                     | >                       |                   |
+|                  | =                       | =  ==                   |                   |
+|                  | !=                      | !=                      |                   |
+|                  | -n                      | -n                      |                   |
+|                  | -z                      | -z                      |                   |
+| integer          | -gt -lt -ge -le -eq -ne | -gt -lt -ge -le -eq -ne | \> \>= == != < <= |
+| condition        | -a                      | &&                      |                   |
+|                  | -o                      | \|\|                    |                   |
+|                  | !                       | !                       |                   |
+| expression group | \\(     \ \)            | ()                      |                   |
+| pattern matching |                         | = ==                    |                   |
+| reg     matching |                         | =~                      |                   |
+
+###   小括号
+
+- ( )    组命令 group cmder     启动一个子shell执行,括号外不可使用括号内的变量 命令之间用";"分割, 最后一个可以没有";", 各命令与括号之间不必有空格( )  
+
+- (a b c)   初始化数组 init array            
+
+- \$(hostname)  命令替换cmd substitution
+
+  支持变量嵌套"\$(echo \"$x" | grep "aa")"  
+
+  支持表达式的双引号嵌套而不用使用转义符 "\$(echo "$x"|grep aa)"
+  
+- (())   bash extension 不具移植性  integer arithmetic expansion, 类似于let,但比let强  
+
+  - 整数 完全取代[]中整数操作
+
+    只要括号中的运算符表达式符合C语言运算规则,都可以放在$((exp))中,甚至三目运算符 echo $(( 2 > 1  ? 1 : 2 )) 
+
+    ​		++ --          前后缀
+
+    ​		/  % + -
+
+    ​		**             幂
+
+    ​		<< >>       左右位移  
+
+    ​		& | ~        位与或非
+
+    ​		= > == != < <= 
+
+  -  重定义变量值  如a=5; ((a++))  #$a为6
+
+  - 算术运算比较   
+
+    双括号中的变量可以不使用$前缀. 括号内支持多个用逗号分隔的符合C语言运算规则的表达式 
+    	for((i=0;i<10;i++))   for i in `seq 0 10` for in {0..10}
+
+  - 逻辑运算       如if ((\$i))                 if ((\$i<5))  
+
+    ​                      &&   ||   !    支持()改变优先级
+
+  - 不支持文件操作
+  
+- $(( ))      进制转换      将(2,8,16)转换成10进制, 如echo $((16#5f))   #16进制转为10进制结果为95
+
+
+###  中括号
+
+- []  posix标准,具有移植性    /usr/bin/[ 由ubuntu16.04提供,但优先级没有bash中内置的高, 用于
+
+  - 数组下标
+
+  - 正则表达式的字符范围  [a-z]
+
+  -  test operator, 等价于test, 既是bash内置关键字也是可执行命令 左右都要有空格
+
+    - 字符串的操作符  
+
+      -n  -z   =(亦可用bash extension符==)  != 
+
+      其他的需要转义以防止表示重定向, 如posix扩展\\< \\> ,不支持\<= \>=?
+
+    - 整数           -gt -ge -eq -ne -lt -le
+
+    - 逻辑运算   -a  -o  !  不支持()改变优先级,因为()在[]表示sub shell,所以如果需要改变优先级需转义\( \)
+
+- [[ ]]  bash extension,不具移植性
+
+  - test operator
+
+    - 字符串  不用使用""以便防止字符串变量切割 如x='a b'; [[ $x = a b ]]
+      - 仍然保留一部分  -n -z =(亦可用bash extension符==) !=                      \<= \>=?
+
+      - 新增部分 不区分大小写比较 shopt -s nocaseglob
+        <            取代\\<     由于[[ $a < $b ]] 不知是字符还是整数,所以[[ "x$a" < "x$b" ]]
+
+         \>            取代\\>  
+         ! \$a >\$b      表示不大于即<=含义
+         ! $a < \$b      表示不小于即>=含义
+
+      - 完全新增部分
+
+        ==(偶尔亦可用=) !=  模式匹配pattern matching     globbing 
+                                      匹配字符串或通配符,一定不需要引号,否则当成文本字符串  
+        
+        ​                                  如 [[ hello == hell? ]]
+        
+    
+    ​              =~                             正则匹配regular expression 
+  
+    - 整数  同[]    不支持>= > == != < <= 建议数值比较使用(())
+  
+  - 逻辑   && ||  !  支持()改变优先级
+
+###  大括号
+
+- {}
+  - 组命令 group cmd, 又称代码块,内部组, 实际上创建了一个匿名函数   
+                    不会启动子shell执行, 括号外仍可使用括号内的变量 
+                    命令之间用";"分割, 最后一个必须要有";", 第一个命令必须与左括号有一个空格
+  -  大括号扩展
+                    以,分割的离散文件列表  touch {a,d}.txt 结果为a.txt d.txt
+                    以..分割的连续文件列表 touch {a..d}.txt 结果为a.txt b.txt c.txt d.txt
+- \${}   refer to variables and avoid confusion over their name  如${var}const
+
 
 ```
+${var:-string}     if ( var == null ) { return string} else { return var}                 为空返回默认值,否则返回原值
+${var:=string}     if ( var == null ) { var = string; return string;} else { return var;} 为空返回默认值并赋值,否则返回原值
+${var:+string}     if ( var != null ) { return string } else { return null }              不为空返回默认值,否则返回null  明显是搞事的
+${var:?string}     if ( var != null ) { return var } else { print string; exit 0;} 判断是否已经赋值 打印为空时的错误消息  提前询问
+
+${var#pattern}            去掉左边最小匹配
+${var##pattern}           去掉左边最大匹配
+${var%pattern}            去掉右边最小匹配  ${filename%.*}   echo $filename | sed 's/\.[^.]*$//'
+${var%%pattern}           去掉右边最大匹配
+
+字符串切割
+${var:num}                 从var中第$num处提取到末尾的所有的字符. 若num为正数则从左边num处;若num为负数,则从右边开始
+                           但必须使用在冒号后面加空格或一个数字或整个num加上括号，如${var: -2} ${var:1-3}或${var:(-2)}
+${var:num1:num2}           从var中第$num1处摘取长度为$num2的子串  不能为负数
+
+字符串替换
+${var/pattern1/pattern2}   将var中第一个匹配patter1的字符串替换为pattern2
+${var//pattern1/pattern2}  将var中所有匹配patter1的字符串替换为pattern2
+
+
+#字符匹配的条件 中间== 右边有双引号""
+[ "$a" == "z*" ]
+[[ $a  == "z*" ]]
+
+#模式匹配的条件 中间== 右边没有双引号""
+[  $a  == z*   ]   #file globbing word splitting
+[[ $a  == z*   ]]  #模式匹配 如果$a以z开始,那么为true
+
+#正则匹配的条件  中间=~ 右边没有双引号""
+[[ $a  =~ z*   ]]
+```
+
+##  数组/map
+
+```
+man bash 查看Arrays
+
+声明
+	declare -a indexedArray        
+	declare -A associateArray
+
+初始化
+	定义index数组
+		array=(valA valB valC)
+    	array=([0]=valA [3]=valB [8]=valC)   #支持稀疏数组
+    	array[0]=val1; array[3]=val3; array[8]=value8;
+    	旋转门
+    		转入数组
+        		array=($text)             # 按空格分隔 text 成数组，并赋值给变量
+        		IFS="/" array=($text)     # 按斜杆分隔字符串 text 成数组，并赋值给变量 
+    		转出数组
+        		text="${array[*]}"        # 用空格链接数组并赋值给变量
+        		text=$(IFS=/; echo "${array[*]}")  # 用斜杠链接数组并赋值给变量
+    定义associate数组map
+    	array=([indexName1]=val1 [indexName2]=val2)
+    	array[indexName1]=val1; array[indexName2]=val2;
+
+增
+	array[#array[@]]=v
+	array[indexName1]=val1; array[indexName2]=val2;
+删除第i个元素
+	方法一:切片方法构造
+	i=2;array=($array[@]:0:$i $array[@]:$i+1);echo ${!array[@]}  #数组下标对应的元素变化
+	
+	方法二:unset删除下标法
+	array=(A B C D E)                       #下标是0 1 2 3 4
+	i=2;unset array[$i]; echo ${!array[@]}  #打印  0 1   3 4
+	由于下标变换错误做法
+		for ((i=0;i<${#array[@]};i++));do 
+			echo "MYARR[$i]=${MYARR[$i]}"; #[0]=A [1]=B [2]= [3]=D ##[2]出现 [4]没出现
+		done
+	由于下标变换正确做法
+		for i in ${!MYARR[@]}; do 
+			echo "MYARR[${i}]=${MYARR[${i}]}"; #[0]=A [1]=B [3]=D [4]=E
+		done
+	这时需要使用旋转门重整下标
+		array=(${array[@]}); 
+		for ((i=0;i<${#array[@]};i++));do 
+			echo "array[$i]=${array[$i]}"; 
+		done
+清空数组
+	unset array[@]
+	unset array[*]
+删除整个数组
+	unset array
+改
+	array[0]=val1; array[3]=val3; array[8]=value8;
+	array[indexName1]=val1; array[indexName2]=val2;
 遍历
 	for ((i=1; i<=j; i++)); do  done
     for i in {1..10}
@@ -466,21 +781,13 @@ bc  echo "1+2" | bc
     IFS=$'\n'; for line in `cat $file`; do done
     for i in "$@"   #$#变量个数 $@ $*变量内容 $0文件名 $9 ${10} ${11}
                     #当变量个数大约9时,需要{},也就是要明确边界
-
-定义数组
-    array=([0]=valA [1]=valB [2]=valC)   
-    array=(valA valB valC)
-旋转门
-    转入数组
-        array=($text)             # 按空格分隔 text 成数组，并赋值给变量
-        IFS="/" array=($text)     # 按斜杆分隔字符串 text 成数组，并赋值给变量 
-    转出数组
-        text="${array[*]}"        # 用空格链接数组并赋值给变量
-        text=$(IFS=/; echo "${array[*]}")  # 用斜杠链接数组并赋值给变量             
+	
+获取所有元素           ${array[@]}    ${array[*]}
+获取所有元素下标        ${!array[@]}   ${!array[*]}
+获取数组长度           ${#array[@]}  ${#array[*]}
 获取数组元素            ${array[i]}
-获取数组长度            ${#array[@]}
 获取数组中某变量长度     ${#array[i]}
-数组切片
+数组切片               ${array[@]:offset:number} #当number省略时,表示直至数组结束
     A=( foo bar "a  b c" 42 ) # 数组定义
     B=("${A[@]:1:2}")         # 数组切片：B=( bar "a  b c" )
     C=("${A[@]:1}")           # 数组切片：C=( bar "a  b c" 42 )
@@ -489,8 +796,6 @@ bc  echo "1+2" | bc
     echo "${C[@]}"            # bar a  b c 42
     echo "${C[@]: -2:2}"      # a  b c 42  减号前的空格是必须的
 ```
-
-##  map
 
 ##  文件属性
 
@@ -502,24 +807,23 @@ help test
 
 ```
 buildin关键字 true(0) false(1)
-
 test {expression}         # 判断条件为真的话 test 程序返回0 否则非零
-[ expression ]            # 判断条件为真的话返回0 否则非零
-! [ expression ]          # 如果 expression 为假那返回真
-
-statement1 && statement2  # and 操作符
-statement1 || statement2  # or 操作符
-exp1 -a exp2              # exp1 和 exp2 同时为真时返回真（POSIX XSI扩展）
-exp1 -o exp2              # exp1 和 exp2 有一个为真就返回真（POSIX XSI扩展）
 ```
 
 ##  流程控制
 
 ```
-help if     if []; then xxx; [ elif []; then xxx; ]... [ else xxx; ] fi   
-help for    见数组
-help while  while []; do xxx; done
-help until  util  []; do xxx; done
+if []; then      #help if
+elif []; then
+else
+fi
+
+while []; do     #help while
+done
+
+util []; do      #help util
+done
+
 
 #命令行处理
 ##位置变量
@@ -693,7 +997,7 @@ https://www.cnblogs.com/yxzfscg/p/5338775.html
 ##  函数 
 
 ```
-function myfunc() {
+function myfunc {    ###或myfunc () {
 	# $# 代表参数个数
 	# $0 代表被调用者自身的名字
     # $1 代表第一个参数，$N 代表第 N 个参数
