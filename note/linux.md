@@ -44,8 +44,6 @@ aa
 bb
 EOF
 
-
-
 man bash | col -bx > bash.txt
 方法1:转化为md
     :%s/^\([A-Z]\)/#\1/g                     #在行首有字母的行前添加#使之成为一级标题
@@ -468,21 +466,21 @@ env    表示当前用户的环境的变量     env | sort
  	echo $var
 ```
 
-##  数值(( ))/bc
+##  数值let exp [] (( )) awk/bc
 
 ```
 计算
     let number_var=$number_var+1 
     number_var=`expr $number + 1`   # 兼容 posix sh 的计算，需要转义
+    i=((i+1))
 整数比较
-    [ num1 -eq num2 ]            # 等价于 if (( num1 == num2 ))
-    [ num1 -ne num2 ]            # 等价于 if (( num1 != num2 ))
-    [ num1 -lt num2 ]            # 等价于 if (( num1 <  num2 ))
-    [ num1 -le num2 ]            # 等价于 if (( num1 <= num2 ))
-    [ num1 -gt num2 ]            # 等价于 if (( num1 >  num2 ))
-    [ num1 -ge num2 ]            # 等价于 if (( num1 >= num2 ))
-小数比较使用awk或bc
-bc  echo "1+2" | bc
+    [ num1 $opt num2]
+    if (( num1 $opt num2 ))      # == != < <= > >=
+小数比较计算使用awk或bc
+	awk
+	bc  
+		echo "1+2" | bc
+		bc <<< "1+2"
 ```
 
 ##  字符串[[ ]]
@@ -567,10 +565,10 @@ bc  echo "1+2" | bc
 |                  | -n                      | -n                      |                   |
 |                  | -z                      | -z                      |                   |
 | integer          | -gt -lt -ge -le -eq -ne | -gt -lt -ge -le -eq -ne | \> \>= == != < <= |
-| condition        | -a                      | &&                      |                   |
-|                  | -o                      | \|\|                    |                   |
-|                  | !                       | !                       |                   |
-| expression group | \\(     \ \)            | ()                      |                   |
+| condition        | -a                      | &&                      | &&                |
+|                  | -o                      | \|\|                    | \|\|              |
+|                  | !                       | !                       | !                 |
+| expression group | \\(     \ \)            | ()                      | ()                |
 | pattern matching |                         | = ==                    |                   |
 | reg     matching |                         | =~                      |                   |
 
@@ -810,10 +808,12 @@ buildin关键字 true(0) false(1)
 test {expression}         # 判断条件为真的话 test 程序返回0 否则非零
 ```
 
-##  流程控制
+##  流程控制if for while util case select
+
+除了if-then case-esac外,其余的都是do-done
 
 ```
-if []; then      #help if
+if   []; then    #help if
 elif []; then
 else
 fi
@@ -821,32 +821,65 @@ fi
 while []; do     #help while
 done
 
-util []; do      #help util
+util  []; do     #help util
 done
 
-
-#命令行处理
-##位置变量
-	只能处理简单固定位置的变量
-	
-##迭代处理
+##迭代处理for
 for opt in "$@"; do
-  case $opt in
-    --help)
-      help
-      exit 0
-      ;;
-    --xdg)
-      ;;
-    [1yY]*)
-      ;;
-    *)
-      echo "unknown option: $opt"
-      help
-      exit 1
-      ;;
+  case $opt in              #help case 深入理解pattern matching
+    --help)  ;;
+    [1yY]*)  ;;
+    *)       help; ;;
   esac
 done
+
+#菜单选择select
+select name [in list]; do 
+	echo "your input is $REPLY and you choose result is $name"
+	case $name in 
+        pattern1 | pattern2 )  statements ;;
+        *                   )  otherwise  ;;
+	esac
+done
+```
+
+##  函数 
+
+```
+function myfunc {    ###或myfunc () {
+	# $# 代表参数个数
+	# $0 代表被调用者自身的名字
+    # $1 代表第一个参数，$N 代表第 N 个参数
+    # ${10} 代表第10个参数 当参数序数大于9时,需用{}表示截止
+    # $* 空格链接起来的所有参数，类型是字符串 
+    #	for i in "$*";do echo $i; done
+    # $@ 代表所有参数，类型是个数组，想传递所有参数给其他命令用 cmd "$@" 
+    #	for i in "$@";do echo $i; done
+    {shell commands ...}
+    //readonly local
+}
+
+myfunc                    # 调用函数 myfunc 
+myfunc arg1 arg2 arg3     # 带参数的函数调用
+myfunc "$@"               # 将所有参数传递给函数
+myfunc "${array[@]}"      # 将一个数组当作多个参数传递给函数
+shift                     # 参数左移
+
+unset -f myfunc           # 删除函数
+declare -f                # 列出函数定义
+
+log() {
+    local prefix="[$(date +%Y/%m/%d\ %H:%M:%S)]: "
+    echo $prefix $@ >&2
+}
+#log "INFO" "A message"
+```
+
+##  命令行参数处理
+
+```
+##位置变量
+	只能处理简单固定位置的变量
 
 ###############################bash内置的getopts
 optstrinng的格式
@@ -960,155 +993,117 @@ do
     echo "processing $arg"
 done
 
-
-#菜单选择
-select name [in list]; do 
-	echo "your input is $REPLY"
-	echo "you choose result is $name"
-	if [ $name == "apple" ]; then 
-		break
-	fi
-	case $name in 
-        pattern1 )
-            statements ;;
-        pattern2 )
-            statements ;;
-        * )
-            otherwise ;;
-	esac
-done
-
-answer_yes_or_no() {
-  while true; do
-  	#help read  -r表示do not allow backslashes to escape any characters
-    read -p "prompt_string ([y]/n) " -r
-    REPLY=${REPLY:-"y"}
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-      return 0
-    elif [[ $REPLY =~ ^[Nn]$ ]]; then
-      return 1
-    fi
-  done
-}
-
 https://www.cnblogs.com/yxzfscg/p/5338775.html
 ```
 
-##  函数 
-
-```
-function myfunc {    ###或myfunc () {
-	# $# 代表参数个数
-	# $0 代表被调用者自身的名字
-    # $1 代表第一个参数，$N 代表第 N 个参数
-    # ${10} 代表第10个参数 当参数序数大于9时,需用{}表示截止
-    # $* 空格链接起来的所有参数，类型是字符串 
-    #	for i in "$*";do echo $i; done
-    # $@ 代表所有参数，类型是个数组，想传递所有参数给其他命令用 cmd "$@" 
-    #	for i in "$@";do echo $i; done
-    {shell commands ...}
-    //readonly local
-}
-
-myfunc                    # 调用函数 myfunc 
-myfunc arg1 arg2 arg3     # 带参数的函数调用
-myfunc "$@"               # 将所有参数传递给函数
-myfunc "${array[@]}"      # 将一个数组当作多个参数传递给函数
-shift                     # 参数左移
-
-unset -f myfunc           # 删除函数
-declare -f                # 列出函数定义
-
-log() {
-    local prefix="[$(date +%Y/%m/%d\ %H:%M:%S)]: "
-    echo $prefix $@ >&2
-}
-#log "INFO" "A message"
-```
-
 ##  输入输出重定向
+
+###   cat 
 
 ```
 cat > a.file            #表示从键盘获取标准输入给cat,然后cat将输出重定向到a.file
 xxx
 #这里按下ctl+D离开
 
-##########代码块重定向
-命令行方式1 更易理解
+cat > a.file << EOF    #here doc
+EOF
+```
+
+###   read
+
+```
+####读取到变量和数组
+read [-p "prompt"] $line      #读取一行到变量line
+read [-p "prompt"] $v1 $v2 $n #将一行按照IFS分割赋值给各变量 
+                              #若变量数小于切片数,则最后一个变量再获取其余值;
+                              #若变量数大于切片数,则多余变量值为空
+read [-p "prompt"] -a $arr    #读取一行到数组
+
+####应用到结构代码块重定向
+这种方式将<提前,更易理解
 while read line < $file;do
 done
-命令行方式2
-while IFS= read -r -u13 line; do
-done 13 < "$(cmd)"
-文件方式3
+
+从文件中读取
 while IFS= read -r  line; do  #The -r option passed to read command prevents backslash 								  #		escapes from being interpreted
 							  #Add IFS= option before read command to prevent                                           #     leading/trailing whitespace from being trimmed 
 done < $file
+从命令行结果中读取
+while IFS= read -r -u13 line; do
+done 13 < "$(cmd)"
 
-read [-p "prompt"] $line # 读取一行到变量line
-read [-p "prompt"] $v1 $v2 $n #将一行按照IFS分割赋值给各变量 若变量数小于切片数,则最后一个变量再获取其余值; 若变量数大于切片数,则多余变量值为空
-read -a $arr            # 读取一行到数组
+####应用到函数
+answer_yes_or_no() {
+  while true; do
+  	#help read  -r表示do not allow backslashes to escape any characters
+    read -p "prompt_string ([y]/n) " -r
+    REPLY=${REPLY:-"y"}
+    if   [[ $REPLY =~ ^[Yy]$ ]]; then
+      return 0
+    elif [[ $REPLY =~ ^[Nn]$ ]]; then
+      return 1
+    fi
+  done
+}
+```
 
+###  <> exec
+
+```
 cmd1 | cmd2                        # 管道，cmd1 的标准输出接到 cmd2 的标准输入
+左边的fd与>不能有空格 >与右边的file之间可以有空格
+-表示关闭
 
+不使用文件描述符的重定向
+    >  file                            # 将命令的标准输出重定向到文件，会覆盖文件
+    >> file                            # 将命令的标准输出重定向到文件，追加不覆盖
+    >| file                            # 强制输出到文件，即便设置过：set -o noclobber
 
-fd与>不能有空格 >与file之间可以有空格
-
-输出重定向
-> file                             # 将命令的标准输出重定向到文件，会覆盖文件
->> file                            # 将命令的标准输出重定向到文件，追加不覆盖
->| file                            # 强制输出到文件，即便设置过：set -o noclobber
-
-输入重定向
-< file                             # 将文件内容重定向为命令的标准输入 mysql < a.sql
-<< text                            # here doc
-<<< word                           # 将word字符串和后面的换行作为输入提供给命令行
-
-cmd <> file                        #以读写模式把文件file重定向到输入，文件file不会被破坏。
-                                   #仅当应用程序利用了这一特性时，它才是有意义的
+    <   file                           # 将文件内容重定向为命令的标准输入 mysql < a.sql
+    <<  text                           # here doc
+    <<< "word"                         # 将word字符串和后面的换行作为输入提供给命令行
+                                       # mysql <<< "select version();" 不需再mysql -e ""
+    diff <(cmd1) <(cmd2)               # 比较两个命令的输出
 
 使用文件描述符的重定向
-cmd >&n                            # 将输出送到文件描述符n
-cmd m>&n                           # 将输出到文件描述符m的重定向到文件描述符n
-cmd >&-                            # 关闭标准输出
-cmd >&n-                         
+    cmd  >&n                           # 将输出送到文件描述符n
+    cmd m>&n                           # 将输出到文件描述符m的重定向到文件描述符n
+    cmd  >&-                           # 关闭标准输出
+    cmd  >&n-                         
 
-cmd <&n                            # 输入来自文件描述符
-cmd m<&n                           
-cmd <&-                            # 关闭标准输入
-cmd <&n-
+    cmd  <&n                           # 输入来自文件描述符
+    cmd m<&n                           
+    cmd  <&-                           # 关闭标准输入
+    cmd  <&n-
+    
+    n> file                            # 重定向文件描述符 n 的输出到文件
+    n>| file                           # 强制将文件描述符 n的输出重定向到文件
+    
+    n< file                            # 重定向文件描述符 n 的输入为文件内容
 
-cmd 2>&1 1>file                    #三者等价
-cmd &> file                        #更简洁
-cmd >& file
+    复合文件描述符重定向
+    cmd 2>&1 1>file                    #三者等价
+    cmd      &>file                    #更简洁
+    cmd      >&file
 
-cmd 2>&1 1>>file                   #二者等价
-cmd &>>file                        #更简洁
+    cmd 2>&1 1>>file                   #二者等价
+    cmd      &>>file                   #更简洁
 
-
-
-n>| file                           # 强制将文件描述符 n的输出重定向到文件
-<> file                            # 同时使用该文件作为标准输入和标准输出
-n<> file                           # 同时使用文件作为文件描述符 n 的输出和输入
-n> file                            # 重定向文件描述符 n 的输出到文件
-n< file                            # 重定向文件描述符 n 的输入为文件内容
 n>&                                # 将标准输出 dup/合并 到文件描述符 n
 n<&                                # 将标准输入 dump/合并 定向为描述符 n
-n>&m                               # 文件描述符 n 被作为描述符 m 的副本，输出用
-n<&m                               # 文件描述符 n 被作为描述符 m 的副本，输入用
-&>file                             # 将标准输出和标准错误重定向到文件
-<&-                                # 关闭标准输入
->&-                                # 关闭标准输出
 n>&-                               # 关闭作为输出的文件描述符 n
 n<&-                               # 关闭作为输入的文件描述符 n
-diff <(cmd1) <(cmd2)               # 比较两个命令的输出
-
+     
+cmd <> file                        # 同时使用该文件作为标准输入和标准输出
+                                   # 以读写模式把文件file重定向到输入，文件file不会被破坏
+                                   # 仅当应用程序利用了这一特性时，它才是有意义的
+n<> file                           # 同时使用文件作为文件描述符 n 的输出和输入
 
 exec 以上命令都是在当前行输入输出重定向,但exec可使接下来都重定向
 exec 3<> File             # 打开"File"并且将fd 3分配给它
 ```
 
-##  组合命令
+##  组合命令group cmd
 
 ```
 ()
@@ -3905,6 +3900,29 @@ readline
 		ctrl-p prep 可重复按
 		ctrl-n next 可重复按(适用于先重复按ctrl-p多次，然后再回过来)
 		M-> 历史的最后一行
+```
+
+##  glob
+
+```
+man 7 glob 
+globbing  wildcard pattern 通配符表达式, 一般只能匹配filenames
+    ?        any signal character 
+    *        any length string, including empty              
+             diff from reg which zero or more copies of preceding things 
+    [aeiou]  离散的
+    [a-z]    连续的范围 
+    [!]      negation 对应正则中的^  diff from reg which is ^
+    "[[?*\]" 双引号"[]"中的失去特殊含义,代表[ ? * \四个字符
+
+    特殊情况pathnames
+    /        pathname中不能由?和*代替, 也不能由[.-o]范围表示
+    .        以.为首的文件名不能由?和*代替, 所以rm -rf *并不能删除隐藏文件
+
+reg expression 正则表达式 posix表达方式
+    [:alnum:]  [:alpha:]  [:blank:]  [:cntrl:]
+    [:digit:]  [:graph:]  [:lower:]  [:print:]
+    [:punct:]  [:space:]  [:upper:]  [:xdigit:]
 ```
 
 
