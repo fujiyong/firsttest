@@ -2369,6 +2369,10 @@ https://www.zsythink.net/archives/2252
 mysql
 windows下是my.ini  linux下是my.cnf  /etc/mysql/mysql.conf.d/mysqld.cnf  mysqld --verbose --help | grep defaults-file
 mysql.cnf是mysql各应用的集中配置的地方
+[client]
+host=        #对应环境变量MYSQL_HOST
+user=        #对应环境变量USER
+password=    #对应环境变量MYSQL_PWD
 [mysqld]   #选项组
 basedir=
 datadir=
@@ -2400,24 +2404,28 @@ mysql_install_db --user=mysql    #会在~/.mysql_secret中存放密码   man mys
 2. 启动
 mysqld_safe --user=mysql &
 
-3.使用初始密码登录 修改密码并可远程登录， 实际就是设置mysql.user表
-mysql -uroot -p
+3.使用初始密码登录 修改密码并可远程登录， 实际就是设置mysql.user表  mysql.host表 mysql.db表
+mysql -uroot -p   #host默认为localhost user默认为登录linux的用户
 Enter password:   #输入上步的密码
 mysql>show databases;
 mysql>use mysql;
 mysql>SET PASSWORD FOR 'root'@'%' = PASSWORD('newpwd'); #方式一 使用环境变量方式 第一个password是环境变量 第二个是函数
-mysql>UPDATE mysql.user SET authentication_string = PASSWORD('newpwd') where user='root'; #方式二 使用sql语句
-mysqladmin -u root -h host_name password "newpwd"       #方式三 这种更方便
+mysql>UPDATE mysql.user SET password = PASSWORD('newpwd') where user='root'; #方式二 使用sql语句
+mysqladmin -u root -h host_name password "111111"       #方式三 这种更方便
 
-mysql>ALTER USER "root"@"%" IDENTIFIED $加密方法 BY "111111" WITH GRANT OPTION; #可以使用默认的加密方法
+mysql>CREATE USER 'yy'@'%' IDENTIFIED BY '111111';     #这步只能查看infomation_schema
+mysql>ALTER USER "root"@"%" IDENTIFIED WITH auth_plugin BY "111111"; #可以使用默认的加密方法
             #plugin是密码的加密方式 authentication_string是密码加密后的字符串
 			#mysql8.0需要修改加密方式，否则一般的gui client由于不支持某种加密方式而无法登录
 mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '111111' WITH GRANT OPTION; 
-                          #on $db.$table TO $user@$host  其中*表示任意 %表示任意ip都可以登录，默认是localhost
-mysql>CREATE USER 'yy'@'%' IDENTIFIED BY '111111';     #这步只能查看infomation_schema
+                          #host的通配符为%或_ %表示任意ip都可以登录，默认是localhost 
+                          #	  root@192.168.1.2/255.255.255.0 只能局域网内访问
+                          #   root@192.168.1.%
+                          #   root@%.loc.gov
+                          #on $db.$table TO $user@$host  db和table的通配符为*
 mysql>show grants for yy;   
 mysql>show grants for yy@%;
-mysql>flush privileges;
+mysql>flush privileges;   #与mysqladmin flush-privileges; 或 mysqladmin reload;效果相同 否则mysql服务需要重启
 
 
       
@@ -2438,6 +2446,7 @@ set [session|global] $variableName=$value;  #global表示全局的，默认是se
 show status    [like '%a%'];
 select version();
 select user();
+select current_user();
 show databases;
 
 select @@global.transaction_isolation;
@@ -2517,13 +2526,18 @@ mysql> SELECT * FROM shop WHERE price=@min_price OR price=@max_price;
 
 
 
+#有2中数据 sql csv
+load data [local]  #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)
+mysqldump
+mysqlimport
 
 
 
 
-
-
-
+information_schema  数据库表 列 函数 存储过程 视图 触发器的定义
+mysql               用户管理 权限
+performance_schema  inspect the internal execution of the server at runtime 查看服务器运行状况
+sys                 提供一系列对象更好地查看performance schema
 
 
 
@@ -2565,3 +2579,4 @@ git clone --depth=1 git://github.com:example/awesome-project
 git fetch --unshallow
 git pull --all
 
+https://www.avtb7788.com/56164/%E7%A4%BE%E4%BA%A4%E5%B9%B3%E5%8F%B0%E9%9D%9E%E5%B8%B8%E7%81%AB%E7%9A%84%E7%BD%91%E7%BA%A2%E9%9B%AA%E4%B9%B3%E6%AD%A3%E5%A6%B9%E7%B3%BB%E5%88%97%E6%9E%81%E5%93%81%E8%B6%85%E7%BA%A7%E5%B7%A8%E4%B9%B3%E8%9B%AE%E8%85%B0%E7%BF%98%E8%87%80%E7%99%BD%E8%99%8E%E5%AB%A9%E7%A9%B4%E5%8F%AB%E5%A3%B0%E5%8F%88%E7%94%9C%E4%B9%B3%E4%BA%A4%E6%89%93%E7%82%AE%E5%AE%85%E7%94%B7%E6%89%93%E9%A3%9E%E6%9C%BA%E7%A5%9E%E5%99%A8/

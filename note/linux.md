@@ -2996,6 +2996,12 @@ apt-get check                         检查是否有损坏的依赖
 tcpdump [-i eth0] port 1234 -w a.cap &   #默认捕获eth0
 kill -15 $!
 
+tcpdump -l -i eth0 -w - src or dst port 3306 | strings #以行为单位显示可打印字符
+                                                       #这样可以查看协议是否加密
+	-l     linebuffered
+	-w -   输出到stdout
+	
+
 wireshark
 	以第二行为例
         第一个按钮 start
@@ -3005,6 +3011,13 @@ wireshark
     以第三行为例
     	点击最左边的那个标签的按钮,会弹出一些提示 选择tcp or udp port is 80然后就自动填充了
 charles
+```
+
+##  tee
+
+```
+tcpdump -l | tee dat
+tcpdump -l > data & tail -f dat
 ```
 
 ##  pstree -c -p -al
