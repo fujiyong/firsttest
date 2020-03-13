@@ -2409,20 +2409,24 @@ mysql -uroot -p   #host默认为localhost user默认为登录linux的用户
 Enter password:   #输入上步的密码
 mysql>show databases;
 mysql>use mysql;
-mysql>SET PASSWORD FOR 'root'@'%' = PASSWORD('newpwd'); #方式一 使用环境变量方式 第一个password是环境变量 第二个是函数
-mysql>UPDATE mysql.user SET password = PASSWORD('newpwd') where user='root'; #方式二 使用sql语句
-mysqladmin -u root -h host_name password "111111"       #方式三 这种更方便
 
 mysql>CREATE USER 'yy'@'%' IDENTIFIED BY '111111';     #这步只能查看infomation_schema
+mysql>insert into mysql.user(host,user,password) values('%','root',password('111111'));
+
+mysql>SET PASSWORD FOR 'root'@'%' = PASSWORD('newpwd'); #方式一 使用环境变量方式 第一个password是环境变量 第二个是函数
+mysql>UPDATE mysql.user SET password = PASSWORD('newpwd') where user='root'; #方式二 使用sql语句
 mysql>ALTER USER "root"@"%" IDENTIFIED WITH auth_plugin BY "111111"; #可以使用默认的加密方法
             #plugin是密码的加密方式 authentication_string是密码加密后的字符串
 			#mysql8.0需要修改加密方式，否则一般的gui client由于不支持某种加密方式而无法登录
-mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '111111' WITH GRANT OPTION; 
+mysqladmin -u root -h host_name password "111111"       #方式三 这种更方便
+
+mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '111111' WITH GRANT OPTION;   #一气呵成  创建用户 远程访问 设置权限
                           #host的通配符为%或_ %表示任意ip都可以登录，默认是localhost 
                           #	  root@192.168.1.2/255.255.255.0 只能局域网内访问
                           #   root@192.168.1.%
                           #   root@%.loc.gov
                           #on $db.$table TO $user@$host  db和table的通配符为*
+                          #全局权限是在mysql.user设置,某个具体数据库的权限是在mysql.db表
 mysql>show grants for yy;   
 mysql>show grants for yy@%;
 mysql>flush privileges;   #与mysqladmin flush-privileges; 或 mysqladmin reload;效果相同 否则mysql服务需要重启
@@ -2527,7 +2531,7 @@ mysql> SELECT * FROM shop WHERE price=@min_price OR price=@max_price;
 
 
 #有2中数据 sql csv
-load data [local]  #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)
+load data [local]  #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)  默认从show variable like '%load%';加载数据文件,所以一般用绝对路径
 mysqldump
 mysqlimport
 
@@ -2547,13 +2551,180 @@ sys                 提供一系列对象更好地查看performance schema
 
 
 
+	mysqldump -uroot -p --single-transaction --master-data --where='id<10' $db $table > a.sql; 
+	cat a.sql
+	lock tables $table write;
+	#一些ddl dml
+	unlock tables; 
+
+	mysqlbinlog mysqld-bin.01 | more   #at是起始位置 end_log_pos是结束位置  [at end_log_pos)
+	/*!50530 SET @@SESSION.PSEUDO_SLAVE_MODE=1*/;
+	/*!40019 SET @@session.max_insert_delayed_threads=0*/;
+	/*!50003 SET @OLD_COMPLETION_TYPE=@@COMPLETION_TYPE,COMPLETION_TYPE=0*/;
+	DELIMITER /*!*/;
+	# at 180   ##############################################################################################################起始点#####
+	#180410 17:57:32 server id 1  end_log_pos 496     Query    thread_id=89    exec_time=0    error_code=0
+	use `employees`/*!*/;
+	SET TIMESTAMP=1523354252/*!*/;
+	INSERT INTO `departments` VALUES 
+	('d001','Marketing'),
+	('d002','Finance'),
+	('d003','Human Resources'),
+	('d004','Production'),
+	('d005','Development'),
+	('d006','Quality Management'),
+	('d007','Sales'),
+	('d008','Research'),
+	('d009','Customer Service')
+	/*!*/;
+
+
+备份和恢复维护之myisam(.frm myd myi)
+	备份
+		全量备份
+			lock tables && flush tables &&  cp 文件  && unlock tables;
+			sql级别 select into outfile $outFileName from $t 或  backup table
+			mysqldump > mysqldumpfullbackup.sql
+			mysqlhotcopy $dbName $dstDir   只适合myisam,已经不再使用了
+			snapshot 快照
+				Client1                                Client2
+				mysql>flush tables with read lock;
+                                                       >mount vxvf snapshot;
+                mysql>unlock tables; 
+                									   从快照复制文件后unmount
+		增量冷备份  自从上次mysqldump以来的binlog
+			mysql>flush logs    或mysqladmin flush-logs #告诉服务器关闭当前的binlogN文件并创建下一个序号的binlogN+1
+			停止mysqld                                  #每次重启也会创建下一个序号的binlog
+			拷贝binlog到远处
+			mysqld --log-bin[=安全媒介如raid/san目录,不同于普通的mysql数据目录]启动.
+		主从之从还需要备份master.info relay-log.info
+	恢复  repair table myisamchk -r
+		全量
+			sql级别 load data infile $inFileName replace 
+			mysql < mysqldumpfullbackup.sql
+		增量冷备份
+			mysql < mysqldumpfullbackup.sql
+			mysqlbinlog mysqld-bin.* | mysql         #正常bin日志,肯定可以恢复  也可以mysqlbinlog bin.1 bin.2 | mysql
+			mysqlbinlog 崩溃raid目录下的mysqld-bin.* | mysql   #崩溃bin日志 尽可能恢复
+	维护
+		检查 check table $tableName; repair table $tableName;
+		优化 optimize table $tableName;
+		分析 analyze table $tableName;
+备份和恢复之innodb   innochecksum
+	不将表的内容保存到数据库目录中
+	不需要加锁,可以在线备份
+	备份
+		全量备份
+			mysqldump --single-transaction --flush-logs --delete-master-logs --all-databases > backup.sql 
+				#--single-transaction使用一致性地读,并且保证mysqldump所看见的数据不会更改
+				#--delete-master-logs  删除binlog 有可能从服务器还没有复制完,慎用
+		增量备份
+			mysql>flush logs;
+	恢复
+		全量
+			mysql < mysqldumpfullbackup.sql
+		增量
+		    #查看binlog的保存位置
+		    mysql>show binlog events;
+
+			mysqlbinlog  --stop-date="2005-04-20 9:59:59"  -v mysqld-bin.1 | mysql
+				--no-defaults
+				--database=$dbName 
+				--base64-output=decode-rows
+				-o $skipNumber
+				--server-id=$serverID
+				-s --short-form              #只显示语句,不显示附加信息
+				-R -h $host/$ip -p           #获取远程服务器的
+			mysqlbinlog --start-date="2005-04-20 10:01:00" mysqld-bin.1 | mysql
+
+			mysqlbinlog --stop-position="368312" mysqld-bin.1 | mysql
+			mysqlbinlog --start-position="368315" mysqld-bin.1 | mysql
+	维护
+		检查 check table $tableName; 
+		优化 optimize table $tableName;
+		分析 analyze table $tableName;
+
+
+binlog
+	格式
+		statement-based replication(SBR)  基于sql语句
+			只记录修改节约IO
+			准确性查,不能now() UUID()
+		row-based replication(RBR)        基于行
+			记录记录每个字段变化前后的值,准确性强
+			文件大,耗磁盘与带宽
+		mixed-based replication           混合模式
+			文件大小适中
+			有可能主从不一致
+	存在形式
+		   .index 记录所有的binlog名
+		bin.log
+	命令
+		查看是否开启 
+			show variables like '%log_bin%';  
+			select @@log_bin;
+		查看正在写入的日志
+			show master logs;
+			show master status;
+		查看binlog文件列表
+			show binary logs;
+		查看log_bin文件中的内容
+			show binlog events [in $logName] [from pos] [limit [offset,] row_count]
+		刷新
+			flush logs;
+		重置所有binlog
+			reset master;
 
 
 
 
+主                                                                                  从
+	配置文件                           
+		gtid_mode=ON
+		enforce-gtid-consistency=ON
+
+		server-id=$ip$port
+
+		log_bin=mysql-bin
+
+		binlog_format=mixed
+		expire_log_days=7
+		mx_binlog_size=100m
+		binlog_cache_size=4M
+		max_binlog_cache_size=512M
+
+
+	创建账号并授权
+		mysql> CREATE USER 'repl'@'192.168.0.%' IDENTIFIED BY 'repl';
+		mysql> GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.0.%';
+
+	全量备份
+		mysqldump -S /tmp/mysql3306.sock -p --master-data=2 --single-transaction -A |gzip >3306-`date +%F`.tar.gz
+																			        清除GTID_EXECUTED值
+																			        	mysql>reset master;
+                                                                                    还原数据
+                                                                                    	gunzip < 3306-2019-10-13.sql.gz | mysql -S /tmp/mysql3306.sock -p
+                                                                                    	mysql>CHANGE MASTER TO
+                                                                                    	       MASTER_HOST='192.168.0.106',
+                                                                                    	       MASTER_PORT=3306,
+                                                                                    	       MASTER_USER='repl',
+                                                                                    	       MASTER_PASSWORD='repl',
+                                                                                    	       MASTER_AUTO_POSITION=1;  #使用GTID模式
+                                                                                    	mysql>start slave;
+                                                                                    	mysql>show slave status;  #Slave_IO_Running: Yes   Slave_SQL_Running: Yes
 
 
 
+
+xtraBackup #https://www.percona.com/downloads/Percona-XtraBackup-LATEST/
+	innobackupex --defaults-file=/data/mysql/mysql3307/my3307.cnf -S /tmp/mysql3307.sock -proot --stream=tar ./ | gzip -> `date +%F%H%M%S`.tar.gz
+	mkdir 2019-03-26092718 && tar -zxvf 2019-03-26092718.tar.gz -C 2019-03-26092718/
+	cd 2019-03-26092718/
+	cat xtrabackup_binlog_info   # mysql-binlog.000181   12921798           ## mysql-binlog.000181 为备份到binlog文件名称，12921798 为备份到的position点
+	innobackupex --apply-log ./
+	innobackupex --defaults-file=/data/mysql/mysql3306/my3306.cnf --copy-back /root/2019-03-26092718/
+	chown -R mysql:mysql /data/
+	mysqld --defaults-file=/data/mysql/mysql3306/my3306.cnf &
 
 
 
