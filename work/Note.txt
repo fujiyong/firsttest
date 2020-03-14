@@ -2365,6 +2365,16 @@ https://www.zsythink.net/archives/2252
 		locate mysql
 
 
+innodb_file_per_table
+
+set [global    | session        ] $systemVar
+set [@@global. | @@session. | @@] $systemVar
+
+SELECT @@var_name  优先返回session global  local
+show   variables   优先返回session global  local
+
+
+mysql>system ls -l *  #执行bash命令
 
 mysql
 windows下是my.ini  linux下是my.cnf  /etc/mysql/mysql.conf.d/mysqld.cnf  mysqld --verbose --help | grep defaults-file
@@ -2373,6 +2383,9 @@ mysql.cnf是mysql各应用的集中配置的地方
 host=        #对应环境变量MYSQL_HOST
 user=        #对应环境变量USER
 password=    #对应环境变量MYSQL_PWD
+default-character-set=utf8
+[mysql]
+default-character-set=utf8
 [mysqld]   #选项组
 basedir=
 datadir=
@@ -2383,8 +2396,7 @@ character-set-server=utf8
 #skip-grant-tables  #忘记密码时使用
 default_authentication_plugin=mysql_native_password #默认的密码加密方式是caching_sha2_password，但很多gui客户端不支持默认加密方式，所以不能登录
 explicit_defaults_for_timestamp = true
-[mysql]
-default-character-set=utf8
+time_zone=system    #使用linux操作系统的时区   SELECT @@global.time_zone, @@session.time_zone;
 [mysqldump]
 
 任何时候出现错误都可以删掉数据目录的所有文件，重新再来  rm -rf /var/lib/mysql/* && chown -R mysql:mysql /var/lib/mysql
@@ -2469,6 +2481,7 @@ desc user;
 show create table $tableName;
 drop table $tableName;
 show index from $tableName;
+show table status [from $dbName] [like 'pattern']
 
 
 mysqladmin -uroot -p111111 
@@ -2499,17 +2512,23 @@ sysbench
 
 pxc集群Percona XtraDB Cluster
 
-mysqlimport
-LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n';
+create table clone_tbl select * from tbl_name limit  0
 
-mysqldump
-select 
 
-mysql < a.sql 
 mysql -t   #批模式下一般比较精简，为得到如交互模式格式的输出
 mysql -vvv #回显在批模式下所执行的语句
+mysql < a.sql 
 mysql>source /root/a.sql
 mysql>.      /root/a.sql
+mysql>alter table tbl_name disable keys;  \
+	  LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' \
+	  	   OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n'; \
+      alter table tbl_name enable keys;
+                                #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)  
+                                #默认从show variable like '%load%';加载数据文件,所以一般用绝对路径
+select 
+mysqldump
+mysqlimport
 
 
 在not null其实可以插入0或"", 因为0或“” is NOT NULL
@@ -2530,10 +2549,29 @@ mysql> SELECT * FROM shop WHERE price=@min_price OR price=@max_price;
 
 
 
-#有2中数据 sql csv
-load data [local]  #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)  默认从show variable like '%load%';加载数据文件,所以一般用绝对路径
-mysqldump
-mysqlimport
+
+
+log
+mysql>flush logs;
+mysqladmin flush-logs;
+mysqladmin refresh;
+错误日志
+log-error[=hostname.err]
+通用日志
+general_log=ON
+general_log_file=[hostname.log] #mysqld -l 
+慢查日志  mysqldumpslow
+log-slow-queries[=hostname-slow.log]
+long_query_time=10
+log_queries_not_using_indexes=1   使用mysqld --log-short-format避免记录不适用index的query
+log_slow_admin_statements=0       默认alter optimize analyze table不记录
+bin日志  mysqlbinlog
+log_bin[=/dataPath/bin.$hostName]              #文件名后缀会被忽略
+max_binlog_size[=]                             #但也必须确保一个tx写入同一个文件
+log_bin_index[=/dataPath/bin.$hostName.index]  #包含所有binlog文件名。 
+                                               #mysql>reset master;      #删除所有二进制日志
+                                               #mysql>purge master logs TO $logName ;        #只删除部分二进制日志
+                                               #mysql>purge master los before ''2003-04-02 22:46:26';
 
 
 
@@ -2542,6 +2580,39 @@ information_schema  数据库表 列 函数 存储过程 视图 触发器的定�
 mysql               用户管理 权限
 performance_schema  inspect the internal execution of the server at runtime 查看服务器运行状况
 sys                 提供一系列对象更好地查看performance schema
+
+mysql-log-rotate 
+
+create select
+insert select
+
+
+mysql>show variables like '%query_cache%'
+mysql> SHOW STATUS LIKE 'Qcache%';
+have_query_cache=YES/NO;  指示查询缓存是否可用
+query_cache_type=on/off;  0/off表示禁用 1/on允许缓存，尽明确使用select sql_no_cache除外 2/demand仅针对select SQL_CACHE可以启用缓存  
+select SQL_CACHE    id from t;
+select SQL_NO_CACHE id from t;
+query_cache_min_res_unit[=4k]；  #每次分配一次select查询结果至少使用多少缓存 
+query_cache_limit[=1M]           #每次分配一次select查询结果至多使用多少缓存 
+query_cache_size[=0]             #默认值0表示禁用缓存,至少40K
+Qcache_lowmem_prunes=            #因为缓存太少而被踢除的数量
+                                 #它计算为了缓存新的查询而从查询缓冲区中移出到自由内存中的查询的数目。查询缓冲区使用最近最少使用(LRU)策略来确定哪些查询从缓冲区中移出
+Qcache_queries_in_cache=
+
+Qcache_total_blocks=             #总块多少
+Qcache_free_blocks=              #空闲块多少 total与free blocks可知querycache碎片程度
+mysql>flush query cache          #清理query,只保留一个块 cache内存碎片整理而提高查询速度
+
+select数量=Qcache_hits(命中缓存数) + com_select(普通查询数) + queries with errors found by parser
+com_select=Qcache_inserts + Qcache_not_cached + queries with errors found during columns/rights check
+
+Qcache_hits +1 而不是 com_select
+mysql>reset query cache   #重置清空query cache
+
+当执行sql语句或设置SET GLOBAL query_cache_size = 4000;时，会提示有warning，因为至少需要40Kquery_cache.这时可以使用show warning查看具体warning;
+
+
 
 
 
@@ -2569,13 +2640,6 @@ sys                 提供一系列对象更好地查看performance schema
 	INSERT INTO `departments` VALUES 
 	('d001','Marketing'),
 	('d002','Finance'),
-	('d003','Human Resources'),
-	('d004','Production'),
-	('d005','Development'),
-	('d006','Quality Management'),
-	('d007','Sales'),
-	('d008','Research'),
-	('d009','Customer Service')
 	/*!*/;
 
 
@@ -2657,25 +2721,37 @@ binlog
 			文件大小适中
 			有可能主从不一致
 	存在形式
-		   .index 记录所有的binlog名
+		   .index 记录所有的binlog名，以便跟踪日志循环
 		bin.log
 	命令
 		查看是否开启 
 			show variables like '%log_bin%';  
 			select @@log_bin;
 		查看正在写入的日志
-			show master logs;
-			show master status;
+			show master logs;      #master与binary是同义词
 		查看binlog文件列表
 			show binary logs;
 		查看log_bin文件中的内容
 			show binlog events [in $logName] [from pos] [limit [offset,] row_count]
 		刷新
 			flush logs;
+
 		重置所有binlog
+			show master status;
+			show slave hosts;
+			show slave status; 
+
 			reset master;
+			reset slave;
 
+			start slave $threadType $UNIT
+				IO_THREAD   MASTER_LOG_FILE = 'log_name', MASTER_LOG_POS = log_pos
+				SQL_THREAD  RELAY_LOG_FILE = 'log_name', RELAY_LOG_POS = log_pos
+			stop slave  IO_THREAD | SQL_THREAD;
 
+		binlog_cache_size
+		Binlog_cache_use
+		Binlog_cache_disk_use
 
 
 主                                                                                  从
@@ -2684,8 +2760,10 @@ binlog
 		enforce-gtid-consistency=ON
 
 		server-id=$ip$port
-
-		log_bin=mysql-bin
+                                                                                  master-connect-retry[=60] #从服务器若失去连接隔多长时间去重试
+		sql_log_bin=1     #是否允许写入binlog
+		log_bin=mysql-bin #定义文件
+		sync_binlog=1     #定义写入文件的频率
 
 		binlog_format=mixed
 		expire_log_days=7
@@ -2727,7 +2805,7 @@ xtraBackup #https://www.percona.com/downloads/Percona-XtraBackup-LATEST/
 	mysqld --defaults-file=/data/mysql/mysql3306/my3306.cnf &
 
 
-
+perl -ne ‘m/^([^#][^\s=]+)\s*(=.*|)/ && printf(“%-35s%s\n”, $1, $2)’ /etc/mysql/my.cnf 美化my.cnf
 
 
 
