@@ -2526,7 +2526,7 @@ mysql>alter table tbl_name disable keys;  \
       alter table tbl_name enable keys;
                                 #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)  
                                 #默认从show variable like '%load%';加载数据文件,所以一般用绝对路径
-select 
+mysql>select to outfile from 
 mysqldump
 mysqlimport
 
