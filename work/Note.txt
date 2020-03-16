@@ -2754,16 +2754,24 @@ binlog
 		Binlog_cache_disk_use
 
 
-主                                                                                  从
+主(binlog binlog.index)                                                           从(relaylog relaylog.index master.info relay-log.info) 
 	配置文件                           
 		gtid_mode=ON
 		enforce-gtid-consistency=ON
 
-		server-id=$ip$port
+		server-id=$ip$port                                                        server-id=$ip$port
                                                                                   master-connect-retry[=60] #从服务器若失去连接隔多长时间去重试
 		sql_log_bin=1     #是否允许写入binlog
 		log_bin=mysql-bin #定义文件
 		sync_binlog=1     #定义写入文件的频率
+
+		log_slave-update=1 #当这个slave又作为其他slave的master时，否则不会给更新的记录写入到binlog
+		slve_skip_errors=1 #跳过错误 继续复制
+
+		binlog_do_db=mydb1      #必须写入binlog的db
+		binlog_do_db=mydb2
+		binlog_ignore_db=mydb3  #必须忽略写入binlog的db
+		binlog_ignore_db=mydb4
 
 		binlog_format=mixed
 		expire_log_days=7
@@ -2773,10 +2781,12 @@ binlog
 
 
 	创建账号并授权
-		mysql> CREATE USER 'repl'@'192.168.0.%' IDENTIFIED BY 'repl';
-		mysql> GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.0.%';
+		mysql> GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.0.%' IDENTIFIED BY 'repl';
 
 	全量备份
+		mysql>flush tables with read lock;
+		mysql>show master status;
+		mysql>unlock tables;
 		mysqldump -S /tmp/mysql3306.sock -p --master-data=2 --single-transaction -A |gzip >3306-`date +%F`.tar.gz
 																			        清除GTID_EXECUTED值
 																			        	mysql>reset master;
@@ -2791,6 +2801,15 @@ binlog
                                                                                     	mysql>start slave;
                                                                                     	mysql>show slave status;  #Slave_IO_Running: Yes   Slave_SQL_Running: Yes
 
+     出现问题时
+     slave
+     	mysql>stop slave;
+     	mysql>reset master;
+     master
+     	mysql>reset master
+     slave
+     	mysql>reset slave;
+     	mysql>start slave;
 
 
 
