@@ -2739,7 +2739,8 @@ binlog
 		重置所有binlog
 			show master status;
 			show slave hosts;
-			show slave status; 
+			show slave status; !!!!关注seconds_behind_master字段, 这是salve的sql线程分析relaylog得到的,当前要执行的sql与master执行这条sql时相差的时间.
+                               !!!!show processlist中的sql线程time字段为 从master复制而来的最后一次事件/最后一条sql与slave现在的时间差, 从这个地方可以看出master最后一次发送binlog的时间
 
 			reset master;
 			reset slave;
@@ -2760,23 +2761,23 @@ binlog
 		enforce-gtid-consistency=ON
 
 		server-id=$ip$port (1-2^32-1)                                             server-id=$ip$port
-                                                                                  master-connect-retry[=60] #从服务器若失去连接隔多长时间去重试
-		sql_log_bin=1     #是否允许写入binlog
-		log_bin=mysql-bin #定义文件
-        innodb_flush_log_at_trx_commit=1
-		sync_binlog=1     #定义写入文件的频率
+		sql_log_bin=1     #是否允许写入binlog                                      
+		logs_bin=mysql-bin #定义文件                                               logs_bin=mysql-bin #定义文件
 
-		log_slave-update=1 #当这个slave又作为其他slave的master时，否则不会给更新的记录写入到binlog
-		slve_skip_errors=1 #跳过错误 继续复制
+        sync_binlog=1     #定义写入文件的频率                                       logs_slave-update=1 #当这个slave又作为其他slave的master时，否则不会给更新的记录写入到binlog
+		       
+        innodb_flush_log_at_trx_commit=1                                
+		
+		slave_skip_errors=1 #跳过错误 继续复制                                      master-connect-retry[=60] #从服务器若失去连接隔多长时间去重试
 
-		binlog_do_db=mydb1      #必须写入binlog的db
-		binlog_do_db=mydb2
-		binlog_ignore_db=mydb3  #必须忽略写入binlog的db
-		binlog_ignore_db=mydb4
-
+		binlog_do_db=mydb1      #必须写入binlog的db                                replicate-do-db=mydb1     #必须复制的数据库             
+		binlog_do_db=mydb2                                                        replicate-do-db=mydb1     #必须复制的数据库 
+		binlog_ignore_db=mydb3  #必须忽略写入binlog的db                            replicate-ignore-db=mydb3
+		binlog_ignore_db=mydb4                                                    replicate-ignore-db=mydb4
+                                                                                  replicate-ignore-table=mydb1.mytabl1
 		binlog_format=mixed
 		expire_log_days=7
-		mx_binlog_size=100m
+		max_binlog_size=100m                                                      max-relay-logs-size=size
 		binlog_cache_size=4M
 		max_binlog_cache_size=512M
 
@@ -2800,7 +2801,7 @@ binlog
         #mysqldump效率较低 相对于拷贝文件
 		mysqldump -S /tmp/mysql3306.sock -p --master-data=2 --single-transaction -A |gzip >3306-`date +%F`.tar.gz
                                                                                     mysqld 
-                                                                                        --skip-slave-start 不立即连接master
+                                                                                        --skip-slave-start 不立即连接master, 即以后start slave
                                                                                         --log-warnings     默认启动  记录更多信息
 																			        清除GTID_EXECUTED值
 																			        	mysql>reset master;
@@ -2812,8 +2813,23 @@ binlog
                                                                                     	       MASTER_USER='repl',
                                                                                     	       MASTER_PASSWORD='repl',
                                                                                     	       MASTER_AUTO_POSITION=1;  #使用GTID模式
+                                                                                               master_log_file=
+                                                                                               master_log_pos=
                                                                                     	mysql>start slave;
-                                                                                    	mysql>show slave status;  #Slave_IO_Running: Yes   Slave_SQL_Running: Yes
+                                                                                    	mysql>show slave status;  #!!!!!Slave_IO_Running: Yes   Slave_SQL_Running: Yes
+                                                                                                                  #seconds_behind_master
+
+    master/slave强制同步
+        master                                       slave
+            mysql>flush tables with read lock;
+            mysql>show master status;
+                  #此时master只读,等待slave
+                                                     mysql>select master_pos_wait('binlog_file', binlog_pos);
+                                                           #执行这条sql会阻塞知道slave达到指定的file和pos,此时master/slave同步,返回
+            mysql>unlock tables;
+
+
+
 
      出现问题时
      slave
@@ -2825,7 +2841,22 @@ binlog
      	mysql>reset slave;
      	mysql>start slave;
 
-     不复制table的存储引擎类别
+     不复制table的存储引擎类别 以便在不同的存储引擎间复制; 为提高速度,salve一般使用myisam来代替innodb和bdb
+     双主复制  只是减少了锁竞争  
+
+     主从切换
+         在每个slave上,先
+            mysql>stop io_thread; 不再复制
+            循环执行mysql>show processlist; 直到status为has read all relay log
+         在被选举为master的slave上
+            mysql>stop slave;
+            mysql>reset master;
+         在未被选为master的slave上
+            mysql>stop slave;
+            mysql>change master to master_host="" master_port= master_user= master_password=; #file使用默认值(第一个bin'log), pos使用默认值(4)
+            msyql>start slave;
+
+
 
 
 
@@ -2844,7 +2875,10 @@ perl -ne ‘m/^([^#][^\s=]+)\s*(=.*|)/ && printf(“%-35s%s\n”, $1, $2)’ /et
 
 
 
-
+set profiling = 1;
+select * from mysql.user;
+show profile;
+set profiling = 0;
 
 
 
