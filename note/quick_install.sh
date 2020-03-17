@@ -413,6 +413,15 @@ if [ $(which ag) ]; then
 else
     install_item "silversearcher-ag"
 fi
+
+################################ jq ###########################################
+git clone https://github.com/stedolan/jq.git
+cd && cd jq
+autoreconf -i
+./configure --disable-maintainer-mode
+make && make install
+cd 
+
 ###############################################################################
 install_item "axel"
 install_item "cloc"

@@ -2759,10 +2759,11 @@ binlog
 		gtid_mode=ON
 		enforce-gtid-consistency=ON
 
-		server-id=$ip$port                                                        server-id=$ip$port
+		server-id=$ip$port (1-2^32-1)                                             server-id=$ip$port
                                                                                   master-connect-retry[=60] #从服务器若失去连接隔多长时间去重试
 		sql_log_bin=1     #是否允许写入binlog
 		log_bin=mysql-bin #定义文件
+        innodb_flush_log_at_trx_commit=1
 		sync_binlog=1     #定义写入文件的频率
 
 		log_slave-update=1 #当这个slave又作为其他slave的master时，否则不会给更新的记录写入到binlog
@@ -2784,10 +2785,23 @@ binlog
 		mysql> GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.0.%' IDENTIFIED BY 'repl';
 
 	全量备份
-		mysql>flush tables with read lock;
-		mysql>show master status;
-		mysql>unlock tables;
+        不是binlog方式运行
+            mysql>flush tables with read lock;
+            tar czvf 数据文件或目录
+            mysql>show master status;                                            #change master to master_log_file="" master_log_pos=4
+            mysqladmin -u root shutdown
+
+        已经是binlog方式运行
+    		mysql>flush tables with read lock;
+            tar czvf 数据文件或目录
+    		mysql>show master status;
+    		mysql>unlock tables;
+
+        #mysqldump效率较低 相对于拷贝文件
 		mysqldump -S /tmp/mysql3306.sock -p --master-data=2 --single-transaction -A |gzip >3306-`date +%F`.tar.gz
+                                                                                    mysqld 
+                                                                                        --skip-slave-start 不立即连接master
+                                                                                        --log-warnings     默认启动  记录更多信息
 																			        清除GTID_EXECUTED值
 																			        	mysql>reset master;
                                                                                     还原数据
@@ -2810,6 +2824,8 @@ binlog
      slave
      	mysql>reset slave;
      	mysql>start slave;
+
+     不复制table的存储引擎类别
 
 
 

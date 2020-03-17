@@ -60,6 +60,8 @@
 
  nohup ./svds --datadir $HOME/svds-data  --rpc --rpcaddr "0.0.0.0" --rpcapi "db,eth,net,web3,personal,admin,miner" --rpccorsdomain "*"  --nodiscover --networkid 1688  >> $HOME/svds-data/debug.log 2>&1 &
 
+  nohup ./svds --datadir $HOME/svds-data  --rpc --rpcaddr "0.0.0.0" --rpcapi "db,eth,net,web3,personal,admin,miner" --rpccorsdomain "*"  --sv.debug 5 --nodiscover --networkid 1688  >> $HOME/svds-data/debug.log 2>&1 &
+
 
  端口
  	rpc 8545
