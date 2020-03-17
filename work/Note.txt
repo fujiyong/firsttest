@@ -2367,11 +2367,36 @@ https://www.zsythink.net/archives/2252
 
 innodb_file_per_table
 
-set [global    | session        ] $systemVar
-set [@@global. | @@session. | @@] $systemVar
+变量
+	系统变量
+		set 必须明确
+			global
+				set @@global.$var
+				set global $var
+			session
+				set @@session.$var
+				set session $var
+				set $var
+		get
+			global
+				select @@global.$var
+				select global $var
+				show   @@global.$var
+				show   global variables like $var
+			session
+				select @@session.$var
+				select session $var
+				show   @@session.$var
+				show   session variables like $var
 
-SELECT @@var_name  优先返回session global  local
-show   variables   优先返回session global  local
+		SELECT @@var_name  优先返回session global
+		show   variables   优先返回session global
+	用户变量
+		set
+			set @useVar1:=1, @userVar2:=2
+		get
+			select @userVar1, @userVar2
+
 
 
 mysql>system ls -l *  #执行bash命令
@@ -2754,6 +2779,8 @@ binlog
 		Binlog_cache_use
 		Binlog_cache_disk_use
 
+		mysqlbinlog -j $pos $file | head
+
 
 主(binlog binlog.index)                                                           从(relaylog relaylog.index master.info relay-log.info) 
 	配置文件                           
@@ -2780,6 +2807,9 @@ binlog
 		max_binlog_size=100m                                                      max-relay-logs-size=size
 		binlog_cache_size=4M
 		max_binlog_cache_size=512M
+
+		auto_increment_offset=1
+		auto_increment_increment=1    
 
 
 	创建账号并授权
@@ -2841,6 +2871,10 @@ binlog
      	mysql>reset slave;
      	mysql>start slave;
 
+     	mysql>SET GLOBAL SQL_slave_SKIP_COUNTER = n; #当next为AUTO_INCREMENT或LAST_INSERT_ID()的语句使用值2的原因是它们从主服务器的二进制日志中取两个事件
+     	                                             #当是其他时为1
+     	mysql>start slave;
+
      不复制table的存储引擎类别 以便在不同的存储引擎间复制; 为提高速度,salve一般使用myisam来代替innodb和bdb
      双主复制  只是减少了锁竞争  
 
@@ -2856,6 +2890,30 @@ binlog
             mysql>change master to master_host="" master_port= master_user= master_password=; #file使用默认值(第一个bin'log), pos使用默认值(4)
             msyql>start slave;
 
+    状态
+    	master (show processlist中Command: Binlog Dump)
+    		Sending binlog event to slave
+    		Finished reading one binlog; switching to next binlog
+    		Has sent all binlog to slave; waiting for binlog to be updated
+    		Waiting to finalize termination
+    	slave
+    		io thread (show processlist中command: connect)
+    			Connecting to master
+    			Checking master version
+    			Registering slave on master
+    			Requesting binlog dump
+    			Waiting to reconnect after a failed binlog dump request
+    			Reconnecting after a failed binlog dump request
+    			Waiting for master to send event
+    			Queueing master event to the relay log
+    			Waiting to reconnect after a failed master event read
+    			Reconnecting after a failed master event read
+    			Waiting for the slave SQL thread to free enough relay log space
+    			Waiting for slave mutex on exit
+    		sql thread (show processlist中command: connect)
+    			Reading event from the relay log
+    			Has read all relay log; waiting for the slave I/O thread to update it
+    			Waiting for slave mutex on exit
 
 
 
