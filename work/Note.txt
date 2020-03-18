@@ -394,7 +394,7 @@ top htop glances
 zeal  dash
 everything listary
 Mockoon
-chocolatey homebrew  
+chocolatey homebrew  babun
 
 
 https://blog.csdn.net/u010625000/article/details/44455023
