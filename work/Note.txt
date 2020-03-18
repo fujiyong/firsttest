@@ -2351,6 +2351,9 @@ https://www.zsythink.net/archives/2252
 8.0.11 2018-04-19
 
 
+https://www.docs4dev.com/docs/zh/mysql/5.7/reference/explain-output.html  mysql5.7中文文档
+http://www.deituicms.com/mysql8cn/cn/web.html                             mysql8.0中文手册https://github.com/lrjxgl/mysql8cn
+
 
 
 删除mysql
@@ -2892,28 +2895,28 @@ binlog
 
     状态
     	master (show processlist中Command: Binlog Dump)
-    		Sending binlog event to slave
-    		Finished reading one binlog; switching to next binlog
-    		Has sent all binlog to slave; waiting for binlog to be updated
-    		Waiting to finalize termination
+    		Sending binlog event to slave  线程已经从二进制日志读取了一个事件并且正将它发送到从服务器
+    		Finished reading one binlog; switching to next binlog  线程已经读完二进制日志文件并且正打开下一个要发送到从服务器的日志文件
+    		Has sent all binlog to slave; waiting for binlog to be updated 线程已经从二进制日志读取所有主要的更新并已经发送到了从服务器。线程现在正空闲，等待由主服务器上新的更新导致的出现在二进制日志中的新事件
+    		Waiting to finalize termination 线程停止时发生的一个很简单的状态
     	slave
     		io thread (show processlist中command: connect)
-    			Connecting to master
-    			Checking master version
-    			Registering slave on master
-    			Requesting binlog dump
-    			Waiting to reconnect after a failed binlog dump request
-    			Reconnecting after a failed binlog dump request
-    			Waiting for master to send event
-    			Queueing master event to the relay log
-    			Waiting to reconnect after a failed master event read
-    			Reconnecting after a failed master event read
-    			Waiting for the slave SQL thread to free enough relay log space
-    			Waiting for slave mutex on exit
+    			Connecting to master     线程正试图连接主服务器
+    			Checking master version  建立同主服务器之间的连接后立即临时出现的状态
+    			Registering slave on master 建立同主服务器之间的连接后立即临时出现的状态
+    			Requesting binlog dump  建立同主服务器之间的连接后立即临时出现的状态。线程向主服务器发送一条请求，索取从请求的二进制日志文件名和位置开始的二进制日志的内容
+    			Waiting to reconnect after a failed binlog dump request 如果二进制日志转储请求失败(由于没有连接)，线程进入睡眠状态，然后定期尝试重新连接。可以使用--master-connect-retry选项指定重试之间的间隔
+    			Reconnecting after a failed binlog dump request 线程正尝试重新连接主服务器
+    			Waiting for master to send event 线程已经连接上主服务器，正等待二进制日志事件到达。如果主服务器正空闲，会持续较长的时间。如果等待持续slave_read_timeout秒，则发生超时。此时，线程认为连接被中断并企图重新连接
+    			Queueing master event to the relay log 线程已经读取一个事件，正将它复制到中继日志供SQL线程来处理
+    			Waiting to reconnect after a failed master event read 读取时(由于没有连接)出现错误。线程企图重新连接前将睡眠master-connect-retry秒
+    			Reconnecting after a failed master event read  线程正尝试重新连接主服务器。当连接重新建立后，状态变为Waiting for master to send event
+    			Waiting for the slave SQL thread to free enough relay log space 正使用一个非零relay_log_space_limit值，中继日志已经增长到其组合大小超过该值。I/O线程正等待直到SQL线程处理中继日志内容并删除部分中继日志文件来释放足够的空间
+    			Waiting for slave mutex on exit 线程停止时发生的一个很简单的状态
     		sql thread (show processlist中command: connect)
-    			Reading event from the relay log
-    			Has read all relay log; waiting for the slave I/O thread to update it
-    			Waiting for slave mutex on exit
+    			Reading event from the relay log  线程已经从中继日志读取一个事件，可以对事件进行处理了
+    			Has read all relay log; waiting for the slave I/O thread to update it 线程已经处理了中继日志文件中的所有事件，现在正等待I/O线程将新事件写入中继日志
+    			Waiting for slave mutex on exit 线程停止时发生的一个很简单的状态
 
 
 
@@ -2938,6 +2941,83 @@ select * from mysql.user;
 show profile;
 set profiling = 0;
 
+explain
+字段
+    id                  查询序号
+    select_type
+        simple          简单select,不使用uniion或subquery
+        primary         最外面的select
+        union           union中的第二个或后面的select
+        dependent union union中的第二个或后面的select
+        union result    union的结果
+        subquery        子查询中的第一个select
+        dependent subquery 子查询中的第一个select,取决于外面的查询
+        derived         导出表的select(from子句的子查询)
+    table               输出的行所引用的表
+    partition
+    type 联结类型,从优到此排序
+        system          表仅有一行(系统表),这是const联结类型的特列
+        const           表最多有一个匹配行,它将在查询开始使被读取.因为仅有一行,在这行的数据可被优化器剩余部分认为是常熟.
+                        const表很快,因为之读取一次.
+                        用于常数值比较primaryKey或unique索引的所有部分时
+                        select * from t where pk=1;
+                        select * from t where pk_part1=1 and pk_part2=2;
+        eq_ref          对于每个来自前面的表的行组合,从该表中读取一行.
+                        这可能是除了const外最好的情形.
+                        它用在一个索引的所有部分被联结使用并且链接是unique或pk
+                        可用于使用=操作符比较的带索引的列.比较值可以为常量或一个使用在该表前面所读取的表的列的表达式
+                        select * from ref_t, other_t where ref_t.key_column = other_t.column;
+                        select * from ref_t, other_t where ref_t.key_column_part1 = other_t.column and ref_t.key_column_part2=2;
+        ref             对于每个来自于前面的表的行组合，所有有匹配索引值的行将从这张表中读取
+                        如果联接只使用键的最左边的前缀，或如果键不是UNIQUE或PRIMARY KEY（换句话说，如果联接不能基于关键字选择单个行的话），则使用ref
+                        如果使用的键仅仅匹配少量行，该联接类型是不错的
+                        ref可以用于使用=或<=>操作符的带索引的列
+                        select * from ref_t where key_column=expr;
+                        select * from ref_t, other_t where ref_t.key_column = other_t.column;
+                        select * from ref_t, other_t where ref_t.key_column_part1 = other_t.column and ref_t.key_column_part2=2;
+        ref_or_null     该联接类型如同ref，但是添加了MySQL可以专门搜索包含NULL值的行。在解决子查询中经常使用该联接类型的优化
+                        select * from ref_t where key_column=expr or key_column is null;
+        index_merge     该链接类型使用了索引合并优化
+                        key列包含了使用的索引的清单,key_len包含了使用的索引的最长的关键元素
+        unique_subquery 该类型替换了下面形式的IN子查询的ref
+                        v  in (select pk from t where some_exp) 
+        index_subquery  类似于unique_subquery. 只适用于子查询的非唯一索引
+                        v  in (select k_column from t where some_exp)  
+        range           只检索给定范围的行，使用一个索引来选择行。key列显示使用了哪个索引。key_len包含所使用索引的最长关键元素。在该类型中ref列为NULL。
+                        当使用=、<>、>、>=、<、<=、IS NULL、<=>、BETWEEN或者IN操作符，用常量比较关键字列时，可以使用range
+                        select * from t where k=10;
+                        select * from t where k between 10 and 20;
+                        select * from t where k in (10,20,30)
+                        select * from t where k_part1=1 and k_part2 in (10,20,30)
+        index
+        all             对每个来自先前表的行的组合,进行完整的表扫描
+    possible_keys       可以使用哪个索引. 如果该列为NULL,则没有相关的索引.
+    key                 实际使用的哪个索引. 如果该列为NULL,则没有相关的索引.
+                        可以强制使用force index, use index, 或 ignore index.
+    key_len             实际使用的键的长度. 如果key为null,则长度为null.
+                        通过key_len可以确定实际使用一个多字段为index的哪些部分
+    ref                 显示选择使用其他表的哪些列或常数与key
+    rows                显示执行query时必须检查的行数
+    filtered            显示结果返回多少行
+    extra               详细信息
+        distinct        发现一行后停止扫描
+        not exists 
+        range checked for each record
+        using filesort   order by
+        using index
+        using temporary  需要创建临时表来容纳结果,如查询包含可以按不同情况出列的group by和order by
+        using where
+        using sort_union(), using union(), using intersect()
+        using index for group_by
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2961,3 +3041,8 @@ https://www.avtb7788.com/56164/%E7%A4%BE%E4%BA%A4%E5%B9%B3%E5%8F%B0%E9%9D%9E%E5%
 
 激活码  https://www.41sh.cn/?id=101
 E70JHCOV2H-eyJsaWNlbnNlSWQiOiJFNzBKSENPVjJIIiwibGljZW5zZWVOYW1lIjoi5bGx5Lic55CG5bel5aSn5a2mIiwiYXNzaWduZWVOYW1lIjoiIiwiYXNzaWduZWVFbWFpbCI6IiIsImxpY2Vuc2VSZXN0cmljdGlvbiI6IkZvciBlZHVjYXRpb25hbCB1c2Ugb25seSIsImNoZWNrQ29uY3VycmVudFVzZSI6ZmFsc2UsInByb2R1Y3RzIjpbeyJjb2RlIjoiSUkiLCJwYWlkVXBUbyI6IjIwMjEtMDItMTgifSx7ImNvZGUiOiJBQyIsInBhaWRVcFRvIjoiMjAyMS0wMi0xOCJ9LHsiY29kZSI6IkRQTiIsInBhaWRVcFRvIjoiMjAyMS0wMi0xOCJ9LHsiY29kZSI6IlBTIiwicGFpZFVwVG8iOiIyMDIxLTAyLTE4In0seyJjb2RlIjoiR08iLCJwYWlkVXBUbyI6IjIwMjEtMDItMTgifSx7ImNvZGUiOiJETSIsInBhaWRVcFRvIjoiMjAyMS0wMi0xOCJ9LHsiY29kZSI6IkNMIiwicGFpZFVwVG8iOiIyMDIxLTAyLTE4In0seyJjb2RlIjoiUlMwIiwicGFpZFVwVG8iOiIyMDIxLTAyLTE4In0seyJjb2RlIjoiUkMiLCJwYWlkVXBUbyI6IjIwMjEtMDItMTgifSx7ImNvZGUiOiJSRCIsInBhaWRVcFRvIjoiMjAyMS0wMi0xOCJ9LHsiY29kZSI6IlBDIiwicGFpZFVwVG8iOiIyMDIxLTAyLTE4In0seyJjb2RlIjoiUk0iLCJwYWlkVXBUbyI6IjIwMjEtMDItMTgifSx7ImNvZGUiOiJXUyIsInBhaWRVcFRvIjoiMjAyMS0wMi0xOCJ9LHsiY29kZSI6IkRCIiwicGFpZFVwVG8iOiIyMDIxLTAyLTE4In0seyJjb2RlIjoiREMiLCJwYWlkVXBUbyI6IjIwMjEtMDItMTgifSx7ImNvZGUiOiJSU1UiLCJwYWlkVXBUbyI6IjIwMjEtMDItMTgifV0sImhhc2giOiIxNjc5MTgwMy8wIiwiZ3JhY2VQZXJpb2REYXlzIjo3LCJhdXRvUHJvbG9uZ2F0ZWQiOmZhbHNlLCJpc0F1dG9Qcm9sb25nYXRlZCI6ZmFsc2V9-qlgtO4xVGHX/r45fIKMaR6B9pWQtucrCYVsz0o00crcAiYN1k/kSMygggYl187B0u0jeXQCe4BmQIItKL79x6NwoPn43inreVhZ88f4+Cbl+V/KGeAYeybon+7YoTs8FY4+31ANW/LwBPxkPnlErxYdQ6oc/k6mnxIOm5Nf8WjKRfYYIl5Bhmdt1gHMGgFsocCcTLLiqDUGEcPj5tUIJXwwYaeKAR3YGXm/P73QpnYR/BcGaodBN3jprQRxsS5Ia5y06rrDAJcPSZuttAFpAit/4o/gq2XzhrjaBCtOMxNzk3XEAT82glTlWQOQx6KnRq6D7WUXzd81g44aP+Dca5Q==-MIIElTCCAn2gAwIBAgIBCTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBMB4XDTE4MTEwMTEyMjk0NloXDTIwMTEwMjEyMjk0NlowaDELMAkGA1UEBhMCQ1oxDjAMBgNVBAgMBU51c2xlMQ8wDQYDVQQHDAZQcmFndWUxGTAXBgNVBAoMEEpldEJyYWlucyBzLnIuby4xHTAbBgNVBAMMFHByb2QzeS1mcm9tLTIwMTgxMTAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxcQkq+zdxlR2mmRYBPzGbUNdMN6OaXiXzxIWtMEkrJMO/5oUfQJbLLuMSMK0QHFmaI37WShyxZcfRCidwXjot4zmNBKnlyHodDij/78TmVqFl8nOeD5+07B8VEaIu7c3E1N+e1doC6wht4I4+IEmtsPAdoaj5WCQVQbrI8KeT8M9VcBIWX7fD0fhexfg3ZRt0xqwMcXGNp3DdJHiO0rCdU+Itv7EmtnSVq9jBG1usMSFvMowR25mju2JcPFp1+I4ZI+FqgR8gyG8oiNDyNEoAbsR3lOpI7grUYSvkB/xVy/VoklPCK2h0f0GJxFjnye8NT1PAywoyl7RmiAVRE/EKwIDAQABo4GZMIGWMAkGA1UdEwQCMAAwHQYDVR0OBBYEFGEpG9oZGcfLMGNBkY7SgHiMGgTcMEgGA1UdIwRBMD+AFKOetkhnQhI2Qb1t4Lm0oFKLl/GzoRykGjAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBggkA0myxg7KDeeEwEwYDVR0lBAwwCgYIKwYBBQUHAwEwCwYDVR0PBAQDAgWgMA0GCSqGSIb3DQEBCwUAA4ICAQAF8uc+YJOHHwOFcPzmbjcxNDuGoOUIP+2h1R75Lecswb7ru2LWWSUMtXVKQzChLNPn/72W0k+oI056tgiwuG7M49LXp4zQVlQnFmWU1wwGvVhq5R63Rpjx1zjGUhcXgayu7+9zMUW596Lbomsg8qVve6euqsrFicYkIIuUu4zYPndJwfe0YkS5nY72SHnNdbPhEnN8wcB2Kz+OIG0lih3yz5EqFhld03bGp222ZQCIghCTVL6QBNadGsiN/lWLl4JdR3lJkZzlpFdiHijoVRdWeSWqM4y0t23c92HXKrgppoSV18XMxrWVdoSM3nuMHwxGhFyde05OdDtLpCv+jlWf5REAHHA201pAU6bJSZINyHDUTB+Beo28rRXSwSh3OUIvYwKNVeoBY+KwOJ7WnuTCUq1meE6GkKc4D/cXmgpOyW/1SmBz3XjVIi/zprZ0zf3qH5mkphtg6ksjKgKjmx1cXfZAAX6wcDBNaCL+Ortep1Dh8xDUbqbBVNBL4jbiL3i3xsfNiyJgaZ5sX7i8tmStEpLbPwvHcByuf59qJhV/bZOl8KqJBETCDJcY6O2aqhTUy+9x93ThKs1GKrRPePrWPluud7ttlgtRveit/pcBrnQcXOl1rHq7ByB8CFAxNotRUYL9IF5n3wJOgkPojMy6jetQA5Ogc8Sm7RG6vg1yow==
+
+
+D:\fjy\code\go\src\github.com\ethereum\go-ethereum\miner\miner.go  Start()
+
+D:\fjy\code\go\src\github.com\ethereum\go-ethereum\internal\web3ext\web3ext.go 28 miner minerjs
