@@ -2542,21 +2542,55 @@ pxc集群Percona XtraDB Cluster
 
 create table clone_tbl select * from tbl_name limit  0
 
-
+调整参数key_buffer_size bulk_insert_buffer_size
 mysql -t   #批模式下一般比较精简，为得到如交互模式格式的输出
 mysql -vvv #回显在批模式下所执行的语句
-mysql < a.sql 
+mysql < a.sql   
 mysql>source /root/a.sql
 mysql>.      /root/a.sql
-mysql>alter table tbl_name disable keys;  \
+mysql>alter table tbl_name disable keys;  \    #使用alter可以跳过flush tables;
 	  LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' \
 	  	   OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n'; \
       alter table tbl_name enable keys;
                                 #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)  
                                 #默认从show variable like '%load%';加载数据文件,所以一般用绝对路径
+mysql>lock tables a write; \             #只锁定部分表
+       insert into a values (), (), ()  \
+       insert into a values (), (), ()  \
+       unlock tables;                    #释放这个session所有获取的lock
+msyql>begin; \           #对于事务表
+       insert into a values (), (), ()  \
+       insert into a values (), (), ()  \
+      commit;
+mysql>lock tables real_t write, temp_t write; \
+       insert into real_t select * from temp_t; \
+       truncate table temp_t; \
+       unlock tables;
 mysql>select to outfile from 
 mysqldump
 mysqlimport
+
+select count(*) fron myisam_t #不能有where语句,直接读
+为什么innodb不保存行数?
+因为是事务特性,同一时刻表中的行数对不同的事务而言是不一样的.
+
+
+锁
+除bdb页 innodb行外, 基本都是表锁myisam/memory
+表级锁不可能死锁,因为在事务前就已获取锁
+页行锁因为在sql语句处理时获取锁,而不是事务启动时,所以可能死锁
+查看行级锁 show variabeles like '%table%'  tables_locks_waited tables_locks_immediate
+表级锁 write优先级高于read
+建议锁 GET_LOCK()/RELEASE_LOCK()
+
+表写锁 lock tables a write, b write;
+表读锁 lock tables a read, b read;
+行读锁 select * from t in share mode;
+行写锁  select * from t for update;
+
+
+thread_cache_size connection数的大小
+
 
 
 在not null其实可以插入0或"", 因为0或“” is NOT NULL
@@ -3009,9 +3043,6 @@ explain
         using where
         using sort_union(), using union(), using intersect()
         using index for group_by
-
-
-
 
 
 
