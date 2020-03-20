@@ -2402,6 +2402,7 @@ innodb_file_per_table
 
 
 
+
 mysql>system ls -l *  #执行bash命令
 
 mysql
@@ -2471,19 +2472,31 @@ mysql>show grants for yy;
 mysql>show grants for yy@%;
 mysql>flush privileges;   #与mysqladmin flush-privileges; 或 mysqladmin reload;效果相同 否则mysql服务需要重启
 
+mysqld --skip-networking #禁止tcp/ip连接
+mysqld --key_buffer_size=32M --verbose --help  #立即查看更改效果
+key_buff_size
+table_cache
+sort_buffer_size
+read_buffer_size  对表进行顺序扫描时分配的区域
+read_rnd_bufer_size 对表按任意顺序(如排序顺序)分配的随机读缓存
+临时表一般是基于内存的heap表(tmp_table_size)
+每个连接 stack(默认64K) net_buffer_length(连接缓冲区) net_buffer_length(结果缓冲区) 
+        连接缓存区和结果缓存区可以根据需要动态扩充到max_allowed_packet
 
       
->help;  #最后提示
->help contents;
->help show;
->help set;
->help alter {database|table}
->help {create|drop} {database|table|index}
->help select insert delete update replace truncate
->help {do|handler|load data infile}
->help use $dbName;
->help desc $tableName;
->help explain
+>help;   #最后提示
+>status; #查看server db client connection字符集  slow-query数
+#下面的都可以通过delphi编写的heidisql的帮助查看
+#>help contents;
+#>help show;
+#>help set;
+#>help alter {database|table}
+#>help {create|drop} {database|table|index}
+#>help select insert delete update replace truncate
+#>help {do|handler|load data infile}
+#>help use $dbName;
+#>help desc $tableName;
+#>help explain
 
 show variables [like '%a%'];
 set [session|global] $variableName=$value;  #global表示全局的，默认是session级别。
@@ -2521,11 +2534,7 @@ mysqladmin -uroot -p111111
 	password  '$newPassword'
 	start-slave|stop-slave 
 
-mysql -uroot -p -N -e " select * from user where user='root'; "
---disable-column-names --skip-column-names --column-names=0
---column-names --enable-column-names --column-names=1
-
-
+         execute
 
 
 show open tables where in_use > 0;            #查看哪些表被锁住了
@@ -2540,7 +2549,30 @@ sysbench
 
 pxc集群Percona XtraDB Cluster
 
-create table clone_tbl select * from tbl_name limit  0
+
+mysql -uroot -p -N -e " select * from user where user='root'; "
+--disable-column-names --skip-column-names --column-names=0
+--column-names --enable-column-names --column-names=1
+
+--silent 沉默模式. 只有在错误时才输出.
+--verbose 冗长模式. 写过程及结果.
+
+mysql -s -N -e "select user,host from mysql.user;"
+    -s --silent  以\t分割
+    -N           no header
+    -q --quick   不是缓存所有的结果后才输出,而是找到一行就输出一行. 如果输出被挂起,服务器会慢下来.使用该选项,mysql不使用历史文件
+    -r --raw     列的值不进行转义
+       --show-warinings
+       --reconnect
+       --tee=a.tee 将输出添加到文件
+    -t --table   以table形式
+    -v --verbose 打印sql语句
+    -E --vertical 等价于\G
+    -e  
+    ln -s /dev/null $HOME/.mysql_history #一般来说,在mysql中执行的命令都会.mysql_history中保存
+
+快速建表create table clone_tbl select * from tbl_name limit 0
+快速插入insert [into] myt1 [(col,col2,...,coln)] select * from myt2 [on duplicate key update col1=1, col2=values(col1)]
 
 调整参数key_buffer_size bulk_insert_buffer_size
 mysql -t   #批模式下一般比较精简，为得到如交互模式格式的输出
@@ -2566,9 +2598,28 @@ mysql>lock tables real_t write, temp_t write; \
        insert into real_t select * from temp_t; \
        truncate table temp_t; \
        unlock tables;
-mysql>select to outfile from 
+mysql>select * from  pet into outfile '/path/pet.txt'  TERMINATED BY '\t' \
+            OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n'
+
 mysqldump
+    --single-transaction                             #dumping all tables in a single transaction
+    --fields-terminated-by=name 
+    --fields-enclosed-by=name 
+    --fields-optionally-enclosed-by=name 
+    --fields-escaped-by=name 
+mysqldump -d mydb                         > mydb.sql  #导出数据库mydb所有表的定义 -d,--no-data no row information
+mysqldump -d mydb --ignore-table=mydb.myt > mydb.sql  #导出数据库mydb所有表的定义,但不包括表mydb.myt
+mysqldump -d mydb myt                     > myt.sql   #导出数据库表mydb.myt的定义
+mysqldump    mydb                         > mydb.sql  #导出数据库mydb所有表的定义和数据
+
 mysqlimport
+    --fields-terminated-by=name 
+    --fields-enclosed-by=name 
+    --fields-optionally-enclosed-by=name 
+    --fields-escaped-by=name 
+
+
+
 
 select count(*) fron myisam_t #不能有where语句,直接读
 为什么innodb不保存行数?
@@ -2580,7 +2631,7 @@ select count(*) fron myisam_t #不能有where语句,直接读
 表级锁不可能死锁,因为在事务前就已获取锁
 页行锁因为在sql语句处理时获取锁,而不是事务启动时,所以可能死锁
 查看行级锁 show variabeles like '%table%'  tables_locks_waited tables_locks_immediate
-表级锁 write优先级高于read
+表级锁 write优先级高于read, 因为更新一般认为比select更重要
 建议锁 GET_LOCK()/RELEASE_LOCK()
 
 表写锁 lock tables a write, b write;
@@ -3047,6 +3098,18 @@ explain
 
 
 
+
+
+file $file #包括exe .so .a, 若最后显示with debug_info, not stripped; 若最后显示stripped则没有debug
+gdb  $file #包括exe .so .a, 若最后显示Reading symbols from  done; 若最后显示Reading symbols from (no debugging symbols found) done
+
+readelf -a $elf-file
+
+nm 列出地址 类型type 符号symbol
+
+objdump -a .exe
+objdump -a .so
+objdump -a .a   #查看包含了哪些文件
 
 
 
