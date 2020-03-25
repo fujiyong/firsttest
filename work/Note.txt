@@ -2332,6 +2332,11 @@ ctrl-shift-p 输入remote-ssh:connect to host -> configure ssh host
 
 
 
+强制用户修改密码
+chage -l $userName #查看用户密码的有效期
+chage -d 0 $userName  #设置密码过期,下次登录必须修改密码
+passwd -e  $userName  #设置密码过期,下次登录必须修改密码
+
 
 
 
