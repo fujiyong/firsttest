@@ -313,7 +313,7 @@ install_compile_tool_chain
 install_items "wget" "curl"
 ############################### git ###########################################
 install_item git
-#####git configure
+#####git configure alias可以参考zsh
 git config --global user.name "yy"
 git config --global user.email "fujiyong2000@126.com"
 git config --global alias.st status
@@ -323,8 +323,8 @@ git config --global alias.br branch
 git config --global alias.unstage 'reset HEAD'
 git config --global alias.last 'log -1'
 #git config --global alias.lg     "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
-git config --global alias.lg     "log --all --graph  --oneline  --date-order --date iso --pretty=format:'%C(cyan)%h%Creset %C(black bold)%cd%Creset %C(bold blue)<%cn>%Creset %C(auto)%d %s'"
-git config --global alias.lgstat "log --all --graph  --stat     --date-order --date iso --pretty=format:'%C(cyan)%h%Creset %C(black bold)%cd%Creset %C(bold blue)<%cn>%Creset %C(auto)%d %s'"
+git config --global alias.lg     "log --all --graph  --oneline  --date-order --date format:'%Y-%m-%d %H:%M:%S' --pretty=format:'%C(cyan)%h%Creset %C(black bold)%cd%Creset %C(bold blue)<%cn>%Creset %C(auto)%d %s'"
+git config --global alias.lgstat "log --all --graph  --stat     --date-order --date format:'%Y-%m-%d %H:%M:%S' --pretty=format:'%C(cyan)%h%Creset %C(black bold)%cd%Creset %C(bold blue)<%cn>%Creset %C(auto)%d %s'"
 git config --global color.ui always
 #git config --global log.date iso
 git config --global log.date format:'%Y-%m-%d %H:%M:%S'
