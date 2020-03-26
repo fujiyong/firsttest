@@ -2864,7 +2864,28 @@ binlog
 		Binlog_cache_use
 		Binlog_cache_disk_use
 
-		mysqlbinlog -j $pos $file | head
+		mysqlbinlog -j $pos $file1.[0-9]* $f2.[0-9]* | head
+			--read-from-remote-server --host --port --user --password --protocol{TCP/SOCKET/PIPE|MEMORY} --socket
+			--database=   -d  #只显示某数据库
+			--force-read  -f  #读取不能识别的二进制日志文件 打印警告并继续， 否则立即停止
+			--offset      -o  #跳过n条sql
+			--short-form  -s  #只显示sql语句
+			--start-datetime="2004-12-25 11:25:56" 或timestamp #相对于运行mysqlbinlog的机器的本地时区
+			--stop-datetime=""
+			--start-position=
+			--stop-position=
+			--to-last-log -t 到当前这个binlog不停止，而是继续直至最后一个binlog的结尾。 如果在ms，就无限循环
+			不能如下，防止f1中提供的ctx由于session中断而导致f2不能顺利进行,如f1中create temporary table
+				mysqlbinlog f1 | mysql
+				mysqlbinlog f2 | mysql
+			可以 
+				mysqlbinlog f1 > f.sql
+				mysqlbinlog f2 >> f.sql
+				mysql -e "source ./f.sql"
+
+
+
+--silent 一般只打印错误信息
 
 
 主(binlog binlog.index)                                                           从(relaylog relaylog.index master.info relay-log.info) 
