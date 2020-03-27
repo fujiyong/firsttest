@@ -3118,8 +3118,9 @@ ldd  是一个shell脚本
 
 devC++ 是由delphi开发的
 setting——>code style——>Groovy——>Wrapping and baces——>field groups——>align in columns  按等号对齐
-cygwin  
-mingw
+setting-->code style-->c++   -->code generation -> general -> line/block comment at first column 取消掉
+cygwin  [cygnus天鹅 solution 公司]
+mingw   [minimalist gnufor windows] 完全用windows api实现了posix接口
 hyper-v
 
 
@@ -3166,5 +3167,8 @@ struct symbol {
 }
 
 name 账户
+struct name{
+    uint64_t value = 0;
+}
 
 
