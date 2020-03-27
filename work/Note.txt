@@ -3118,7 +3118,9 @@ ldd  是一个shell脚本
 
 devC++ 是由delphi开发的
 setting——>code style——>Groovy——>Wrapping and baces——>field groups——>align in columns  按等号对齐
-
+cygwin  
+mingw
+hyper-v
 
 
 
