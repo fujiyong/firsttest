@@ -59,13 +59,6 @@ linux命令  column -t
 
 
 https://www.cnblogs.com/the-tops/p/7600985.html
-知识点
-    git fetch --all  //所有分支
-    确定自己所在分支 git pull origin master && git log -p -1   //-p 以patch方式  
-    git shortlog
-    git log 
-            --stat 
-            -p
 
 
              符号位     指数位     尾数位
@@ -2570,7 +2563,9 @@ mysql -s -N -e "select user,host from mysql.user;"
     -t --table   以table形式
     -v --verbose 打印sql语句
     -E --vertical 等价于\G
-    -e  
+    -e  "$sql_statement"
+    --auto-rehash  自动完成  以前是关闭的 现在是开的
+    --tee=a.log    记录日志
     ln -s /dev/null $HOME/.mysql_history #一般来说,在mysql中执行的命令都会.mysql_history中保存
 
 快速建表create table clone_tbl select * from tbl_name limit 0
