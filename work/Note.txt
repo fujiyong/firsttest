@@ -2575,8 +2575,8 @@ mysql -s -N -e "select user,host from mysql.user;"
 mysql -t   #批模式下一般比较精简，为得到如交互模式格式的输出
 mysql -vvv #回显在批模式下所执行的语句
 mysql < a.sql   
-mysql>source /root/a.sql
-mysql>.      /root/a.sql
+mysql>source /root/a.sql                       #为了显示进度， 可以在文件中插入 select 'progress1' AS ' ';
+mysql>\.      /root/a.sql
 mysql>alter table tbl_name disable keys;  \    #使用alter可以跳过flush tables;
 	  LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' \
 	  	   OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n'; \
