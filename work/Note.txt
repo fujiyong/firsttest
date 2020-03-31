@@ -3166,6 +3166,43 @@ struct name{
     uint64_t value = 0;
 }
 
+https://blog.csdn.net/hhye_l/article/details/80602196
+https://www.cnblogs.com/Evsward/p/multi_index.html
+https://segmentfault.com/a/1190000016088076
+
+multi_index
+    typedef eosio::multi_index<$tabName, $typeName,
+    构造函数  (code, scope)
+        不支持拷贝构造函数  不支持赋值构造函数
+    成员访问
+             uint64_t get_code() const
+             uint64_t get_scope() const
+    工具函数
+        uint64_t available_primary_key() const  返回一个可用的未使用的主键值， 用于主键严格自增的表 它不会被设置为自定义值
+    迭代器
+        begin() cbegin()  rbegin() crbegin()
+        end()   cend()    rend()   crend()
+        const_it = mi.lower_bound(pk)
+        const_it = mi.upper_bound(pk)
+
+        const_it iterator_to(const obj&) const   #返回给定对象的迭代器
+        second_index get_index<indeName>() const #返回一个适当类型的二级索引
+    创建     
+        const_it = mi.emplace(owner, [&](auto& rec){})  需要marshall
+    删除     
+        const_it = mi.erase(it)                         退还由于存储而产生的费用
+        void       mi.erase(const ob&)
+    查找     
+        const_it   = mi.find(pk)  若未找到返回end()迭代器
+        const_obj& = mi.get(pk)   若未找到则抛出异常
+    修改     
+        void mi.modify(const_it, uint64_t payer,[&](auto& updater){})   需要marshall
+        void mi.modify(obj&, uint64_t payer,[&](auto& updater){})       需要marshall
+            payer:  为更新而付费的账户  当更新账户和创建账户相同时可以为0
+            如果payer与该对象的payer，则需要退还费用给现有的payer
+            如果payer与该对象的payer，只需为现有对象和更新对象的不同部分付费。如果差额为负，则退还费用
+
+
 
 windows7的允许远程桌面连接
 服务
