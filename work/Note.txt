@@ -3142,6 +3142,8 @@ E70JHCOV2H-eyJsaWNlbnNlSWQiOiJFNzBKSENPVjJIIiwibGljZW5zZWVOYW1lIjoi5bGx5Lic55CG5
 
 
 
+cppreference.com
+
 
 
 assert.hpp  资产
@@ -3169,9 +3171,12 @@ struct name{
 https://blog.csdn.net/hhye_l/article/details/80602196
 https://www.cnblogs.com/Evsward/p/multi_index.html
 https://segmentfault.com/a/1190000016088076
-
+http://sns.hwcrazy.com/boost_1_41_0/libs/multi_index/doc/tutorial/key_extraction.html
 multi_index
     typedef eosio::multi_index<$tabName, $typeName,
+        indexed_by<$indexName, const_mem_func<$typeName, $retType, $funcName> > > table(code, scope)
+        // indexName 最多13个字符 12(a-z 1-5 .) 13(a-p .)
+
     构造函数  (code, scope)
         不支持拷贝构造函数  不支持赋值构造函数
     成员访问
@@ -3193,8 +3198,9 @@ multi_index
         const_it = mi.erase(it)                         退还由于存储而产生的费用
         void       mi.erase(const ob&)
     查找     
-        const_it   = mi.find(pk)  若未找到返回end()迭代器
-        const_obj& = mi.get(pk)   若未找到则抛出异常
+        const_it   = mi.find(pk)     若未找到返回end()迭代器
+        const_it   = mi.require(pk)  若未找到则抛出异常
+        const_obj& = mi.get(pk)      若未找到则抛出异常
     修改     
         void mi.modify(const_it, uint64_t payer,[&](auto& updater){})   需要marshall
         void mi.modify(obj&, uint64_t payer,[&](auto& updater){})       需要marshall
@@ -3203,6 +3209,8 @@ multi_index
             如果payer与该对象的payer，只需为现有对象和更新对象的不同部分付费。如果差额为负，则退还费用
 
 
+
+win7/10 ctrl-alt--> 旋转   在任务栏找到显卡 右击属性 快捷键 -> 禁用
 
 windows7的允许远程桌面连接
 服务
