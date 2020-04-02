@@ -3164,6 +3164,10 @@ E70JHCOV2H-eyJsaWNlbnNlSWQiOiJFNzBKSENPVjJIIiwibGljZW5zZWVOYW1lIjoi5bGx5Lic55CG5
 
 
 cppreference.com
+cplusplus.com
+learncpp.com
+tutorialspoint.com
+https://github.com/fffaraz/awesome-cpp
 
 
 
@@ -3240,3 +3244,19 @@ windows7的允许远程桌面连接
     我的电脑   属性   远程选项卡  允许运行任意版本的远程桌面的计算机连接
 防火墙 
     控制面板 系统安全  防火墙  允许程序或功能通过防火墙  远程桌面RemoteFX
+
+
+
+go build [-o output] [-i] [build flags] [pkgs]
+    build flags
+        -gcflags='' -ldflags=''
+        #gcflags是传递给go compiler的参数，可以使用 go tool compile --help查看所有参数
+        #    -m 检查代码的优化情况， 包括逃逸情况和函数是否内联
+        #    如过只在编译特定包时传递参数，格式应该遵守"$pkgName=参数列表" go build -gcflags='log=-N -l' main.go
+        #ldflags是传递给go linker的参数，可以使用go tool link --help查看所有参数
+        #    -X用来指定特定版本才编译 例如代码中定义var buildVer string，然后在编译时用go build -ldflags "-X main.buildVer=1.0" ... 来赋值。注意-X只能给string类型变量赋值
+    pkgs
+        默认为当前目录，可以省略。  如果提供想对，则是相对于GOROOT GOPATH环境变量
+        go build mydir      #只编译mydir这个包
+        go build mydir/...  #...代表所有字符串 所以编译mydir下的所有pkg
+
