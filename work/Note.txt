@@ -2609,11 +2609,20 @@ mysqldump -d mydb --ignore-table=mydb.myt > mydb.sql  #导出数据库mydb所有
 mysqldump -d mydb myt                     > myt.sql   #导出数据库表mydb.myt的定义
 mysqldump    mydb                         > mydb.sql  #导出数据库mydb所有表的定义和数据
 
-mysqlimport
+mysqlimport   #Load data infile 命令行版
     --fields-terminated-by=name 
     --fields-enclosed-by=name 
     --fields-optionally-enclosed-by=name 
     --fields-escaped-by=name 
+    --compress -C  #在client与server之间进行压缩
+    --delete -D  #导入文本文件前清空表
+    --force -f   #忽略错误
+    --ignore-lines=n #忽略前几行
+    --lock-tables -l #锁定所有表，这样保证所有表在服务器上都保持同步
+    --silent -s      #只有错误时才输出
+    --ignore -i      #当存在重复的唯一键时，跳过
+    --replace -r     #当存在重复的唯一键时，替换  如果不指定-i/-r则判断为错误并忽略文本的剩余部分
+
 
 
 
