@@ -2368,13 +2368,74 @@ http://www.deituicms.com/mysql8cn/cn/web.html                             mysql8
 
 innodb_file_per_table
 
+3种注释  #  --   /* */
+
+CREATE TABLE t (b BIT(8));INSERT INTO t SET b = b'11111111';
+
+#current_timestamp current_timestamp() now()等价 
+create table t (ts timestamp)  #等价于下面这句 默认值为now()并自动更新
+create table t (ts timestamp default current_timestamp on update current_timestamp)
+create table t (ts timestamp default current_timestamp)    #默认值为now()但不自动更新
+create table t (ts timestamp on update current_timestamp)  #默认值为0并自动更新
+
+列类型
+		BLOB  binary large object  memcpy
+		TEXT                       strcpy
+	enum 最多65536个成员，序数从1,2,3开始，只能是其中的一个
+		 如果你想要确定一个ENUM列的所有可能的值，使用SHOW COLUMNS FROM tbl_name LIKE enum_col，并解析输出中第2列的ENUM定义
+	set  最多64个成员，   序数从1,2,4,8开始，可能是其中的一部分set('one','two'，'three') 
+	有以下(''，'one','two','three','one,two','one,three','two,three','one,two,three')
+	      (0,  1,    2,    4,      1+2,       1+4,       2+4,        1+2+4)
+	      SELECT * FROM tbl_name WHERE FIND_IN_SET('value',set_col)>0; #包含value
+	      SELECT * FROM tbl_name WHERE set_col LIKE '%value%';
+	      SELECT * FROM tbl_name WHERE set_col & 1;    #寻找包含第1个set成员的值
+	      SELECT * FROM tbl_name WHERE set_col = 'val1,val2'; #不同于‘val2,val1'
+	      如果想要为SET列确定所有可能的值，使用SHOW COLUMNS FROM tbl_name LIKE set_col并解析输出中第2列的SET定义。
+	select now()+0;  
+	select $enumColumn+0 from t order by concat($enumColumn) #按照column中定义的字母顺序排序
+函数
+	cast() 类型转换
+	convert() 字符串的字符集转换
+
+
+数值型
+	M 显示宽度
+	用于显示宽度小于指定的列宽度的值时从左侧填满宽度
+	一般结合zerofill使用可以显式的查看占用宽度情况
+	显示宽度并不限制可以在列内保存的值的范围，也不限制超过列的指定宽度的值的显示。
+	M的最大值为255，根据具体的类型M会适当变化
+	整数
+		tinyint(M)   [UNSIGNED] [ZEROFILL]	1     255
+		smallint(M)  [UNSIGNED] [ZEROFILL]	2  65,535
+		mediumint(M) [UNSIGNED] [ZEROFILL]	3  16,777,215                   8位千万
+		int(M)       [UNSIGNED] [ZEROFILL]	4   4,294,967,295               10位42亿
+		integer(M)                                                          #与int是同义词
+		bigint(M)    [UNSIGNED] [ZEROFILL]	8  18,446,744,073,709,551,615   20位
+	小数
+		精度: 不包括+-.在内的其他所有位数和
+		标度：小数点后面的位数
+		浮点数
+			单精度	FLOAT(M,D)  [unsigned] [zerofill] M表示总位数,D表示小数点后面的位数 精确到7位数
+			双精度	DOUBLE(M,D) [unsigned] [zerofill] M表示总位数,D表示小数点后面的位数 精确到15位数
+
+			REAL默认为double的同义词，除非设定了选项REAL_AS_FLOAT
+			FLOAT(p) [UNSIGNED] [ZEROFILL]  若精度p属于[0,24]则表示单精度;若精度p属于[25,53]则表示双精度浮点数
+		定点数
+			DECIMAL[(M[,D])] [UNSIGNED] [ZEROFILL] #M的最大值65 D的最大值为30 M的默认值为0 D的默认值为10
+			DEC[(M[,D])]     [UNSIGNED] [ZEROFILL]
+			NUMERIC[(M[,D])] [UNSIGNED] [ZEROFILL]
+			FIXED[(M[,D])]   [UNSIGNED] [ZEROFILL]
+
+
+
+
 变量
 	系统变量
 		set 必须明确
 			global
 				set @@global.$var
 				set global $var
-			session
+			session/local
 				set @@session.$var
 				set session $var
 				set $var
@@ -2384,17 +2445,19 @@ innodb_file_per_table
 				select global $var
 				show   @@global.$var
 				show   global variables like $var
-			session
+			session/local
 				select @@session.$var
 				select session $var
 				show   @@session.$var
 				show   session variables like $var
 
+        当set全局变量时必须显式使用global关键字但查询时不需要的原因是防止将来出问题
 		SELECT @@var_name  优先返回session global
-		show   variables   优先返回session global
+		show   variables   返回session
 	用户变量
-		set
-			set @useVar1:=1, @userVar2:=2
+		set  未被初始化的变量值为NULL，类型为字符串
+			set @useVar1=1, @userVar2:=2  #set语句既可以使用=也可以使用:=
+			select @userVar:=1             #非set语句只能使用:=, 因为非set中=作为一个比较操作符
 		get
 			select @userVar1, @userVar2
 
@@ -2622,6 +2685,7 @@ mysqlimport   #Load data infile 命令行版
     --silent -s      #只有错误时才输出
     --ignore -i      #当存在重复的唯一键时，跳过
     --replace -r     #当存在重复的唯一键时，替换  如果不指定-i/-r则判断为错误并忽略文本的剩余部分
+    
 
 
 
