@@ -2394,8 +2394,37 @@ create table t (ts timestamp on update current_timestamp)  #默认值为0并自�
 	select now()+0;  
 	select $enumColumn+0 from t order by concat($enumColumn) #按照column中定义的字母顺序排序
 函数
-	cast() 类型转换
-	convert() 字符串的字符集转换
+	cast(expr AS type) 类型转换 binary(N) char(N) signed unsigned date time datetime
+	convert(expr, type) 
+	convert(expr using transcoding_name) 字符串的字符集转换
+
+时间日期
+	curdate()      curtime() 
+	current_date() current_time() current_timestamp()  from_unixtime() #本地时区
+	utc_date()     utc_time()     utc_timestamp()
+	
+
+	date
+		curdate() current_date() current_date
+		adddate(date, interval expr type)
+		adddate(expr, days)
+		date_add()
+		date(exp)
+		datediff(exp1,exp2)
+	time
+		curtime() current_time() current_time
+		addtime(exp1,exp2)
+	ts
+		          current_timestamp() current_timestamp now()
+		 localtime() localtime
+		 localtimestamp() localtimestamp
+	tz
+		convert_tz(dt,from_tz,to_tz)  #时区时间转换
+
+		date_format(exp, fmt)
+	datetime <-> timestamp
+		from_unixtime(875996580)
+		unix_timestamp() unix_timestamp('1997-10-04 22:23:00')  #默认值为now() 875996580
 
 
 数值型
@@ -2563,8 +2592,8 @@ show variables [like '%a%'];
 set [session|global] $variableName=$value;  #global表示全局的，默认是session级别。
 show status    [like '%a%'];
 select version();
-select user();
-select current_user();
+select user();             #root@113.109.21.208
+select current_user();     #root@%
 show databases;
 
 select @@global.transaction_isolation;
@@ -2634,6 +2663,9 @@ mysql -s -N -e "select user,host from mysql.user;"
 快速建表create table clone_tbl select * from tbl_name limit 0
 快速插入insert [into] myt1 [(col,col2,...,coln)] select * from myt2 [on duplicate key update col1=1, col2=values(col1)]
 
+select count(*) from t            #包括null
+select count(distinct col) from t #不包括null 
+
 调整参数key_buffer_size bulk_insert_buffer_size
 mysql -t   #批模式下一般比较精简，为得到如交互模式格式的输出
 mysql -vvv #回显在批模式下所执行的语句
@@ -2688,7 +2720,7 @@ mysqlimport   #Load data infile 命令行版
     
 
 
-
+last_insert_id()返回的插入的第一条记录的值即使一条sql插入多条记录。
 
 
 select count(*) fron myisam_t #不能有where语句,直接读
@@ -3034,7 +3066,7 @@ binlog
             mysql>show master status;
                   #此时master只读,等待slave
                                                      mysql>select master_pos_wait('binlog_file', binlog_pos);
-                                                           #执行这条sql会阻塞知道slave达到指定的file和pos,此时master/slave同步,返回
+                                                           #执行这条sql会阻塞直到slave达到指定的file和pos,此时master/slave同步,返回
             mysql>unlock tables;
 
 
