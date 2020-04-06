@@ -2662,6 +2662,8 @@ mysql -s -N -e "select user,host from mysql.user;"
 
 快速建表create table clone_tbl select * from tbl_name limit 0
 快速插入insert [into] myt1 [(col,col2,...,coln)] select * from myt2 [on duplicate key update col1=1, col2=values(col1)]
+                 #on duplicate key update col1=col2+col3                       #使用旧表旧值
+                 #on duplicate key update col1=values(col1) + values(col2)     #使用sql语句中新值
 
 select count(*) from t            #包括null
 select count(distinct col) from t #不包括null 
@@ -2676,7 +2678,9 @@ mysql>alter table tbl_name disable keys;  \    #使用alter可以跳过flush tab
 	  LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' \
 	  	   OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n'; \
       alter table tbl_name enable keys;
-                                #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)  
+                                #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)
+                                #local当是绝对路径时 当是相对路径时，是相对于启动客户端的路径来说
+                                #当不是local时另说 所以最好使用绝对路径  
                                 #默认从show variable like '%load%';加载数据文件,所以一般用绝对路径
 mysql>lock tables a write; \             #只锁定部分表
        insert into a values (), (), ()  \
@@ -2721,11 +2725,25 @@ mysqlimport   #Load data infile 命令行版
 
 
 last_insert_id()返回的插入的第一条记录的值即使一条sql插入多条记录。
-
+default(col_name) 返回列的默认值
 
 select count(*) fron myisam_t #不能有where语句,直接读
 为什么innodb不保存行数?
 因为是事务特性,同一时刻表中的行数对不同的事务而言是不一样的.
+在where中使用别名是不允许的 因为当where执行时列值还没有确定
+
+
+t1           [inner|cross] join t2
+t1                straight_join t2
+t1 left           [outer]  join t2
+t1 right          [outer]  join t2
+t1 natural [left  [outer]] join t2
+t1 natural [right [outer]] join t2
+
+from t1, t2, t3 等价于 from t1 cross join t2 cross t3
+在标准sql中inner join和cross是不同的，但在mysql中从语法上市等同的。
+inner join与on同时使用
+
 
 
 锁
