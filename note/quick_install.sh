@@ -487,24 +487,27 @@ fi
 
 
 ################################ go ###########################################
-# if [ $(which go) ]; then
-#     echo "go has installed and version is $(go version)"
-# else
-#     echo "start to install go v1.13"
-#     mkdir -p $HOME/cots && cd $HOME/cots
-#     wget https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz
-#     tar -zxvf go1.13*
-#     rc_file=${rc_root}/go/.go_rc
-#     mkdir -p $(dirname $rc_file)
-#     cat > "$rc_file" << EOF
-# export GOROOT=~/cots/go
-# export GOBIN=$GOROOT/bin
-# export PATH=$PATH:$GOBIN
-# export GOPATH=~/code/go
-# EOF
-#     source_rc_file "$rc_file" ".go_rc"
-#     echo "installing go v1.13 ends"
-# fi
+rc_root="${HOME}/.local/rc"
+if [ $(which go) ]; then
+    echo "go has installed and version is $(go version)"
+else
+    go env -w GOPROXY=https://goproxy.cn,direct
+    echo "start to install go v1.14"
+    mkdir -p $HOME/code/go/{src,bin,pkg}
+    mkdir -p $HOME/cots && cd $HOME/cots
+    wget https://dl.google.com/go/go1.14.1.linux-amd64.tar.gz
+    tar -zxvf go1.14*
+    rc_file=${rc_root}/go/.go_rc
+    mkdir -p $(dirname $rc_file)
+    cat > "$rc_file" << EOF
+export GOROOT=~/cots/go
+export GOBIN=${GOROOT}/bin
+export PATH=$PATH:${GOBIN}
+export GOPATH=~/code/go
+EOF
+    source_rc_file "$rc_file" ".go_rc"
+    echo "installing go v1.14 ends"
+fi
 ################################ java #########################################
 ################################# npm #########################################
 #

@@ -2744,6 +2744,28 @@ from t1, t2, t3 等价于 from t1 cross join t2 cross t3
 在标准sql中inner join和cross是不同的，但在mysql中从语法上市等同的。
 inner join与on同时使用
 
+union [all | distinct]  #默认distinct
+
+                  
+set autocommit=0; #show global VARIABLES like 'autocommit';
+start transaction;#开始一项事务会隐式地造成unlock tables;
+                #在tx中，如果ddl lock/unlock tables，rename table, truncate table会隐式造成commit
+select @A:=sum(salary) from t1 where type=1;
+savepoint $spid;
+rollback to savepoint $spid;   #release savepoint $spid;
+update t2 set summary=@A where type=1;
+commit;
+
+xa #与本地非xa(即本地普通的tx)互斥
+xa start 'xatest';   #执行完这句时进入active状态
+xa end 'xatest';     #执行完这句时进入idle状态
+xa prepare 'xatest'; #执行完这句进入prepare状态
+xa recover;          #可以打印gtxid
+xa commit 'xatest';  #对于prepare状态, 可以xa commit或xa rollback
+
+mysqld --transaction-isolation
+show [global|session] variables like '%isolation%';
+set [global|session] transaction isolation level {read uncommited | read commited | repeated read | serializable}
 
 
 锁
