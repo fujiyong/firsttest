@@ -2456,6 +2456,119 @@ create table t (ts timestamp on update current_timestamp)  #默认值为0并自�
 			FIXED[(M[,D])]   [UNSIGNED] [ZEROFILL]
 
 
+mysql -s -e  "show variables" | column -t
+show variables like '%character%';  //character_set_client character_set_server character_set_database character_set_filesystem character_set_results character_set_system
+                                    //set names $character  只是设置character_set_client, character_set_connection和character_set_results这三个变量
+show variables like '%datadir%';
+show variables like '%log%';
+show variables like '%isolation%';
+show engines|privileges|character set|;     show VARIABLES like '%ENGINE%';  show VARIABLES like 'default_storage_engine';
+
+show full tables; #查表和view
+show triggers [from db_name] [like expr]; #INFORMATION_SCHEMA.TRIGGERS ACTION_STATEMENT
+
+
+reset query cache;
+
+innodb_buffer_pool_size 
++ key_buffer_size
++ max_connections*(sort_buffer_size+read_buffer_size+binlog_cache_size)
++ max_connections*2M  #2M通常是一个stack size
+
+
+
+set profiling=1;
+select * from t;
+show profile;
+set profiling=0;
+
+kill connection $tid;  #这个连接被kill
+kill query      $tid;  #这个语句的执行被kill但仍然保持连接
+
+show triggers; show create trigger $triggerName;
+use sys;show create view processlist;
+
+
+清理log的步骤
+master                                    slave
+                                          #正在读取哪个日志
+                                        show slave status; 
+#获取master上所有日志
+show master logs;
+#从所有的slave判断哪个是最早log,以这个日志为目标log
+#删除比这个最早log更早的log
+purge {master|binary} logs to 'mysql-bin.010'
+perge {master|binary} logs before '2003-04-02 22:46:26';
+
+master
+    purge
+        purge {master|binary} logs to 'mysql-bin.010';  #清除日志到这个文件但这个文件不清除
+        perge {master|binary} logs before '2003-04-02 22:46:26'; #清除日志到这个时间点
+    reset
+        reset master; #删除索引文件中的所有二进制日志，将二进制索引文件置空，并创建一个新的二进制文件
+    set
+        set sql_log_bin={0|1}; #启用或禁用log
+    show
+        show binlog events [in '$log-name'] [from $pos] [limit [offset,] row_count]
+        show master logs;   #列出所有的logs文件名及大小
+        show master status; #列出正在使用的log及其位置
+        show slave hosts;
+slave
+    change #保存到master.info 和 relay_log.info中
+        change master to
+            master_host='$hostName'  #主机名或ip地址
+            master_port='$port'
+            master_user='$userName'
+            master_password='$password'
+            master_log_file='$master_log_name'
+            master_log_pos=$master_log_pos
+            relay_log_file='$relay_log_name'
+            relay_log_pos=$relay_log_pos
+            master_ssl={0|1}
+            master_ssl_ca='$ca_file_name'
+            master_ssl_capath='$ca_dir_name'
+            master_ssl_cert='$cert_file_name'
+            master_ssl_key='$key_file_name'
+            master_ssl_ciper='ciper_list'
+            #change默认会删除所有relay log并启动一个新的log，除非制定了relay_log_file或relay_log_pos，在此种情况下，relaylog被保持且全局变量relay_log_purge设置为0。
+            #若change语句中出现master_host或master_port时，则mysql则假定原来的master_log_file和master_log_pos不再有效；若没有提供，则假定master_log_file=和master_log_pos=4
+            #若master_log_file和master_log_pos只指定了其中一个，则不能指定relay_log_file或relay_log_pos
+            #若master_log_file和master_log_pos都没有指定，则使用在发布change指定前的最后一个slave sql thread的数值
+
+    reset
+        reset slave;  #忘记其在主服务器二进制中的复制位置(删除文件master.info和relay-log.info) 并删除原有的中继日志 并开始一个新的中继日志
+    master_pos_wait
+        select master_pos_wait('$log_file_name',$log_file_pos) #执行函数，用于确认slave到达指定位置
+    set
+        set global sql_slave_skip_count=$n;  #前提条件: slave_sql_thread没有在运行  一般用于发生错误时跳过n条sql语句 
+    show
+        show slave status; #显示slave_io_runing    yes 判定slave是否连接上master还是只是在running
+                           #    slave_sql_running  yes
+                           #    slave_io_status 即show processlist中status字段
+                           #    last_error:  当出现错误时，关注此字段
+                           #    skip_counter: 即sql_slave_skip_count
+                           #    master_host master_port master_user
+                           #    master_log_file master_log_pos relay_log_file relay_log_pos
+                           #    seconds_behind_master 当为Null时表示slave未能感知master 0表示没有时间差
+    start
+        start slave [io_thread|sql_thread] until master_log_file= master_log_pos= relay_log_file= relay_log_pos=;
+    stop
+        stop slave [io_thread|sql_thread]
+
+预处理语句mysql_stmt_prepare()
+    prepare $stateName from $sqlStatement
+    execute $stateName using @userVar1, @userVar2;
+    deallocate|drop prepare $stateName
+
+
+
+     myisam   innodb
+锁   table    row
+索引 BTree    BTree
+              hash
+     full
+事务  no       yes
+外键  no       yes
 
 
 变量
@@ -2489,6 +2602,8 @@ create table t (ts timestamp on update current_timestamp)  #默认值为0并自�
 			select @userVar:=1             #非set语句只能使用:=, 因为非set中=作为一个比较操作符
 		get
 			select @userVar1, @userVar2
+
+    小结： 全局变量一定要global  用户变量一定要@
 
 
 
