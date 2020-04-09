@@ -2463,6 +2463,7 @@ show variables like '%datadir%';
 show variables like '%log%';
 show variables like '%isolation%';
 show engines|privileges|character set|;     show VARIABLES like '%ENGINE%';  show VARIABLES like 'default_storage_engine';
+show variables like '%default%';   #default-table-type=innodb
 
 show full tables; #查表和view
 show triggers [from db_name] [like expr]; #INFORMATION_SCHEMA.TRIGGERS ACTION_STATEMENT
@@ -2707,6 +2708,7 @@ show variables [like '%a%'];
 set [session|global] $variableName=$value;  #global表示全局的，默认是session级别。
 show status    [like '%a%'];
 select version();
+select connection_id();
 select user();             #root@113.109.21.208
 select current_user();     #root@%
 show databases;
@@ -2790,9 +2792,13 @@ mysql < a.sql
 mysql>source /root/a.sql                       #为了显示进度， 可以在文件中插入 select 'progress1' AS ' ';
 mysql>\.      /root/a.sql
 mysql>alter table tbl_name disable keys;  \    #使用alter可以跳过flush tables;
+      set foreigin_key_check = 0;
+      set autocommit = 0;
 	  LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' \
 	  	   OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n'; \
       alter table tbl_name enable keys;
+      set foreign_key_check=1;
+      set autocommit=1;
                                 #local可以装在client端文件(运行mysqlcli的客户端),否则只能装在server端文件(运行mysqld的服务器)
                                 #local当是绝对路径时 当是相对路径时，是相对于启动客户端的路径来说
                                 #当不是local时另说 所以最好使用绝对路径  
@@ -3177,6 +3183,8 @@ binlog
 		auto_increment_offset=1
 		auto_increment_increment=1    
 
+        #innodb只会创建文件 不会创建目录 所以如果需要创建目录，只能手动
+
 
 	创建账号并授权
 		mysql> GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.0.%' IDENTIFIED BY 'repl';
@@ -3374,8 +3382,27 @@ explain
         using index for group_by
 
 
+mysqladmin processlist; mysqladmin kill
+show processlist
+select * from information_schema.processlist;   #show processlist;
+select thread_id, name, processlist_id from performance_schema.threads;
 
+mysql>select concat('KILL ',id,';') from information_schema.processlist where user='root' into outfile '/tmp/a.txt';
+mysql>source /tmp/a.txt;
+mysqladmin -uroot -p processlist|awk -F "|" '{if($3 == "Mike")print $2}'|xargs -n 1 mysqladmin -uroot -p kill
+for id in `mysqladmin processlist|grep -i locked|awk '{print $1}'`;do
+    mysqladmin kill ${id}
+done
 
+使用工具Maatkit提供的命令
+mk-kill -busy-time 60 -kill
+mk-kill -busy-time 60 -print
+mk-kill -busy-time 60 -print –kill
+
+锁
+select * from information_schema.innodb_locks;
+select * from information_schema.innodb_lock_waits;
+select * from information_schema.innodb_trx;
 
 
 file $file #包括exe .so .a, 若最后显示with debug_info, not stripped; 若最后显示stripped则没有debug
@@ -3506,6 +3533,8 @@ windows7的允许远程桌面连接
     控制面板 系统安全  防火墙  允许程序或功能通过防火墙  远程桌面RemoteFX
 
 
+https://lexiangla.com/docs/b20524eefa4f11e9a6b10a58ac131389?company_from=c1ee04f4854f11e9ae505254002f1020
+
 
 go build [-o output] [-i] [build flags] [pkgs]
     build flags
@@ -3520,3 +3549,47 @@ go build [-o output] [-i] [build flags] [pkgs]
         go build mydir      #只编译mydir这个包
         go build mydir/...  #...代表所有字符串 所以编译mydir下的所有pkg
 
+
+https://www.aneasystone.com/archives/2017/10/solving-dead-locks-one.html
+https://zhuanlan.zhihu.com/p/67793185
+https://blog.csdn.net/u010841296/article/details/84204701
+
+事务的特性
+    原子性 
+    一致性：  从一个一致性状态转向另外一个一致性状态
+    隔离性：  一个事务在提交数据前其他事务是不可见的
+    持久性：  事务一旦提交就是永久性的
+并发可能导致的问题
+    1.丢失数据修改 （修改的数据被其它线程事务覆盖）
+    2.脏读（B事务读取了A事务尚未提交的数据，且A事务回滚数据）
+    3.不可重复读（一个事务中两次读取的数据内容不一致，重点在update）
+    4.幻读（一个事务中两次读取的数据量不一致，重点在insert，delete）
+
+解决并发问题
+    锁
+        锁的类型 
+            读锁
+            写锁
+            更新锁(U) 防止通常形式的死锁，两个拥有共享锁的事务要同时更新数据时，需要将共享锁转换为排他锁，所以他们都需要X锁并且要等待对方释放s锁（x锁和其它事务的S锁不兼容），会发生死锁
+        锁的粒度
+            行锁
+            表锁
+        锁的持续时间
+            临时锁:  锁的持续时间是当前语句还是当前事务的结束
+            持续锁
+        悲观乐观
+            悲观 一开始就加锁  
+            乐观 一开始不加锁 MVCC   不能避免脏读
+    设置事务隔离级别
+        （1）读未提交(RU)：事务写阻塞其它事务的写不阻塞读（加“持续-X锁”实现）
+          ---避免丢失数据修改
+        （2）读已提交(RC)：事务写会阻塞其它事务的读和写（写操作加“持续-X”锁，读操作加“临时-S锁”实现）
+         ---避免丢失数据修改和脏读
+        （3）可重复读(RR)：事务读会阻塞其它事务的写，不会阻塞读，事务写会阻塞其它事务读写（写操作加“持续-X”锁，读操作加“持续-S锁”实现）    
+         ---避免丢失数据修改和脏读和不可重复读幻读
+        （4）串行化：事务的最高级别，在每个读的数据行上，加上锁，使之不可能相互冲突，因此，会导致大量的超时现象
+         ---解决了所有问题
+    三级加锁协议
+        一级加锁协议：读数据不加锁，修改数据前加X锁（解决丢失数据修改）
+        二级加锁协议：读取时加s锁，修改时加x锁（解决丢失数据修改+脏读）
+        三级枷锁协议：全程加x锁和s锁（解决所有问题）
