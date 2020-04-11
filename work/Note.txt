@@ -3551,12 +3551,17 @@ go build [-o output] [-i] [build flags] [pkgs]
 
 
 https://www.aneasystone.com/archives/2017/10/solving-dead-locks-one.html
+https://www.aneasystone.com/archives/2018/04/solving-dead-locks-four.html
 https://zhuanlan.zhihu.com/p/67793185
 https://blog.csdn.net/u010841296/article/details/84204701
 
 https://blog.csdn.net/qq_36431213/article/details/86497493
+
 https://zhuanlan.zhihu.com/p/38214642
+https://www.zhihu.com/people/kayaklee/posts
+
 http://oserror.com/backend/transaction-isolation-first/
+http://oserror.com/backend/transaction-isolation-second/
 
 事务的特性
     原子性 
@@ -3566,31 +3571,40 @@ http://oserror.com/backend/transaction-isolation-first/
 
 
 实际情景模拟
-    1读1写：都是一个事务写,另一个事务读  
-        后果:      一个事务的写导致了另外一个事务的读取错误
-        具体表现:  脏读 不可重复读 幻读
-    双写（丢失更新(lost update)）
-        提交覆盖  第一类丢失更新
-        回滚覆盖  第二类丢失更新
+    ANSI SQL标准涉及的场景 1读1写：
+    ANSI SQL标准扩展涉及的场景 双写（丢失更新） 
 并发可能导致的问题
-    1.丢失数据修改 （修改的数据被其它线程事务覆盖）
-    2.脏读      （A事务中对同一条数据，一次读取了B事务尚未提交的数据，且B事务回滚数据）
-    3.不可重复读  (A事务中对同一条数据，两次读取的数据内容不一致，重点在update）
-    4.幻读       (A事务中对同一范围内的，两次读取的数据量不一致，重点在insert，delete)
+    描述符号解释  R(read) W(write) 1(T1) 2(T2) X(record某条记录) P(predict谓词 包括范围的多条记录)  C(commit) A(abort/rollback)
 
-解决并发问题
+    ANSISQL标准（ANSI sql isolation levels defined in terms of the three orignal phenomena),都是一个事务写,另一个事务读   一个事务的写导致了另外一个事务的读取错误
+        P1.脏读       W1(X)…R2(X)…A1…R2(X)（A事务中对同一条数据，一次读取了B事务尚未提交的数据，且B事务回滚数据） 
+        P2.不可重复读  R1(X)…W2(X)…C2…R1(X) (A事务中对同一条数据，两次读取的数据内容不一致，重点在update）
+        P3.幻读       R1(P)…W2(P)…C2…R1(P)  (A事务中对同一范围内的，两次读取的数据量不一致，重点在insert，delete)
+    ANSI标准扩展,双写(lost update)
+        丢失数据修改 （修改的数据被其它线程事务覆盖）
+            P0回滚覆盖  第二类丢失更新   脏写  W1(X)…W2(X)…A1
+            P4提交覆盖  第一类丢失更新         R1(X)…R2(X)…W2(X)…C2…W1(X)…C1
+
+解决并发问题的工具
     锁
         悲观乐观
-            乐观 一开始不加锁 MVCC   不能避免脏读
+            乐观 一开始不加锁    不能避免脏读
+                时间戳Basic Time Ordering，把Basic Time Ordering达到的隔离级别称为Snapshot级别。
+                    事务T1开始时，先申请一个时间戳，记做Start-Timestamp
+                    事务T1的读不会阻塞，因为，它会读其Start-Timestamp之前的版本，其他事务在Start-Timestamp之后的修改，对该事务是不可见的
+                    事务T1本身的修改，包括更新，插入和删除，都会保存在事务的上下文中，方便事务本身重复读取修改过的数据
+                    当事务T1要提交时，它会获取一个Commit-Timestamp，此Commit-Timestamp要保证比现有的所有其他事务的Start-Timestmap和Commit-Timestmap要大，
+                        如果存在其他事务Commit-Timestamp在事务T1的[Start-Timestamp, Commit-Timestamp]之内，且该事务修改了事务T1修改的数据，那么，事务T1会被终止，否则，事务提交
+                MVCC
             悲观 一开始就加锁 传统的加锁控制
                 锁的兼容性 
                     读锁
                     写锁
                     更新锁(U) 防止通常形式的死锁，两个拥有共享锁的事务要同时更新数据时，需要将共享锁转换为排他锁，所以他们都需要X锁并且要等待对方释放s锁（x锁和其它事务的S锁不兼容），会发生死锁
-                锁的范围粒度
-                    行锁  都是加在索引上的，最终会落在聚簇索引，加锁的过程是一条一条加的
-                        记录锁(SX)
-                        避免幻读
+                锁的范围粒度   
+                    行锁  都是加在索引上的，最终会落在聚簇索引，加锁的过程是一条一条加的  根据锁住的对象
+                        普通锁：记录锁(SX)
+                        谓词锁: 避免幻读
                             间隙所(GapLock) (SX)
                                 记录锁只能对已经存在的记录并发控制(update/delete),不能对要插入的记录控制(insert),所以需要间隙锁(GapLock)
                                 GapLock不锁住任何记录,锁住的是不占任何实体的左开右开区间(previousKey,thisKey)
@@ -3606,14 +3620,63 @@ http://oserror.com/backend/transaction-isolation-first/
                        意向锁之间是完全兼容的。因为意向锁只代表想往下获取锁，但具体是哪些记录是不确定的，因此完全兼容。
                        即使其他事务已经加了某种意向锁，事务还是可以成功加意向锁。
                 锁的持续时间
-                    临时锁:  锁的持续时间是当前语句还是当前事务的结束
-                    持续锁
+                    临时锁(short duration):  没有持续到事务结束
+                    持续锁(long duration):   持续到事务结束(commit或rollback)
+
+
+                锁的2阶段
+                    two-phase read(write)是当有一个或多个read(write) lock被释放后，不能再加新的read(write) lock。如果一个事务在释放一个或多个锁后，不再加其他的锁，那么称该事务是two-phase的
+                    Expanding phase：加锁阶段，此阶段只加锁，不释放锁
+                    Shrinking phase：解锁阶段，此阶段只解锁，不加锁
+
+                    经典的死锁的案例， 互相持有对方的资源
+                        T1       T2
+                        R1(X)   R2(Y)
+                        W1(Y)   W2(X)
+                        解决方案：
+                            死锁检测并消除： 有一个单独的线程检测事务的锁等待图，如果图构成了一个环，那么，说明发生了死锁，此时，需要选择环中的一个事务进行回滚，并释放锁，使得其他事务能够继续运行下去
+                            锁等待一段时间阈值后，对事务进行回滚，并释放所有锁： 表明，每次发生死锁时，都会先回滚最早开始执行的事务，使得其他的事务能够继续运行下去
+                well-formed read(write)
+                    是指在read(write)一个数据项或者查询条件时，会先对数据项或者查询条件加read(write) lock。如果一个事务的所有读写都是well-formed，那称事务是well-formed
+
+                根据数据库的基础理论，采用well-formed two-phase locking方式调度事务的话，是能够保证serializability的
+
+
         
-        
-    设置事务隔离级别
+解决并发的途径：
+    理论界，设置ANSI SQL标准下的事务隔离级别  主要是Read，没有涉及到写操作的隔离性，所以有所限制，需要工业界扩展
+        P0脏写 
+            表现形式: W1(X)…W2(X)…A1
+            分析: 如果需要禁止P0，即禁止多个事务同时能修改一个数据项或谓词条件，则需要修改数据时，加写锁，并且是long duration的，此时，隔离级别满足Read Uncommitted。
+            解决方案： 当写时，加long duration的写锁
+            设置隔离级别：读未提交RU(read uncommit)
+        P1脏读 也是读未提交  
+            表现形式:  W1(X)…R2(X)…A1…R2(X)
+            分析：如果需要禁止P1，即禁止读取到其他事务修改的中间状态的数据，在禁止P0的条件下，则需要，对读加锁，short duration的就能够满足条件，此时，隔离级别满足Read Committed
+            设置隔离级别：读已提交RC(read commit)
+        P4
+            表现形式： R1(X)…R2(X)…W2(X)…C2…W1(X)…C1
+            分析：如果需要禁止P4，即禁止事务读取并且修改某个数据项后，需要禁止其他事务再次修改，但如果只是读取的话，不影响，这里，需要一种特殊的锁，称为Cursor Lock，会对事务当前处理的行进行加锁，
+                 如果行记录被修改，那么锁会是long duration的，直到事务结束，如果，行未被修改，则锁会提前被释放，此时，隔离级别满足Curstor stability
+            设置隔离级别：[Cursor Stability]
+        P2不可重复读        
+            表现形式： R1(X)…W2(X)…C2…R1(X)
+            分析： 如果需要禁止P2，即要禁止到读到某个数据项后，该数据还可能被其他事务修改，因此，需要对读加锁，且一直加锁到事务结束，即long duration，此时，隔离级别满足Repeatable Read
+            设置隔离级别：可重复读RR(read repeated) [Snapshot]
+        P3幻读 
+            表现形式： R1(P)…W2(P)…C2…R1(P)            
+            分析： 如果需要禁止P3，即要禁止读到某个谓词条件后，满足该谓词条件的数据还被其他事务修改，因此，需要对谓词条件加读锁，且是long duration的，此时，隔离级别满足SERIALIZABLE
+            设置隔离级别: 串行化  
+                指的是并发调度执行的结果等于这些事务某个串行执行的结果。
+                例如，有三个并发执行的事务T1，T2和T3，如果其执行结果和其某个串行执行((T1,T2,T3),(T1,T3,T2),(T2,T1,T3),(T2,T3,T1),(T3,T1,T2),(T3,T2,T1))的结果相同
+
+    工业界
+
+
+
         （1）读未提交(RU) 脏读(dirty read 读取未提交的update)：事务写阻塞其它事务的写不阻塞读（加“持续-X锁”实现）
           ---避免丢失数据修改
-        （2）读已提交(RC) 不可重复读(unrepeated read 读取未提交之前的update和读取update已提交的 这2次读取获得的数据不一致)：事务写会阻塞其它事务的读和写（写操作加“持续-X”锁，读操作加“临时-S锁”实现）
+        （2）读已提交(RC) 不可重复读(unrepeated read/ fuzzy read 读取未提交之前的update和读取update已提交的 这2次读取获得的数据不一致)：事务写会阻塞其它事务的读和写（写操作加“持续-X”锁，读操作加“临时-S锁”实现）
          ---避免丢失数据修改和脏读
         （3）可重复读(RR)：事务读会阻塞其它事务的写，不会阻塞读，事务写会阻塞其它事务读写（写操作加“持续-X”锁，读操作加“持续-S锁”实现）    
          ---避免丢失数据修改和脏读和不可重复读和幻读(phantom read)
@@ -3633,6 +3696,7 @@ http://oserror.com/backend/transaction-isolation-first/
 二级封锁协议  读已提交    Y           Y      N             N           N
 三级封锁协议  可重复读    Y           Y      Y             ?           N
 四级封锁协议  序列化      Y           Y      Y             Y           Y
+             隔离级别越高，并发性越低
 
 隔离级别的实现
     悲观的传统的基于锁的并发控制Lock-Based Concurrent Control(LBCC)  封锁协议(Locking protocol)
