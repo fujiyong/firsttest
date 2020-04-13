@@ -3399,10 +3399,7 @@ mk-kill -busy-time 60 -kill
 mk-kill -busy-time 60 -print
 mk-kill -busy-time 60 -print –kill
 
-锁
-select * from information_schema.innodb_locks;
-select * from information_schema.innodb_lock_waits;
-select * from information_schema.innodb_trx;
+
 
 
 file $file #包括exe .so .a, 若最后显示with debug_info, not stripped; 若最后显示stripped则没有debug
@@ -3553,6 +3550,7 @@ go build [-o output] [-i] [build flags] [pkgs]
 https://www.aneasystone.com/archives/2017/10/solving-dead-locks-one.html
 https://www.aneasystone.com/archives/2018/04/solving-dead-locks-four.html
 https://zhuanlan.zhihu.com/p/67793185
+https://zhuanlan.zhihu.com/p/20832611
 https://blog.csdn.net/u010841296/article/details/84204701
 
 https://blog.csdn.net/qq_36431213/article/details/86497493
@@ -3587,8 +3585,8 @@ http://oserror.com/backend/transaction-isolation-second/
 
 解决并发问题的工具
     锁
-        悲观乐观
-            乐观 一开始不加锁    不能避免脏读
+        悲观乐观 是一种上锁的思想
+            乐观(Optimistic Lock) 一开始不加锁    不能避免脏读
                 时间戳Basic Time Ordering，把Basic Time Ordering达到的隔离级别称为Snapshot级别。
                     事务T1开始时，先申请一个时间戳，记做Start-Timestamp
                     事务T1的读不会阻塞，因为，它会读其Start-Timestamp之前的版本，其他事务在Start-Timestamp之后的修改，对该事务是不可见的
@@ -3596,29 +3594,60 @@ http://oserror.com/backend/transaction-isolation-second/
                     当事务T1要提交时，它会获取一个Commit-Timestamp，此Commit-Timestamp要保证比现有的所有其他事务的Start-Timestmap和Commit-Timestmap要大，
                         如果存在其他事务Commit-Timestamp在事务T1的[Start-Timestamp, Commit-Timestamp]之内，且该事务修改了事务T1修改的数据，那么，事务T1会被终止，否则，事务提交
                 MVCC
-            悲观 一开始就加锁 传统的加锁控制
-                锁的兼容性 
-                    读锁
-                    写锁
-                    更新锁(U) 防止通常形式的死锁，两个拥有共享锁的事务要同时更新数据时，需要将共享锁转换为排他锁，所以他们都需要X锁并且要等待对方释放s锁（x锁和其它事务的S锁不兼容），会发生死锁
-                锁的范围粒度   
-                    行锁  都是加在索引上的，最终会落在聚簇索引，加锁的过程是一条一条加的  根据锁住的对象
-                        普通锁：记录锁(SX)
-                        谓词锁: 避免幻读
-                            间隙所(GapLock) (SX)
-                                记录锁只能对已经存在的记录并发控制(update/delete),不能对要插入的记录控制(insert),所以需要间隙锁(GapLock)
-                                GapLock不锁住任何记录,锁住的是不占任何实体的左开右开区间(previousKey,thisKey)
-                                一事务为了防止插入，获取了某条记录的间隙锁；
-                                另一事务，为了插入，需要获取插入意向锁(insert intension lock),如果需要插入的间隙有间隙锁，则获取插入意向锁会失败必须进行锁等待，从而实现了阻塞插入.
-                            插入意向锁(insert intension lock)
-                            Next-key Lock = GapLock+RecordLock (SX)
-                    表锁(实际实现为意向锁intension lock)
-                        意向共享锁(IS)意向排他锁(IX)
-                        自增锁(一般见不到，只有在 innodb_autoinc_lock_mode = 0 或者 Bulk inserts 时才可能有）
-                        DDL(alter create等) 隐式提交，不能回滚
-                    ps:先加意向锁，再加行锁。 如获取意向锁失败，则不能再往下加行锁。
+            悲观(Pessimistic Lock) 一开始就加锁 传统的加锁控制
+                锁的兼容性 lock_mode
+                    /* Basic lock modes */
+                    enum lock_mode {
+                        LOCK_IS = 0,   /* intension shared */
+                        LOCK_IX,       /* intension exclusive */
+                        LOCK_S,        /* shared */
+                        LOCK_X,        /* exclusive */
+                        LOCK_AUTO_INC, /* locks the auto-inc counter of a table in an exclusive mode*/
+                    }
+                    
+                    读锁写锁
+                        为提高读的并发性
+                        (这里的读是当前读，而不是快照读，快照读是无需加锁的，记录上无论有没有锁，都可以快照读)
+
+                    表级意向共享锁(IS) 表级意向排他锁(IX)
+                        只会应用在表锁上，方便表锁与行锁之间的冲突检测。
+                    表级自增锁(AI一般见不到，只有在 innodb_autoinc_lock_mode = 0 或者 Bulk inserts 时才可能有）
+                        是一种特殊的表锁
+                        不遵循2段锁协议，也就是说并不是事务结束时释放，而是在insert执行时释放，这样提高并发性。
+                        一旦分配就会自增1，如果回滚，自增值也不会减回去，所以自增值可能出现中断。
+                    DDL(alter create等) 隐式提交，不能回滚
+
+                    更新锁(U update lock)  SQL Server 支持， mysql不支持
+                        防止通常形式的死锁，两个拥有共享锁的事务要同时更新数据时，需要将共享锁升级为排他锁，
+                        所以他们都需要X锁并且要等待对方释放s锁（x锁和其它事务的S锁不兼容），会发生死锁
+
+                    ps:先加表级别意向锁，再加行级别行锁。 如获取意向锁失败，则不能再往下加行锁。
                        意向锁之间是完全兼容的。因为意向锁只代表想往下获取锁，但具体是哪些记录是不确定的，因此完全兼容。
                        即使其他事务已经加了某种意向锁，事务还是可以成功加意向锁。
+
+                锁的范围粒度 lock_type   
+                    行锁  都是加在索引上的，最终会落在聚簇索引，加锁的过程是一条一条加的  根据锁住的对象
+                        #define LOCK_ROW 32
+                        普通锁：记录锁(SX)
+                            #define LOCK_REC_NOT_GAP 1024
+                        谓词锁: 避免幻读
+                            间隙所(GapLock) (SX)
+                                #define LOCK_GAP 512
+                                记录锁只能对已经存在的记录并发控制(update/delete),不能对要插入的记录控制(insert),所以需要间隙锁(GapLock)
+                                GapLock不锁住任何记录,锁住的是不占任何实体的左开右开区间(previousKey,thisKey)，或加在第一条索引之前，或最后一条索引之后。
+                                间隙锁和间隙锁之间是互不冲突的，间隙锁唯一的作用就是为了防止其他事务的插入，所以加间隙 S 锁和加间隙 X 锁没有任何区别。
+                                一事务为了防止插入，获取了某条记录的间隙锁；
+                                另一事务，为了插入，需要获取插入意向锁(insert intension lock),如果需要插入的间隙有间隙锁，则获取插入意向锁会失败必须进行锁等待，从而实现了阻塞插入.
+                            插入意向锁(insert intension lock)  插入记录时使用，是LOCK_GAP的特例， 有时可以简称II GAP
+                                #define LOCK_INSERT_INTENSION 2048
+                                同一gap不同的tx中可以同时插入互不冲突的不同索引的记录
+                            后码锁Next-key Lock = GapLock+RecordLock (SX)
+                                #define LOCK_ORDINARY 0
+                                更新非唯一索引对应的记录会加上这个锁
+                                假如表主键为10,11,20, 则（-∞,10] (10,11] (11,20]是nextkeyLock (20,+∞)是gapLock
+                    表锁(实际实现为意向锁intension lock)
+                        #define LOCK_TABLE 16
+                    
                 锁的持续时间
                     临时锁(short duration):  没有持续到事务结束
                     持续锁(long duration):   持续到事务结束(commit或rollback)
@@ -3691,6 +3720,42 @@ http://oserror.com/backend/transaction-isolation-second/
         三级加锁协议：全程加x锁和s锁（解决所有问题）
 
 
+表级锁兼容矩阵
+     IS  IX  S  X  AI   
+IS   Y   Y   Y     Y
+IX   Y   Y         Y
+S    Y       Y
+X
+AI   Y   Y
+    意向锁之间互不冲突；
+    S 锁只和 S/IS 锁兼容，和其他锁都冲突；
+    X 锁和其他所有锁都冲突；
+    AI 锁只和意向锁兼容；
+row锁兼容矩阵
+             record    gap     next-key   II gap (已有的锁)
+Record                 Y                  Y
+Gap          Y         Y       Y          Y
+next-key               Y                  Y
+II GAP       Y                            Y
+(想加的锁)
+    一个事务已经获取了插入意向锁，对其他事务是没有任何影响的
+    一个事务想要获取插入意向锁，如果有其他事务已经加了间隙锁或 Next-key 锁，则会阻塞
+
+锁
+    以前：  
+        show full processlist;  #status： lock
+        show engine innodb status;
+            #set global innodb_status_output = on;
+            #set global innodb_status_output_locks = on;
+            #backgroud thread, semaphores, transaction(including locks)
+            #file io, insert buffer and adaptive hash index
+            #log, buffer pool and memory, row operation and so on
+    现在：
+        select * from information_schema.innodb_locks;  #只有出现锁竞争时才有记录
+        select * from information_schema.innodb_lock_waits;
+        select * from information_schema.innodb_trx;
+
+
              隔离级别    回滚覆盖    脏读    不可重复读     提交覆盖     幻读
 一级封锁协议  读未提交    Y           N      N             N           N
 二级封锁协议  读已提交    Y           Y      N             N           N
@@ -3725,5 +3790,60 @@ mysql
     表
         ddl
         dml(alter table create table)
-        lock table $table read/write
+        lock tables $t1 read/write, $t2 read/write    unlock tables;
 
+
+
+
+
+对于myisam，如果加表锁lock tables $t read; 默认即是加read lock，自身这个session不能访问未被自身session锁定的表。其他session不能写被别的session锁定的表。
+
+释放锁的途径
+unlock tables $t1;
+在持有表锁的前提下再次lock tables,将会释放之前获取的lock;
+在持有表锁的前提下start transaction/begin,将会释放之前获取的lock;
+session断开。
+
+
+
+二分查找(binary search)
+    优点：固定长度
+    缺点：变长时，需移动大量元素
+二叉查找树/二叉排序树(sorted binary tree)  
+    缺点： 有可能退化成线性树
+平衡树(balance search tree)
+AVL(通过树的旋转保证2棵子树最大差为1)
+    缺点: 以上都是单纯考虑算法本身的复杂度，没考虑与外部设备之间的读写效率。
+          二叉树的每个node都只能保存一条数据(record),并且最多有2个childNode，查找效率有点低。
+          因此，可不可以在一个node保存多条数据(data)和多个childNode?
+          这一个node保存多条数据和多个childNode就是B-Tree.
+B-Tree
+    2-3Tree: 每个node保存1,2条数据
+    2-3-4tree:每个node保存1,2,3条数据
+    优点：实际应用中，会根据page大小来调整n的值，这样一次io读取就能读取n条数据，并且树的高度明显减小，减少开销。
+    缺点：伸缩性不好。 如果将多条数据保存到一个page中且某个字段太长，则一个page的记录数将受到限制，
+                     最坏的情况，一个page只保存一个记录，这样就退化成二叉树。
+                     另外，无法修改字段的最大长度，除非调整page大小，重建整个数据库。
+B+Tree
+    特点：非叶子节点(内节点)不再保存recode,而只保存key，并且所有的叶子结点使用链表连接。
+          这样可以方便范围查询，只要找到起始位置，然后按链表查找，一直到结束位置。
+          MyISAM:  叶子节点只保存指向recode的指针,所以需要2次读取。
+                   将独立的数据文件(.MYD)以堆表的形式存储，每条数据都有一个唯一的地址。所以也称堆组织表(HeapOrganizedTable HOT)
+                   对PrimaryKey与SecondKey这2中索引存储没有区别。
+                   表中的record没有特定的顺序，所有的新行被添加到表尾
+                   所以没有clusterIndex。
+          InnoDB:  叶子节点保存真实的record,也称索引组织表(IndexOrganizedTable IOT)
+                    对于插入操作，根据索引找到对应的索引页，然后通过挪动已有的记录来为新数据腾出空间，最后插入数据。
+                    如果数据页已满，则调整索引指针（如果还有非ClusterIndex,则还需要更新这些索引指向新的数据页)
+
+
+ClusterIndex：聚集索引  索引与整行记录数据聚集在一块。
+              又被称为主键索引(一级索引)。
+              表数据按照索引顺序来存储，也就是说索引项的顺序与表中的物理record的顺序一致。
+              叶子节点即存储了真实的record，而不是数据指针，不再需要单独的数据页。
+              在一张表中最多只能有一个ClusterIndex，因为真实的数据的物理顺序只有一种。
+非ClusterIndex：非聚集索引  索引与整行记录数据不在一起。
+             又被称为second index(二级索引 辅助索引)
+             表数据存储与索引顺序无关，叶子节点只包含数据行的逻辑指针或主键。 
+covering index： 覆盖索引  指通过查询索引就能获取结果而不必通过查询数据表而获取。
+              比如index_k1_k2(col1,col2), 执行select k2 from where col=k1;

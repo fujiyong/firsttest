@@ -82,6 +82,13 @@ geth
 ./geth attach --datadir $HOME/geth-data --exec "admin.nodeInfo.enode"
 ./geth attach $HOME/geth-data/geth.ipc --exec "admin.nodeInfo.enode"
 
+
+
+alias sbashprofile='source ~/.bash_profile'
+alias sv.init='rm -rf $HOME/svds-data && mkdir -p $HOME/svds-data && cd /root/app && ./svds --datadir $HOME/svds-data init /root/app/svds-init.json'alias sv.run='cd /root/app; nohup ./svds --datadir $HOME/svds-data  --rpc --rpcaddr "0.0.0.0" --rpcapi "db,eth,net,web3,personal,admin,miner" --rpccorsdomain "*"  --myconf ./a.toml --nodiscover --networkid 1688  >> $HOME/svds-data/debug.log 2>&1 &'
+alias sv.attach='/root/app/svds attach --datadir $HOME/svds-data'
+
+
 添加节点
 ./geth attach --datadir $HOME/geth-data
 admin.addPeer("")
