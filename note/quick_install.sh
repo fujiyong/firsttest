@@ -491,7 +491,6 @@ rc_root="${HOME}/.local/rc"
 if [ $(which go) ]; then
     echo "go has installed and version is $(go version)"
 else
-    go env -w GOPROXY=https://goproxy.cn,direct
     echo "start to install go v1.14"
     mkdir -p $HOME/code/go/{src,bin,pkg}
     mkdir -p $HOME/cots && cd $HOME/cots
@@ -500,12 +499,13 @@ else
     rc_file=${rc_root}/go/.go_rc
     mkdir -p $(dirname $rc_file)
     cat > "$rc_file" << EOF
-export GOROOT=~/cots/go
+export GOROOT=${HOME}/cots/go
 export GOBIN=${GOROOT}/bin
 export PATH=$PATH:${GOBIN}
-export GOPATH=~/code/go
+export GOPATH=${HOME}/code/go
 EOF
     source_rc_file "$rc_file" ".go_rc"
+    go env -w GOPROXY=https://goproxy.cn,direct
     echo "installing go v1.14 ends"
 fi
 ################################ java #########################################
