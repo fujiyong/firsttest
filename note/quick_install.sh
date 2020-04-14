@@ -487,7 +487,7 @@ fi
 
 
 ################################ go ###########################################
-rc_root="${HOME}/.local/rc"
+# rc_root="${HOME}/.local/rc"
 if [ $(which go) ]; then
     echo "go has installed and version is $(go version)"
 else
@@ -500,8 +500,8 @@ else
     mkdir -p $(dirname $rc_file)
     cat > "$rc_file" << EOF
 export GOROOT=${HOME}/cots/go
-export GOBIN=${GOROOT}/bin
-export PATH=$PATH:${GOBIN}
+export GOBIN=${HOME}/cots/go/bin
+export PATH=$PATH:${HOME}/cots/go/bin
 export GOPATH=${HOME}/code/go
 EOF
     source_rc_file "$rc_file" ".go_rc"

@@ -3549,7 +3549,7 @@ go build [-o output] [-i] [build flags] [pkgs]
 
 https://www.aneasystone.com/archives/2017/10/solving-dead-locks-one.html
 https://www.aneasystone.com/archives/2018/04/solving-dead-locks-four.html
-https://zhuanlan.zhihu.com/p/67793185
+https://zhuanlan.zhihu.com/p/67793185       详细
 https://zhuanlan.zhihu.com/p/20832611
 https://blog.csdn.net/u010841296/article/details/84204701
 
@@ -3560,6 +3560,20 @@ https://www.zhihu.com/people/kayaklee/posts
 
 http://oserror.com/backend/transaction-isolation-first/
 http://oserror.com/backend/transaction-isolation-second/
+
+
+https://www.cnblogs.com/ivictor/p/9807284.html   各版本特性对比
+https://www.cnblogs.com/ivictor/p/5324305.html   快速部署
+https://www.cnblogs.com/ivictor/p/5305922.html   帮助
+https://www.cnblogs.com/ivictor/p/5584398.html   cluster
+https://www.cnblogs.com/ivictor/category/960851.html tools
+https://www.cnblogs.com/ivictor/category/886997.html percona toolkit pt
+
+https://blog.csdn.net/robinson_0612/article/details/41315139 percona toolkit pt简介
+
+https://blog.csdn.net/xuheng8600/category_7557470.html
+https://blog.csdn.net/xuheng8600/article/details/79916385
+
 
 事务的特性
     原子性 
@@ -3586,15 +3600,21 @@ http://oserror.com/backend/transaction-isolation-second/
 解决并发问题的工具
     锁
         悲观乐观 是一种上锁的思想
-            乐观(Optimistic Lock) 一开始不加锁    不能避免脏读
+            乐观(Optimistic Lock) 一开始不加锁    不能避免脏读   适用于读多写少
                 时间戳Basic Time Ordering，把Basic Time Ordering达到的隔离级别称为Snapshot级别。
                     事务T1开始时，先申请一个时间戳，记做Start-Timestamp
                     事务T1的读不会阻塞，因为，它会读其Start-Timestamp之前的版本，其他事务在Start-Timestamp之后的修改，对该事务是不可见的
                     事务T1本身的修改，包括更新，插入和删除，都会保存在事务的上下文中，方便事务本身重复读取修改过的数据
                     当事务T1要提交时，它会获取一个Commit-Timestamp，此Commit-Timestamp要保证比现有的所有其他事务的Start-Timestmap和Commit-Timestmap要大，
                         如果存在其他事务Commit-Timestamp在事务T1的[Start-Timestamp, Commit-Timestamp]之内，且该事务修改了事务T1修改的数据，那么，事务T1会被终止，否则，事务提交
-                MVCC
-            悲观(Pessimistic Lock) 一开始就加锁 传统的加锁控制
+                MVCC  最大特点:  读不加锁，读写不冲突
+                    快照读(snapshot read) 读取的是可见版本(有可能是历史版本)，不用加锁
+                        select
+                    当前读(current read)  读取的是记录的最新版本，并且，当前读返回的记录，都会加上锁，保证其他事务不会再并发修改这条记录。
+                        select in share mode;
+                        select for update;
+                        insert/delete/update;  #先找到记录，然后在记录上加锁
+            悲观(Pessimistic Lock) 一开始就加锁 传统的加锁控制  适用于读少写多  基于锁的并发控制Lock-Based Concurrent Control(LBCC)  封锁协议(Locking protocol)
                 锁的兼容性 lock_mode
                     /* Basic lock modes */
                     enum lock_mode {
@@ -3605,10 +3625,11 @@ http://oserror.com/backend/transaction-isolation-second/
                         LOCK_AUTO_INC, /* locks the auto-inc counter of a table in an exclusive mode*/
                     }
                     
-                    读锁写锁
+                    行级读写锁
                         为提高读的并发性
                         (这里的读是当前读，而不是快照读，快照读是无需加锁的，记录上无论有没有锁，都可以快照读)
 
+                    表级读写锁
                     表级意向共享锁(IS) 表级意向排他锁(IX)
                         只会应用在表锁上，方便表锁与行锁之间的冲突检测。
                     表级自增锁(AI一般见不到，只有在 innodb_autoinc_lock_mode = 0 或者 Bulk inserts 时才可能有）
@@ -3628,25 +3649,28 @@ http://oserror.com/backend/transaction-isolation-second/
                 锁的范围粒度 lock_type   
                     行锁  都是加在索引上的，最终会落在聚簇索引，加锁的过程是一条一条加的  根据锁住的对象
                         #define LOCK_ROW 32
-                        普通锁：记录锁(SX)
+                        普通锁：读写记录锁(S X)
                             #define LOCK_REC_NOT_GAP 1024
                         谓词锁: 避免幻读
-                            间隙所(GapLock) (SX)
+                            间隙锁(GapLock) (S X)
                                 #define LOCK_GAP 512
                                 记录锁只能对已经存在的记录并发控制(update/delete),不能对要插入的记录控制(insert),所以需要间隙锁(GapLock)
                                 GapLock不锁住任何记录,锁住的是不占任何实体的左开右开区间(previousKey,thisKey)，或加在第一条索引之前，或最后一条索引之后。
                                 间隙锁和间隙锁之间是互不冲突的，间隙锁唯一的作用就是为了防止其他事务的插入，所以加间隙 S 锁和加间隙 X 锁没有任何区别。
                                 一事务为了防止插入，获取了某条记录的间隙锁；
                                 另一事务，为了插入，需要获取插入意向锁(insert intension lock),如果需要插入的间隙有间隙锁，则获取插入意向锁会失败必须进行锁等待，从而实现了阻塞插入.
-                            插入意向锁(insert intension lock)  插入记录时使用，是LOCK_GAP的特例， 有时可以简称II GAP
-                                #define LOCK_INSERT_INTENSION 2048
-                                同一gap不同的tx中可以同时插入互不冲突的不同索引的记录
-                            后码锁Next-key Lock = GapLock+RecordLock (SX)
+                            后码锁Next-key Lock = GapLock+RecordLock (S X)
                                 #define LOCK_ORDINARY 0
                                 更新非唯一索引对应的记录会加上这个锁
-                                假如表主键为10,11,20, 则（-∞,10] (10,11] (11,20]是nextkeyLock (20,+∞)是gapLock
+                                假如表主键为10,11,20, 则（-∞,10] (10,11] (11,20]是nextkeyLock (20,+∞)是gapLock   （Infimum-∞ Supremum+∞） 
+                             插入意向锁(insert intension lock)  插入记录时使用，是LOCK_GAP的特例， 有时可以简称II GAP
+                                #define LOCK_INSERT_INTENSION 2048
+                                同一gap不同的tx中可以同时插入互不冲突的不同索引的记录
                     表锁(实际实现为意向锁intension lock)
                         #define LOCK_TABLE 16
+                        读写锁(S X)
+                        读写意向锁(IS IX)
+                        自增锁(AI)
                     
                 锁的持续时间
                     临时锁(short duration):  没有持续到事务结束
@@ -3655,6 +3679,7 @@ http://oserror.com/backend/transaction-isolation-second/
 
                 锁的2阶段
                     two-phase read(write)是当有一个或多个read(write) lock被释放后，不能再加新的read(write) lock。如果一个事务在释放一个或多个锁后，不再加其他的锁，那么称该事务是two-phase的
+                    一句话： 在一个事务中，加锁阶段和解锁阶段是互不交叉互不重叠的。
                     Expanding phase：加锁阶段，此阶段只加锁，不释放锁
                     Shrinking phase：解锁阶段，此阶段只解锁，不加锁
 
@@ -3744,9 +3769,10 @@ II GAP       Y                            Y
 锁
     以前：  
         show full processlist;  #status： lock
-        show engine innodb status;
-            #set global innodb_status_output = on;
-            #set global innodb_status_output_locks = on;
+        show engine innodb status; #只能拿到最近一次死锁日志
+            #set global innodb_status_output = on;          #开启标准监控
+            #set global innodb_status_output_locks = on;    #开启锁监控
+            #set global innodb_print_all_deadlocks = on;    #打印所有死锁到err日志
             #backgroud thread, semaphores, transaction(including locks)
             #file io, insert buffer and adaptive hash index
             #log, buffer pool and memory, row operation and so on
@@ -3774,24 +3800,36 @@ II GAP       Y                            Y
     乐观的无锁的并发控制，如时间戳、MVCC,主要是MVCC
 
 mysql
-    快照读SnapshotRead 也是非阻塞读NonblockingRead  RR级别下为一致性非阻塞读ConsistenctNonblockingRead
-        select                      不加锁
-    当前读CurrentRead  也是阻塞读blockingReader 或加锁读LockingRead
-        select  Lock in share mode:  加S锁
-        select  for update:          加X锁
-        insert/delete/updaet:        加X锁
-
-
-加锁表现
     row
-        select lock in share mode
-        select for update
-        insert/delete/update
+        读
+            快照读SnapshotRead 也是非阻塞读NonblockingRead  RR级别下为一致性非阻塞读ConsistenctNonblockingRead
+                select                      不加锁
+            当前读CurrentRead  也是阻塞读blockingReader 或加锁读LockingRead
+                select  Lock in share mode:  加S锁
+                select  for update:          加X锁
+        写
+            dml(insert/delete/updaet):       当前读,加X锁
     表
-        ddl
-        dml(alter table create table)
+        ddl(alter table create table)
         lock tables $t1 read/write, $t2 read/write    unlock tables;
 
+
+聚簇索引
+    单条
+        命中
+        未命中
+    范围查询
+二级索引
+    单条
+        唯一索引
+            命中
+            未命中
+        非唯一索引
+            命中
+            未命中
+    范围查询
+修改索引
+无索引
 
 
 
@@ -3827,12 +3865,16 @@ B-Tree
 B+Tree
     特点：非叶子节点(内节点)不再保存recode,而只保存key，并且所有的叶子结点使用链表连接。
           这样可以方便范围查询，只要找到起始位置，然后按链表查找，一直到结束位置。
-          MyISAM:  叶子节点只保存指向recode的指针,所以需要2次读取。
+          MyISAM:  
+                   叶子节点只保存指向recode的指针,所以需要2次读取。（第二次读取也称回表)
                    将独立的数据文件(.MYD)以堆表的形式存储，每条数据都有一个唯一的地址。所以也称堆组织表(HeapOrganizedTable HOT)
                    对PrimaryKey与SecondKey这2中索引存储没有区别。
                    表中的record没有特定的顺序，所有的新行被添加到表尾
                    所以没有clusterIndex。
-          InnoDB:  叶子节点保存真实的record,也称索引组织表(IndexOrganizedTable IOT)
+
+          InnoDB:  
+                    PrimaryKey:  叶子节点保存真实的record,也称索引组织表(IndexOrganizedTable IOT)
+                    SecondKey:   辅助索引  类似于myisam， 叶子节点保存的是主键索引的位置
                     对于插入操作，根据索引找到对应的索引页，然后通过挪动已有的记录来为新数据腾出空间，最后插入数据。
                     如果数据页已满，则调整索引指针（如果还有非ClusterIndex,则还需要更新这些索引指向新的数据页)
 
