@@ -3571,9 +3571,13 @@ https://www.cnblogs.com/ivictor/category/886997.html percona toolkit pt
 
 https://blog.csdn.net/robinson_0612/article/details/41315139 percona toolkit pt简介
 
+
 https://blog.csdn.net/xuheng8600/category_7557470.html
 https://blog.csdn.net/xuheng8600/article/details/79916385
 
+
+
+https://blog.csdn.net/majipeng19950610/article/details/81236248   
 
 事务的特性
     原子性 
@@ -3777,6 +3781,7 @@ II GAP       Y                            Y
             #file io, insert buffer and adaptive hash index
             #log, buffer pool and memory, row operation and so on
     现在：
+        set global innodb_lock_wait_timeout 30;  #默认值是50
         select * from information_schema.innodb_locks;  #只有出现锁竞争时才有记录
         select * from information_schema.innodb_lock_waits;
         select * from information_schema.innodb_trx;
@@ -3889,3 +3894,39 @@ ClusterIndex：聚集索引  索引与整行记录数据聚集在一块。
              表数据存储与索引顺序无关，叶子节点只包含数据行的逻辑指针或主键。 
 covering index： 覆盖索引  指通过查询索引就能获取结果而不必通过查询数据表而获取。
               比如index_k1_k2(col1,col2), 执行select k2 from where col=k1;
+
+innodb
+    record
+        6字节的类似于next域将连续记录连在一起
+        6字节的最后一个插入、删除、更新事务的txid  
+        7字节的rollback指针指向undo记录
+    index
+        clustered index
+            唯一且升序插入，所以二分查找
+            候选
+                pk
+                第一个仅有非null列的unique索引
+                自动产生一个6字节的recordID
+        secondKey
+            不唯一，所以随机磁盘IO读取
+
+
+        auto-rehash 自适用hash
+            如果使用hash查找的方式优于B+时，innodb会使用auto-rehash方式，毕竟hash查找的复杂度为O(1)
+            所以有mysqld --no-auto-rehash项
+
+
+shard  碎片，分片， 不是share分享
+
+纵向扩展
+横向扩展
+    MasterSlave
+    Clustering(shardEverything|shardDisk架构)  最著名的是Oracle的RAC
+        适用于读密集型的应用，如数据仓库和BI
+    Sharding(shardingNothing架构)
+        分区Partition是库内， sharding是库外，也叫分库分表
+
+mongodb的三大优势
+    灵活性 json
+    高可用 replica set
+    可扩展 sharded cluster
