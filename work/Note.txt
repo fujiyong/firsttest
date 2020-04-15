@@ -3939,4 +3939,4 @@ shard  碎片，分片， 不是share分享
 mongodb的三大优势
     灵活性 json
     高可用 replica set
-    可扩展 sharded cluster  
+    可扩展 sharded cluster     
