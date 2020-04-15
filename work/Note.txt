@@ -2793,6 +2793,7 @@ mysql>source /root/a.sql                       #为了显示进度， 可以在�
 mysql>\.      /root/a.sql
 mysql>alter table tbl_name disable keys;  \    #使用alter可以跳过flush tables;
       set foreigin_key_check = 0;
+      SET UNIQUE_CHECKS=0;
       set autocommit = 0;
 	  LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' \
 	  	   OPTIONALLY ENCLOSED BY '"' ESCAPED BY '\\' LINES TERMINATED BY '\r\n'; \
@@ -3575,6 +3576,9 @@ https://blog.csdn.net/robinson_0612/article/details/41315139 percona toolkit pt�
 https://blog.csdn.net/xuheng8600/category_7557470.html
 https://blog.csdn.net/xuheng8600/article/details/79916385
 
+https://imysql.com/
+https://www.zhihu.com/people/yejr
+
 
 
 https://blog.csdn.net/majipeng19950610/article/details/81236248   
@@ -3712,6 +3716,8 @@ https://blog.csdn.net/majipeng19950610/article/details/81236248
             表现形式:  W1(X)…R2(X)…A1…R2(X)
             分析：如果需要禁止P1，即禁止读取到其他事务修改的中间状态的数据，在禁止P0的条件下，则需要，对读加锁，short duration的就能够满足条件，此时，隔离级别满足Read Committed
             设置隔离级别：读已提交RC(read commit)
+            			 select lock in share mod; 
+            			 select for update;
         P4
             表现形式： R1(X)…R2(X)…W2(X)…C2…W1(X)…C1
             分析：如果需要禁止P4，即禁止事务读取并且修改某个数据项后，需要禁止其他事务再次修改，但如果只是读取的话，不影响，这里，需要一种特殊的锁，称为Cursor Lock，会对事务当前处理的行进行加锁，
@@ -3721,10 +3727,14 @@ https://blog.csdn.net/majipeng19950610/article/details/81236248
             表现形式： R1(X)…W2(X)…C2…R1(X)
             分析： 如果需要禁止P2，即要禁止到读到某个数据项后，该数据还可能被其他事务修改，因此，需要对读加锁，且一直加锁到事务结束，即long duration，此时，隔离级别满足Repeatable Read
             设置隔离级别：可重复读RR(read repeated) [Snapshot]
+                         select lock in share mod; 
+            			 select for update;
+            			 next-key lock;
         P3幻读 
             表现形式： R1(P)…W2(P)…C2…R1(P)            
             分析： 如果需要禁止P3，即要禁止读到某个谓词条件后，满足该谓词条件的数据还被其他事务修改，因此，需要对谓词条件加读锁，且是long duration的，此时，隔离级别满足SERIALIZABLE
             设置隔离级别: 串行化  
+            	所有的select 转化成 select lock in share mod;
                 指的是并发调度执行的结果等于这些事务某个串行执行的结果。
                 例如，有三个并发执行的事务T1，T2和T3，如果其执行结果和其某个串行执行((T1,T2,T3),(T1,T3,T2),(T2,T1,T3),(T2,T3,T1),(T3,T1,T2),(T3,T2,T1))的结果相同
 
@@ -3879,7 +3889,7 @@ B+Tree
 
           InnoDB:  
                     PrimaryKey:  叶子节点保存真实的record,也称索引组织表(IndexOrganizedTable IOT)
-                    SecondKey:   辅助索引  类似于myisam， 叶子节点保存的是主键索引的位置
+                    SecondKey:   辅助索引  类似于myisam， 叶子节点保存的是主键索引值
                     对于插入操作，根据索引找到对应的索引页，然后通过挪动已有的记录来为新数据腾出空间，最后插入数据。
                     如果数据页已满，则调整索引指针（如果还有非ClusterIndex,则还需要更新这些索引指向新的数据页)
 
