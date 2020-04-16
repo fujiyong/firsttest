@@ -2968,6 +2968,8 @@ mysql-log-rotate
 
 用户
     select user();
+版本
+	select version();
 存储引擎
     show engines;
     show engine $engineName {status | mutex}
@@ -3989,3 +3991,9 @@ mongodb的三大优势
 
 procedure/function
     保存在mysql.proc表中
+
+
+
+
+https://www.zhihu.com/question/56172498?sort=created
+http://kafka.apachecn.org/uses.html
