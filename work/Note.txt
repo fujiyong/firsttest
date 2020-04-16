@@ -2954,11 +2954,55 @@ log_bin_index[=/dataPath/bin.$hostName.index]  #包含所有binlog文件名。
 
 
 information_schema  数据库表 列 函数 存储过程 视图 触发器的定义
+    SELECT * FROM `information_schema`.`COLUMNS` WHERE TABLE_SCHEMA='yy' AND TABLE_NAME='t1' ORDER BY ORDINAL_POSITION;
+    SHOW INDEXES FROM `t1` FROM `yy`;
+    SELECT * FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE   CONSTRAINT_SCHEMA='yy'   AND TABLE_NAME='t1'   AND REFERENCED_TABLE_NAME IS NOT NULL;
+    SELECT * FROM information_schema.KEY_COLUMN_USAGE WHERE   CONSTRAINT_SCHEMA='yy'   AND TABLE_NAME='t1'   AND REFERENCED_TABLE_NAME IS NOT NULL;
 mysql               用户管理 权限
+    user
+    proc
 performance_schema  inspect the internal execution of the server at runtime 查看服务器运行状况
 sys                 提供一系列对象更好地查看performance schema
 
 mysql-log-rotate 
+
+用户
+    select user();
+存储引擎
+    show engines;
+    show engine $engineName {status | mutex}
+数据库
+    select database();
+
+    show databases;
+
+    show create database $dbName;
+
+表
+    select * from information_schema.tables;
+    show tables [from $dbName] [like ''];
+
+    show create table $tableName;
+    show table status [from $dbName] [like ''];
+存储过程/函数
+    select * from information_schema.routines;
+    select name from mysql.proc where db=$dbName and type='procedure|function';
+    show procedure status [from $dbName] [like $proName];
+    show function  status [from $dbName] [like $funcName]; 
+
+    show create procedure $proName;
+    show create function $funcName;
+触发器
+    select * from information_schema.triggers;
+    show triggers [from $dbName] [like ''];
+
+    show create trigger $trigName;
+视图
+    select * from information_schema.views;
+    
+    show create view $viewName;
+    
+
 
 create select
 insert select
@@ -3940,3 +3984,8 @@ mongodb的三大优势
     灵活性 json
     高可用 replica set
     可扩展 sharded cluster     
+
+
+
+procedure/function
+    保存在mysql.proc表中
