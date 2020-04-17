@@ -2642,6 +2642,8 @@ time_zone=system    #使用linux操作系统的时区   SELECT @@global.time_zon
 任何时候出现错误都可以删掉数据目录的所有文件，重新再来  rm -rf /var/lib/mysql/* && chown -R mysql:mysql /var/lib/mysql
 mysqld --verbose --help 可以查看加载配置文件的顺序及默认值 mysqld --print-defaults 最后提示查看运行的mysqld的变量可以使用mysqladmin variables 
 mysql            --help 可以查看加载配置文件的顺序及默认值 mysql --print-defaults
+mysqld和mysql使用同一个配置文件my.cnf
+有可能你在mysql>show variables like 'performance_schema_max_socket_classes'； 但mysqld --verbose --help | grep -A performance-schema-max-socket-classes, 下划线变成中划线
 mysqladmin processlist status
 
 1. 初始化生成密码
@@ -2934,30 +2936,38 @@ mysql> SELECT @min_price:=MIN(price),@max_price:=MAX(price) FROM shop;
 mysql> SELECT * FROM shop WHERE price=@min_price OR price=@max_price;
 
 
-
-
+locate mysqld.cnf
+locate mysql.cnf 
+locate my.cnf
 
 log
 mysql>flush logs;
 mysqladmin flush-logs;
 mysqladmin refresh;
 错误日志
-log-error[=hostname.err]
+log-error[=$hostname.err]  #show variables like '%log_error%';
+log_error_verbosity=3;     #mysqld --verbose --help | grep -A 5 log-error
 通用日志
-general_log=ON
-general_log_file=[hostname.log] #mysqld -l 
-慢查日志  mysqldumpslow
-log-slow-queries[=hostname-slow.log]
-long_query_time=10
-log_queries_not_using_indexes=1   使用mysqld --log-short-format避免记录不适用index的query
-log_slow_admin_statements=0       默认alter optimize analyze table不记录
+general_log=ON                   #show VARIABLES like '%general_log%';
+general_log_file=[$hostname.log] #mysqld --verbose --help | grep -A 5 general_log
+慢查日志  mysqldumpslow -s al -n 10 a-slow.log
+slow_query_log=ON                #show VARIABLES like '%slow%';
+log-output[=FILE|Table]          #若为table则输出到Mysql.slow_log csv格式表中  
+log-slow-queries[=$hostname-slow.log]  #
+long_query_time=10               #测试mysql>sleep(15); select * from mysql.slow_log
+log_queries_not_using_indexes=1   #使用mysqld --log-short-format避免记录不适用index的query
+log_slow_admin_statements=0       #默认alter optimize analyze table不记录, 因为这样的语句很耗时
+log_slow_slave_statements=0
 bin日志  mysqlbinlog
-log_bin[=/dataPath/bin.$hostName]              #文件名后缀会被忽略
-max_binlog_size[=]                             #但也必须确保一个tx写入同一个文件
+log_bin=ON                        #show VARIABLES like '%bin%'; mysqld --verbose --help | grep -A 5 log-bin
+log_bin_basename[=/dataPath/bin.$hostName]     #文件名后缀会被忽略
 log_bin_index[=/dataPath/bin.$hostName.index]  #包含所有binlog文件名。 
                                                #mysql>reset master;      #删除所有二进制日志
                                                #mysql>purge master logs TO $logName ;        #只删除部分二进制日志
                                                #mysql>purge master los before ''2003-04-02 22:46:26';
+max_binlog_size[=100M]                         #但也必须确保一个tx写入同一个文件
+expire_logs_days=10                            #
+binlog_format=ROW
 
 
 
@@ -3495,6 +3505,7 @@ git fetch --unshallow
 git pull --all
 
 https://www.avtb7788.com/56164/%E7%A4%BE%E4%BA%A4%E5%B9%B3%E5%8F%B0%E9%9D%9E%E5%B8%B8%E7%81%AB%E7%9A%84%E7%BD%91%E7%BA%A2%E9%9B%AA%E4%B9%B3%E6%AD%A3%E5%A6%B9%E7%B3%BB%E5%88%97%E6%9E%81%E5%93%81%E8%B6%85%E7%BA%A7%E5%B7%A8%E4%B9%B3%E8%9B%AE%E8%85%B0%E7%BF%98%E8%87%80%E7%99%BD%E8%99%8E%E5%AB%A9%E7%A9%B4%E5%8F%AB%E5%A3%B0%E5%8F%88%E7%94%9C%E4%B9%B3%E4%BA%A4%E6%89%93%E7%82%AE%E5%AE%85%E7%94%B7%E6%89%93%E9%A3%9E%E6%9C%BA%E7%A5%9E%E5%99%A8/
+https://www.avtb2020.com/222445/%E9%9C%B2%E8%84%B8%E5%A4%A7%E5%A5%B6%E5%B0%91%E5%A6%87%E5%8F%A3%E6%9D%A1%E8%B6%85%E7%BA%A7%E5%8E%89%E5%AE%B3-%E6%AF%92%E9%BE%99-%E4%B9%B3%E4%BA%A4-%E5%8F%A3%E4%BA%A4-%E5%A5%B3%E4%B8%8A%E5%A4%B9%E6%A3%92%E7%8B%82%E6%8F%92-%E6%93%8D%E7%9A%84%E5%91%BB%E5%90%9F%E4%B8%8D%E6%96%AD/
 
 
 
@@ -4033,6 +4044,13 @@ http://kafka.apachecn.org/uses.html
 
 
 mysql sqlserver oracle(windows)都是单进程多线程 oracle(linux)是多进程
+
+/var/run/mysqld   
+	mysqld.pid     #show variables like '%pid%';
+	mysqld.sock    #show variables like '%sock%';
+	mysqld.sock.lock
+/var/lib/mysql/data/  #show variables like '%datadir%';
+
 
 innodb
     insert buffer 插入缓冲
