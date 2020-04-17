@@ -2354,6 +2354,11 @@ http://www.deituicms.com/mysql8cn/cn/web.html                             mysql8
 
 
 
+http://mysql.taobao.org/monthly/2016/03/07/  
+https://github.com/percona/percona-xtrabackup    备份
+https://github.com/percona/percona-toolkit       工具
+
+
 删除mysql
 	官方方法
 		apt remove mysql-server
@@ -2449,7 +2454,7 @@ create table t (ts timestamp on update current_timestamp)  #默认值为0并自�
 
 			REAL默认为double的同义词，除非设定了选项REAL_AS_FLOAT
 			FLOAT(p) [UNSIGNED] [ZEROFILL]  若精度p属于[0,24]则表示单精度;若精度p属于[25,53]则表示双精度浮点数
-		定点数
+		定点数  以字符串形式存储
 			DECIMAL[(M[,D])] [UNSIGNED] [ZEROFILL] #M的最大值65 D的最大值为30 M的默认值为0 D的默认值为10
 			DEC[(M[,D])]     [UNSIGNED] [ZEROFILL]
 			NUMERIC[(M[,D])] [UNSIGNED] [ZEROFILL]
@@ -2637,6 +2642,7 @@ time_zone=system    #使用linux操作系统的时区   SELECT @@global.time_zon
 任何时候出现错误都可以删掉数据目录的所有文件，重新再来  rm -rf /var/lib/mysql/* && chown -R mysql:mysql /var/lib/mysql
 mysqld --verbose --help 可以查看加载配置文件的顺序及默认值 mysqld --print-defaults 最后提示查看运行的mysqld的变量可以使用mysqladmin variables 
 mysql            --help 可以查看加载配置文件的顺序及默认值 mysql --print-defaults
+mysqladmin processlist status
 
 1. 初始化生成密码
 方式一 官方推荐方式
@@ -2649,7 +2655,10 @@ mysql_install_db --user=mysql    #会在~/.mysql_secret中存放密码   man mys
 
 
 2. 启动
-mysqld_safe --user=mysql &
+mysqld_safe --user=mysql --defaults-file="my.ini" --init-file="init.txt" --log-warnings=2 &
+    --init-file #里面包含可以在mysql客户端执行的命令 如SET PASSWORD FOR 'root'@'localhost' = PASSWORD('MyNewPassword');
+    --log-warnings #更多日志
+
 
 3.使用初始密码登录 修改密码并可远程登录， 实际就是设置mysql.user表  mysql.host表 mysql.db表
 mysql -uroot -p   #host默认为localhost user默认为登录linux的用户
@@ -3992,6 +4001,19 @@ mongodb的三大优势
 procedure/function
     保存在mysql.proc表中
 
+
+约束
+    主键  外键  唯一键
+
+count(*)        #计算行数
+count($colName) #计算非null值数目
+
+mysql_options(..., MYSQL_OPT_WRITE_TIMEOUT,...)
+mysql_options(..., MYSQL_OPT_READ_TIMEOUT,...)
+int value = 1;
+mysql_options(&mysql, MYSQL_OPT_RECONNECT, (char *)&value);  #show variables like '%timeout%'; wait_timeout和interactive_timeout默认值是28800也就是8小时，最大值只允许2147483（24天左右）
+
+where 语句中不能使用列别名，因为在运行where的时候还没有确定列别名，只有到了返回group by  having时才可以使用别名过滤
 
 
 
