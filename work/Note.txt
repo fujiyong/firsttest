@@ -3969,7 +3969,7 @@ innodb
         clustered index
             唯一且升序插入，所以二分查找
             候选
-                pk
+                primaryKey
                 第一个仅有非null列的unique索引
                 自动产生一个6字节的recordID
         secondKey
@@ -3981,7 +3981,17 @@ innodb
             所以有mysqld --no-auto-rehash项
 
 
-shard  碎片，分片， 不是share分享
+数据库架构
+    share everthing  一般针对单个主机，完全共享CPU MEM IO 并行处理能力最差，
+        典型代表是sql server
+    share disk       各个处理器有自己的CPU和MEM，共享disk  由于是数据共享，可以通过增加节点来提高并行处理能力 扩展较好
+        类似于SMP(对称多处理) 但当存储器接口达到饱和时，增加节点并不能提高性能
+        典型代表是oracle rac
+    share nothing    各个处理器有自己的CPU MEM disk，不存在共享资源
+        类似于MPP(大规模并行处理) 各个单元通过协议通讯，并行处理和扩展能力良好。
+        各个节点相互独立，各自处理自己的数据，处理后的结果向上汇报并在节点间流转
+        典型代表是DB2 DPF和hadoop 
+        亦是我们常说的sharding  碎片，分片， 不是share分享
 
 纵向扩展
 横向扩展
@@ -4019,3 +4029,38 @@ where 语句中不能使用列别名，因为在运行where的时候还没有确
 
 https://www.zhihu.com/question/56172498?sort=created
 http://kafka.apachecn.org/uses.html
+
+
+
+mysql sqlserver oracle(windows)都是单进程多线程 oracle(linux)是多进程
+
+innodb
+    insert buffer 插入缓冲
+    double write  双写
+    adaptive hash index 自适应hash索引
+    read ahead    预读
+    
+    特性
+        row lock
+        tx
+        外键
+        类似于oracle的非锁定读
+
+    线程
+        select thread_id, name, processlist_id from performance_schema.threads;
+    内存
+        innodb_buffer_pool_size    #show engine innodb status;的BUFFER POOL AND MEMORY查看使用情况
+                                   # Buffer pool size: 已分配的buf大小， 单位为page = 16K
+                                   # Free buffers    : 未使用的buf大小
+                                   # modified db pages: 脏页
+            data dict           数据字典
+            datapage            数据页 即表的行记录数据
+            indexpage           索引页 即表的index
+            adaptive hash idnex 自适应hash索引
+            lock info           锁信息
+            insert buffer       插入缓冲  提高性能，多次写入合并为一次写入 合并insertbuffer中的辅助索引到buffer_pool中
+            double write        双写      提高安全性                     将page写合并为1M写
+                show global status like 'innodb_dblwr%';
+                    Innodb_dblwr_pages_written/Innodb_dblwr_writes=1M/16K=64 如果此值远小于64，则写无压力
+        innodb_log_buffer_size(redo log buffer)      
+
