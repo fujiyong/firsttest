@@ -2700,6 +2700,14 @@ read_rnd_bufer_size 对表按任意顺序(如排序顺序)分配的随机读缓�
 每个连接 stack(默认64K) net_buffer_length(连接缓冲区) net_buffer_length(结果缓冲区) 
         连接缓存区和结果缓存区可以根据需要动态扩充到max_allowed_packet
 
+
+service mysql status;
+service mysql restart;
+
+systemctl list-unit-files;
+systemctl status mysql;
+systemctl restart mysql;
+
       
 >help;   #最后提示
 >status; #查看server db client connection字符集  slow-query数
@@ -2944,30 +2952,57 @@ log
 mysql>flush logs;
 mysqladmin flush-logs;
 mysqladmin refresh;
+验证配置文件的有效性
+    mysqld --verbose --help
 错误日志
-log-error[=$hostname.err]  #show variables like '%log_error%';
-log_error_verbosity=3;     #mysqld --verbose --help | grep -A 5 log-error
+    log-error[=$hostname.err]  #show variables like '%log_error%';
+    log_error_verbosity=3;     #mysqld --verbose --help | grep -A 5 log-error
 通用日志
-general_log=ON                   #show VARIABLES like '%general_log%';
-general_log_file=[$hostname.log] #mysqld --verbose --help | grep -A 5 general_log
-慢查日志  mysqldumpslow -s al -n 10 a-slow.log
-slow_query_log=ON                #show VARIABLES like '%slow%';
-log-output[=FILE|Table]          #若为table则输出到Mysql.slow_log csv格式表中  
-log-slow-queries[=$hostname-slow.log]  #
-long_query_time=10               #测试mysql>sleep(15); select * from mysql.slow_log
-log_queries_not_using_indexes=1   #使用mysqld --log-short-format避免记录不适用index的query
-log_slow_admin_statements=0       #默认alter optimize analyze table不记录, 因为这样的语句很耗时
-log_slow_slave_statements=0
-bin日志  mysqlbinlog
-log_bin=ON                        #show VARIABLES like '%bin%'; mysqld --verbose --help | grep -A 5 log-bin
-log_bin_basename[=/dataPath/bin.$hostName]     #文件名后缀会被忽略
-log_bin_index[=/dataPath/bin.$hostName.index]  #包含所有binlog文件名。 
-                                               #mysql>reset master;      #删除所有二进制日志
-                                               #mysql>purge master logs TO $logName ;        #只删除部分二进制日志
-                                               #mysql>purge master los before ''2003-04-02 22:46:26';
-max_binlog_size[=100M]                         #但也必须确保一个tx写入同一个文件
-expire_logs_days=10                            #
-binlog_format=ROW
+    general_log=ON                   #show VARIABLES like '%general_log%';
+    general_log_file=[$hostname.log] #mysqld --verbose --help | grep -A 5 general_log
+慢查日志  mysqldumpslow -s al -n 10 mysql-slow.log
+    slow_query_log=ON                #show VARIABLES like '%slow%';
+    log-output[=FILE|Table]          #若为table则输出到Mysql.slow_log csv格式表中  
+    log-slow-queries[=$hostname-slow.log]  #
+    long_query_time=10               #测试mysql>sleep(15); select * from mysql.slow_log
+    log_queries_not_using_indexes=1   #使用mysqld --log-short-format避免记录不适用index的query
+    log_slow_admin_statements=0       #默认alter optimize analyze table不记录, 因为这样的语句很耗时
+    log_slow_slave_statements=0
+bin日志  mysqlbinlog  -v mysql-bin.000001  #若binlog格式为statment则可mysqlbinlog 若为row格式则可mysqlbinlog -v  -vv(字段数据类型)
+    server-id       = 1               #启动binlog必须设置该项  否则启动不了mysqld!!!!
+    log_bin=ON                        #show VARIABLES like '%bin%'; mysqld --verbose --help | grep -A 5 log-bin
+    log_bin_basename[=/dataPath/bin.$hostName]     #文件名后缀会被忽略
+    log_bin_index[=/dataPath/bin.$hostName.index]  #包含所有binlog文件名。 
+                                                   #mysql>reset master;      #删除所有二进制日志
+                                                   #mysql>purge master logs TO $logName ;        #只删除部分二进制日志
+                                                   #mysql>purge master los before ''2003-04-02 22:46:26';
+    max_binlog_size[=100M]                         #但也必须确保一个tx写入同一个文件
+    expire_logs_days=10                            #
+    binlog_format=ROW       #statement  5.1以前的只有这个 但now() rand()  uuid()
+                            #mixed
+                            #row        数据量的增加
+    binlog_cache_size=
+                            #show global status like binlog_cache_use        使用缓冲的次数
+                            #show global status like binlog_cache_disk_use   当内存不够使，使用disk当内存缓冲的次数
+    sync_binlog=1           #每写几次内存缓冲就写入日志 默认值为0 1为每写一次内存缓冲就同步到日志，不使用操作系统的缓冲
+    innodb_support_xa=1     #解决了innodb在崩溃时由于写入binlog但并没有commit的情况
+    log_slave_updates=1     #Master-slave-slave
+
+    show VARIABLES like 'innodb%log%'
+    innodb_log_buffer_size=16M
+    innodb_flush_log_at_trx_commit=[0|1|2]  #0每秒 1commit 2os
+    innodb_log_file_size=48M
+    innodb_log_files_in_group=2
+    innodb_log_group_home_dir=./
+
+              binlog     innodblog(redoLog)   http://blog.itpub.net/31452896/viewspace-2137379/
+    enginge   all        innodb
+    来源                  先将这个事物的lsn(log sequence number)写到innodb_log_buffer(redo log buffer)，
+                          再通过innodb_flush_log_at_trx_commit写入ib_logfile0 ib_logfile1这2个redo log（这步叫write-ahead logging) 
+                          最后将data通过读取innodb_buf_pool内存中的数据写入磁盘的物理数据页(这步叫write)
+    内容      一个tx      page的修改(spaceid pageNo OpCode Data)
+    时间      tx提交前    tx过程中不断写
+
 
 
 
@@ -4080,5 +4115,28 @@ innodb
             double write        双写      提高安全性                     将page写合并为1M写
                 show global status like 'innodb_dblwr%';
                     Innodb_dblwr_pages_written/Innodb_dblwr_writes=1M/16K=64 如果此值远小于64，则写无压力
-        innodb_log_buffer_size(redo log buffer)      
+        innodb_log_buffer_size(redo log buffer)    写入ib_logfile0 ib_logfile1这2个redo log
 
+    表
+        tablespace
+            segment 段
+                extend  区
+                    page(block) 页
+                        row(txid fields rollbackPointer)
+
+
+
+
+http://www.eimhe.com/forum.php?mod=viewthread&tid=146964&page=1&extra=#pid1135075
+MySQL内核：InnoDB存储引擎   https://www.cnblogs.com/broadview/p/3756983.html
+https://www.cnblogs.com/zengkefu/p/5600742.html  dba的博客
+https://blog.csdn.net/youqika/article/details/42557511  各高可用的优缺点
+https://www.jianshu.com/p/c04cd6a7e22e
+https://www.sohu.com/a/141509827_610509
+https://www.cnblogs.com/erisen/p/6068265.html 参数优化
+https://blog.51cto.com/853056088/2160995  复制从5.6-8.0
+https://www.kancloud.cn/thinkphp/mysql-parallel-applier/45909
+https://www.jb51.net/article/137123.htm
+
+
+https://blog.51cto.com/853056088/2426205
