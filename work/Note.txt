@@ -2811,7 +2811,7 @@ mysql < a.sql
 mysql>source /root/a.sql                       #为了显示进度， 可以在文件中插入 select 'progress1' AS ' ';
 mysql>\.      /root/a.sql
 mysql>alter table tbl_name disable keys;  \    #使用alter可以跳过flush tables;
-      set foreigin_key_check = 0;
+      set foreigin_key_check = 0;              #当往子表中导入数据时，默认会立即执行外键检查，而不是像oracle延时检查
       SET UNIQUE_CHECKS=0;
       set autocommit = 0;
 	  LOAD DATA LOCAL INFILE '/path/pet.txt' INTO TABLE pet FIELDS TERMINATED BY '\t' \
@@ -4008,9 +4008,18 @@ covering index： 覆盖索引  指通过查询索引就能获取结果而不必
 
 innodb
     record
-        6字节的类似于next域将连续记录连在一起
-        6字节的最后一个插入、删除、更新事务的txid  
-        7字节的rollback指针指向undo记录
+        2个隐藏列
+            6字节的最后一个插入、删除、更新事务的txid  
+            7字节的rollback指针指向undo记录undoPtr
+        1个rowid
+            若表未定义primaryKey,则自动产生一个6字节的rowID  //6字节的类似于next域将连续记录连在一起
+        flag
+            delete_flag
+            min_rec_flag
+            n_owned
+            heap_no
+            record_type
+            next_recorder
     index
         clustered index
             唯一且升序插入，所以二分查找
@@ -4120,11 +4129,51 @@ innodb
     表
         tablespace
             segment 段
-                extend  区
-                    page(block) 页
+                extend  区(64页=1M)  在启动innodb_file_per_table之后，创建的表默认大小为96K,可见表的初始大小在extend与page之间
+                    page(block) 页（16K）
                         row(txid fields rollbackPointer)
 
 
+外键
+    create table parent(id int not null, 
+                        primary key(id)) engine=innodb;
+    create table  child(id int not null, parent_id int, 
+                        index par_ind(parent_id),
+                        foreign key(parent_id) reference parent(id)) 
+                        [on update {restrict|cascade|set null|no action}]
+                        [on delete {restrict|cascade|set null|no action}]
+                        engine=innodb;
+    on parent update|delete, child should do
+        cascade: 父表update/delete,子表也update/delete
+        set null: 父表update/delete，子表该字段设置为null
+        no action:父表update/delete, 
+        restrict: 父表update/delete,抛出错误，不允许这样的操作发生。如果定义外键时没有指定on delete或on update,这就是默认值。
+view
+    可更新视图updatable view
+        create table t(id int);
+        CREATE VIEW v_t as select * from t where id < 20;
+            insert into v_t select 200; 即使不符合view的数据都可以通过view往t插入数据，但通过view查不到数据
+        CREATE VIEW v_t as select * from t where id < 20 with check option;
+        insert into v_t select 200; 插入不了数据
+    Oracle的物化视图或MSServer的索引视图
+        view不是基于基表baseTable的虚表，而是根据虚表实际存在的实表
+        预先计算并保存表连接或聚集等耗时较多的操作，这样在执行复杂查询时，就可以快速获取结果。
+        Oracle
+            创建的方式
+                build immediate  创建的时候就生成数据(默认方式)
+                build deferenced 根据需要再生成数据
+            查询重写query rewrite
+                当对物化视图的基表进行查询时，oracle会自动判断是否可以根据物化视图来获取结果。如果可以，则从物化视图获取。
+            刷新
+                当基表发生了dml操作后，物化视图以何种方式与基表同步。
+                刷新时机
+                    on demand: 在用户需要的时候
+                    on commit: 当对基表commit时
+                刷新方式
+                    fast: 采用增量刷新，只刷新自上次刷新以后的更改
+                    complete:采用全量刷新(清空表，再导入数据)
+                    force:oracle在刷新时会去判断采用fast或complete方式，优先选择fast。
+                    never: 不进行任何刷新
 
 
 http://www.eimhe.com/forum.php?mod=viewthread&tid=146964&page=1&extra=#pid1135075
@@ -4142,3 +4191,13 @@ https://www.jb51.net/article/137123.htm
 https://blog.51cto.com/853056088/2426205
 
 https://www.sohu.com/a/141509827_610509
+
+
+
+hexdump -C -v a.exe
+
+
+/etc/mysql/mysql.conf.d/
+/var/lib/mysql/
+/var/run/mysqld/{mysqld.pid,mysqld.sock,mysqld.sock.lock}
+/var/log/mysql/
