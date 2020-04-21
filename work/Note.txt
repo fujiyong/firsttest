@@ -4175,6 +4175,42 @@ view
                     force:oracle在刷新时会去判断采用fast或complete方式，优先选择fast。
                     never: 不进行任何刷新
 
+索引
+    可以只使用某一字段的前几个字节 col(n)  alter table t add index idx_b(b(100))
+    主键索引 需要重建表
+        添加/删除 先create tmp_t -> import data -> drop old table -> rename tmp_t old_table
+    辅助索引 不需要重建table
+        添加  先加S锁   （在加锁S期间，只能read)
+        删除  将辅助索引的空间标记为不可用 ，并在内部视图上删除该索引的定义即可
+
+
+
+isam  indexed sequential access method 索引顺序存取方法
+show index from t
+    collation    排序(ascending descending null)
+    cardinality  基数 势 
+        == 索引的唯一的行数   
+        如果该值除以表的总行数，越接近1，越接近unique index， 越有可能被使用
+        并非每次索引的更新都会引起该值的实时更新，否则代价太大， 因此不太准确 
+        强制更新该值,执行命令analyze table $tableName
+索引
+    选择性
+        高选择性：可取值的范围很大， 如unique index的字段
+        低选择性：可取值的范围很小， 如性别
+    只有在高选择性的列和小的返回结果行数(即总行数的20%)时，mysql才会选择该索引
+    强制使用索引
+        select 
+        into outfile 'a' 
+        from t 
+        force index($index_name) 
+        where 
+    查看是否使用除了index外的sort的步骤
+        mysql>show variables like 'sort_rows';
+        mysql>select * from t order by col1 limit 3;
+        mysql>show variables like 'sort_rows';
+        
+
+
 
 http://www.eimhe.com/forum.php?mod=viewthread&tid=146964&page=1&extra=#pid1135075
 MySQL内核：InnoDB存储引擎   https://www.cnblogs.com/broadview/p/3756983.html
