@@ -3743,8 +3743,28 @@ https://blog.csdn.net/majipeng19950610/article/details/81236248
                         只会应用在表锁上，方便表锁与行锁之间的冲突检测。
                     表级自增锁(AI一般见不到，只有在 innodb_autoinc_lock_mode = 0 或者 Bulk inserts 时才可能有）
                         是一种特殊的表锁
+                        
                         不遵循2段锁协议，也就是说并不是事务结束时释放，而是在insert执行时释放，这样提高并发性。
                         一旦分配就会自增1，如果回滚，自增值也不会减回去，所以自增值可能出现中断。
+                        innodb_autoinc_lock_mode
+                            ==0时  5.1.22版本之前 表锁实现 select max(auto_inc_col) from t for update;
+                            ==1时  默认值
+                                对于simple insert，即插入前就可以知道需要插入的行数的语句,
+                                    如insert,replace,不包括insert...on duplacte key update
+                                    使用mutex
+                                对于bulk insert,即插入前不可知会插入的行数，
+                                    如insert...select, replace...select, load data
+                                    使用传统的表锁auto-inc locking，
+                                    优点： 如果不考虑回滚，值的增长还是连续的；基于statementReplication可以很好工作。
+                                对于mixed-mode来说，有一部分是确定的有一部分是不确定的
+                                    如insert into t(c1,c2) values (1,'a'),(null,'b')
+                                      insert...on duplicate key update
+                            ==2时 完全使用mutex 性能最高
+                                优点 性能最高
+                                缺点
+                                    因为并发插入的存在，每次插入时，自增长的值可能不是连续的
+                                    基于statement-base replication会出现问题，当使用这个模式时，最好使用rowBaseReplication
+                                    这样才能保证最大的并发性和replication数据的同步
                     DDL(alter create等) 隐式提交，不能回滚
 
                     更新锁(U update lock)  SQL Server 支持， mysql不支持
@@ -3918,11 +3938,18 @@ II GAP       Y                            Y
 mysql
     row
         读
-            快照读SnapshotRead 也是非阻塞读NonblockingRead  RR级别下为一致性非阻塞读ConsistenctNonblockingRead
-                select                      不加锁
+            快照读SnapshotRead 也是非阻塞读NonblockingRead 或不加锁读
+                何为一致性，何为非一致性？ 一致(2次读取到的数据是一样的) 非一致(2次读取到的数据时不一样的)
+                RC级别下为非一致性非阻塞读
+                RR级别下为一致性非阻塞读ConsistenctNonblockingRead
+                select                      
+                    如果正在读取的行正在delete/update,这时读取操作不需要等待X锁的释放，
+                    而是去读取undo段的历史数据，也就是该行之前版本的数据
+                    因为没必要对历史段数据进行修改，所以没必要加锁。
             当前读CurrentRead  也是阻塞读blockingReader 或加锁读LockingRead
                 select  Lock in share mode:  加S锁
                 select  for update:          加X锁
+                必须将2者置于一个tx中，当事务提交了，锁就释放了
         写
             dml(insert/delete/updaet):       当前读,加X锁
     表
@@ -4209,7 +4236,22 @@ show index from t
         mysql>select * from t order by col1 limit 3;
         mysql>show variables like 'sort_rows';
         
-
+锁
+    innodb_lock_wait_timeout=50
+    innodb_rollback_on_timeout=OFF 超时不回滚
+performance_schema
+    global_status
+    global_variables
+    session_status
+    session_variables
+    status_by_account  //accounts
+    status_by_user     //users
+    status_by_host     //hosts
+    status_by_thread   //threads
+    user_variables_by_thread 
+    variables_by_thread 
+sys
+    
 
 
 http://www.eimhe.com/forum.php?mod=viewthread&tid=146964&page=1&extra=#pid1135075
