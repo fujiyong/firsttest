@@ -1226,6 +1226,9 @@ echo $?
 > ```
 > shellcheck $shell_name.sh
 > 
+> 当在调试模式-x时打印行号
+> echo "export PS4='+$LINENO:{$FUNCNAME[0]}'"  >> ~/.bash_profile
+> 
 > ubuntu6.0默认是dash 比bash精简了很多指令 执行速度更快 也就少了一些功能的支持
 > 解决source命令没找到的方法
 > 方法1  代码头部添加#!/bin/bash 执行的时候使用source a.sh 或/bin/bash a.sh 或 ./a.sh

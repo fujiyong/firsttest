@@ -3684,11 +3684,84 @@ https://www.zhihu.com/people/yejr
 
 https://blog.csdn.net/majipeng19950610/article/details/81236248   
 
-事务的特性
-    原子性 
-    一致性：  从一个一致性状态转向另外一个一致性状态
-    隔离性：  一个事务在提交数据前其他事务是不可见的
-    持久性：  事务一旦提交就是永久性的
+事务的特性ACID
+    原子性：  atomicity  
+    一致性：  consistency 从一个一致性状态转向另外一个一致性状态
+    隔离性：  isolation   一个事务在提交数据前其他事务是不可见的
+    持久性：  durability  事务一旦提交就是永久性的
+
+    隔离性是通过锁实现，其余都是通过redo/undo实现
+
+    Redo 
+        innodb_log_buffer_size  
+        show engine innodb status中log段
+            log sequence number 最新的lsn
+            log flushed up to   写入到innodb_log_buffer的最新lsn
+            last checkpoint at  写入到redo日志文件(iblog_file0 iblog_file1)的最新lsn
+
+        开始一事务时，产生一个LSN(LogSequenceNumber)日志序列号
+        事务执行时，会往InnodbLogBuffer中插入事务日志
+        事务提交前，如果事务的运行时长超过1秒，也会有InnodbLogBuffer中的日志刷新到磁盘
+        事务提交前一刻，会将InnodbLogBuffer中的日志刷新到磁盘(innodb_flush_log_at_trx_commit=1)
+        最后事务提交
+
+        这种先flush log，然后再flush data的方式成为预写日志方式WAL(write-adhead log)
+
+    undo
+        tableSpace的undo segment
+        insert <-> delete
+        delete <-> insert
+        update <-> update
+
+    控制语句
+        set transaction level RC|RU|RR|SE
+        begin|start transaction|set autocommit=0
+        savepoint $spid;  #release savepoint $spid;
+        rollback [to [savepoint] $spid];
+        commit [work]
+            当completion_type=0时(默认值)， commit work == commit; 表示没有任何操作。
+            当completion_type=1时， commit work == commit and chain; 表示马上开启一个相同隔离级别的事务
+            当completion_type=2时,  commit work == commit and release; 表示提交之后断开与服务器的连接
+
+    统计
+        com_commit com_rollback 只能统计显式，不能统计隐式如autocommit=1和ddl
+        handle_commit handle_rollback
+
+
+    分布式事务
+        innodb事务隔离级别必须设置在seriable
+        show variables like 'innodb_support_xa' #默认为on
+        2P提交方式
+            第一阶段Prepare,节点将自己的执行结果汇报给txManager
+            第二阶段commit/rollback，txManager通知节点是commit还是rollback
+        mysql是在体系架构支持xa，而不是具体的存储引擎层面支持，所以mysql内部不同存储引擎也会使用xa事务。
+            begin;
+            insert into engine_innodb_t select 1;
+            insert into engine_ndb_t2   select 2;
+            commit;
+
+
+存储过程
+    在oracle中，是一个事务
+    在mysql不是一个事务，只是一些sql的组合； 由于mysql存储过程必须有begin-end，所以开启事务只能begin|start tranaction.
+
+    DROP PROCEDURE IF EXISTS  test_sp1   
+    CREATE PROCEDURE test_sp1( )    
+        BEGIN    
+        DECLARE t_error INTEGER DEFAULT 0;    
+        DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET t_error=1;    
+        
+            START TRANSACTION;    
+                INSERT INTO test VALUES(NULL, 'test sql 001');       
+                INSERT INTO test VALUES('1', 'test sql 002');       
+        
+            IF t_error = 1 THEN    
+                ROLLBACK;    
+            ELSE    
+                COMMIT;    
+            END IF;    
+       select t_error;   //返回标识位的结果集；  
+    END  
 
 
 实际情景模拟
@@ -3770,6 +3843,13 @@ https://blog.csdn.net/majipeng19950610/article/details/81236248
                     更新锁(U update lock)  SQL Server 支持， mysql不支持
                         防止通常形式的死锁，两个拥有共享锁的事务要同时更新数据时，需要将共享锁升级为排他锁，
                         所以他们都需要X锁并且要等待对方释放s锁（x锁和其它事务的S锁不兼容），会发生死锁
+
+                    锁升级(Lock Escalation) 是指将当前锁的粒度降低，减少锁的开销，但降低并发性。如页级升级为表级。
+                        SQLServer表现为
+                            由一条单独的sql语句在一个对象上持有的锁数量超过阈值(默认为5000)。如果是不同对象的话，则不会发生锁升级。
+                            锁占有的内存资源超过了激活内存的40%，则也会发生锁升级。
+                        innodb/oracle
+                            不存在锁升级
 
                     ps:先加表级别意向锁，再加行级别行锁。 如获取意向锁失败，则不能再往下加行锁。
                        意向锁之间是完全兼容的。因为意向锁只代表想往下获取锁，但具体是哪些记录是不确定的，因此完全兼容。
@@ -3855,8 +3935,9 @@ https://blog.csdn.net/majipeng19950610/article/details/81236248
             表现形式： R1(P)…W2(P)…C2…R1(P)            
             分析： 如果需要禁止P3，即要禁止读到某个谓词条件后，满足该谓词条件的数据还被其他事务修改，因此，需要对谓词条件加读锁，且是long duration的，此时，隔离级别满足SERIALIZABLE
             设置隔离级别: 串行化  
-            	所有的select 转化成 select lock in share mod;
+            	所有的select 转化成 select lock in share mod,一致性的非锁定读不再支持;
                 指的是并发调度执行的结果等于这些事务某个串行执行的结果。
+                主要用于innodb的分布式事务。
                 例如，有三个并发执行的事务T1，T2和T3，如果其执行结果和其某个串行执行((T1,T2,T3),(T1,T3,T2),(T2,T1,T3),(T2,T3,T1),(T3,T1,T2),(T3,T2,T1))的结果相同
 
     工业界
@@ -4238,7 +4319,7 @@ show index from t
         
 锁
     innodb_lock_wait_timeout=50
-    innodb_rollback_on_timeout=OFF 超时不回滚
+    innodb_rollback_on_timeout=OFF 超时不回滚 innodb并不会回滚大部分的错误异常，但死锁除外
 performance_schema
     global_status
     global_variables
