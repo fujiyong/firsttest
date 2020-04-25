@@ -58,7 +58,7 @@ create table  child(id int not null, parent_id int,
                     engine=innodb;
                     
 on parent update|delete, child should do
-	cascade: 父表update/delete,子表也update/delete
+	cascade:  父表update/delete,子表也update/delete
     set null: 父表update/delete，子表该字段设置为null
     no action:父表update/delete, 
     restrict: 父表update/delete,抛出错误，不允许这样的操作发生。
@@ -373,8 +373,9 @@ mysql sqlserver oracle(windows)都是单进程多线程 oracle(linux)是多进�
 1. 初始化生成密码
 方式一 官方推荐方式
 mysqld --initialize --user=mysql #会初始化data目录并将password打印到控制台
-                                 #如果不加console， 会写入日志/var/log/mysqld.log
-                                 #a temporary password is generated for root@localhost: $passwd
+                          #如果不加console， 会写入日志/var/log/mysqld.err
+                          #a temporary password is generated for root@localhost: $passwd
+                          # sed -n '/password/p' |  cut -d":" -f2 | tr ' ' ''
 方式二
 mysql_install_db --user=mysql #会在~/.mysql_secret中存放密码man mysql_install_db得知已过时  
                               #创建data目录 mysql数据库(初始化授权表 访问控制) test数据库
@@ -385,22 +386,30 @@ mysqld_safe --user=mysql --defaults-file="my.ini" --init-file="init.txt" --log-w
     --log-warnings #更多日志
 
 
-3.使用初始密码登录 修改密码并可远程登录， 实际就是设置mysql.user表  mysql.host表 mysql.db表
+3. 使用初始密码登录 修改密码并可远程登录， 实际就是设置mysql.user表  mysql.host表 mysql.db表
 mysql -uroot -p   #host默认为localhost user默认为登录linux的用户
 Enter password:   #输入上步的密码
 mysql>show databases;
 mysql>use mysql;
 
+#方式一 使用环境变量方式 第一个password是环境变量 第二个是函数
+mysql>SET PASSWORD FOR 'root'@'%' = password('111111'); 
+
 mysql>CREATE USER 'yy'@'%' IDENTIFIED BY '111111';     #这步只能查看infomation_schema
-mysql>insert into mysql.user(host,user,password) values('%','root',password('111111'));
-
-mysql>SET PASSWORD FOR 'root'@'%' = PASSWORD('newpwd'); #方式一 使用环境变量方式 第一个password是环境变量 第二个是函数
-mysql>UPDATE mysql.user SET password = PASSWORD('newpwd') where user='root'; #方式二 使用sql语句
 mysql>ALTER USER "root"@"%" IDENTIFIED WITH auth_plugin BY "111111"; #可以使用默认的加密方法
-            #plugin是密码的加密方式 authentication_string是密码加密后的字符串
-			#mysql8.0需要修改加密方式，否则一般的gui client由于不支持某种加密方式而无法登录
-mysqladmin -u root -h host_name password "111111"       #方式三 这种更方便
+            #show plugins;可以得知2种密码加密方式mysql_native_password和sha256_password
+            #show variables like '%default%';得知5.7默认是mysql_native_password;8.0是caching_sha2_password
+			#mysql8.0需要修改为以前的加密方式，否则一般的gui client由于不支持新的默认加密方式而无法登录
+			#	default_authentication_plugin=mysql_native_password
 
+mysql>insert into mysql.user(host,user,authentication_string) values('%','root',password('111111'));
+mysql>UPDATE mysql.user SET authentication_string = PASSWORD('111111') where user='root';
+	  #plugin是密码的加密方式 authentication_string是密码加密后的字符串
+
+#方式三 这种更方便
+mysqladmin -u root -h host_name password "111111"       
+
+#方式四 适用于8.0之前，8.0之后创建账户create user和授权grant必须分开
 mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '111111' WITH GRANT OPTION;   #一气呵成  创建用户 远程访问 设置权限
                           #host的通配符为%或_ %表示任意ip都可以登录，默认是localhost 
                           #	  root@192.168.1.2/255.255.255.0 只能局域网内访问
@@ -408,6 +417,7 @@ mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '111111' WITH GRAN
                           #   root@%.loc.gov
                           #on $db.$table TO $user@$host  db和table的通配符为*
                           #全局权限是在mysql.user设置,某个具体数据库的权限是在mysql.db表
+                          
 mysql>show grants for yy;   
 mysql>show grants for yy@%;
 mysql>flush privileges;   #与mysqladmin flush-privileges; 或 mysqladmin reload;效果相同 否则mysql服务需要重启
@@ -533,6 +543,12 @@ linux下是my.cnf  /etc/mysql/mysql.conf.d/mysqld.cnf
          mysqld --verbose --help | grep defaults-file
 mysql.cnf是mysql各应用的集中配置的地方
 
+#query_cache5.7可以手动设置 8.0彻底不用设置了
+    #query_cache_size=0
+    #query_cache_type=0
+#innodb_undo_logs在8.0中彻底不能设置，默认开启且为2个undo,但不能指定回滚段大小默认为128
+#innodb_undo_logs
+
 [client]
 host=        #对应环境变量MYSQL_HOST
 user=        #对应环境变量USER
@@ -577,7 +593,7 @@ mysqladmin refresh;
     log-slow-queries[=$hostname-slow.log]  #
     long_query_time=10               #测试mysql>sleep(15); select * from mysql.slow_log
     log_queries_not_using_indexes=1  #使用mysqld --log-short-format避免记录不适用index的query
-    log_slow_admin_statements=0   #默认alter optimize analyze table不记录, 因为这样的语句很耗时
+    log_slow_admin_statements=0      #默认alter optimize analyze table不记录, 因为这样的语句很耗时
     log_slow_slave_statements=0
     
 bin日志  
@@ -1293,11 +1309,16 @@ mysql>unlock tables;
 
 ```
 master (show processlist中Command: Binlog Dump)
-Sending binlog event to slave  线程已经从二进制日志读取了一个事件并且正将它发送到从服务器
 
-Finished reading one binlog; switching to next binlog  线程已经读完二进制日志文件并且正打开下一个要发送到从服务器的日志文件
+Sending binlog event to slave  
+线程已经从二进制日志读取了一个事件并且正将它发送到从服务器
 
-Has sent all binlog to slave; waiting for binlog to be updated 线程已经从二进制日志读取所有主要的更新并已经发送到了从服务器。线程现在正空闲，等待由主服务器上新的更新导致的出现在二进制日志中的新事件
+Finished reading one binlog; switching to next binlog  
+线程已经读完二进制日志文件并且正打开下一个要发送到从服务器的日志文件
+
+Has sent all binlog to slave; waiting for binlog to be updated 
+线程已经从二进制日志读取所有主要的更新并已经发送到了从服务器。
+线程现在正空闲，等待由主服务器上新的更新导致的出现在二进制日志中的新事件
 
 Waiting to finalize termination 线程停止时发生的一个很简单的状态
 ```
@@ -1306,17 +1327,46 @@ Waiting to finalize termination 线程停止时发生的一个很简单的状态
 
 ```
 io thread (show processlist中command: connect)
-Connecting to master     线程正试图连接主服务器
-Checking master version  建立同主服务器之间的连接后立即临时出现的状态
-Registering slave on master 建立同主服务器之间的连接后立即临时出现的状态
-Requesting binlog dump  建立同主服务器之间的连接后立即临时出现的状态。线程向主服务器发送一条请求，索取从请求的二进制日志文件名和位置开始的二进制日志的内容
-Waiting to reconnect after a failed binlog dump request 如果二进制日志转储请求失败(由于没有连接)，线程进入睡眠状态，然后定期尝试重新连接。可以使用--master-connect-retry选项指定重试之间的间隔
-Reconnecting after a failed binlog dump request 线程正尝试重新连接主服务器
-Waiting for master to send event 线程已经连接上主服务器，正等待二进制日志事件到达。如果主服务器正空闲，会持续较长的时间。如果等待持续slave_read_timeout秒，则发生超时。此时，线程认为连接被中断并企图重新连接
-Queueing master event to the relay log 线程已经读取一个事件，正将它复制到中继日志供SQL线程来处理
-Waiting to reconnect after a failed master event read 读取时(由于没有连接)出现错误。线程企图重新连接前将睡眠master-connect-retry秒
-Reconnecting after a failed master event read  线程正尝试重新连接主服务器。当连接重新建立后，状态变为Waiting for master to send event
-Waiting for the slave SQL thread to free enough relay log space 正使用一个非零relay_log_space_limit值，中继日志已经增长到其组合大小超过该值。I/O线程正等待直到SQL线程处理中继日志内容并删除部分中继日志文件来释放足够的空间
+
+Connecting to master     
+线程正试图连接主服务器
+
+Checking master version  
+建立同主服务器之间的连接后立即临时出现的状态
+
+Registering slave on master 
+建立同主服务器之间的连接后立即临时出现的状态
+
+Requesting binlog dump  
+建立同主服务器之间的连接后立即临时出现的状态。
+线程向主服务器发送一条请求，索取从请求的二进制日志文件名和位置开始的二进制日志的内容
+
+Waiting to reconnect after a failed binlog dump request 
+如果二进制日志转储请求失败(由于没有连接)，线程进入睡眠状态，然后定期尝试重新连接。
+可以使用--master-connect-retry选项指定重试之间的间隔
+
+Reconnecting after a failed binlog dump request 
+线程正尝试重新连接主服务器
+
+Waiting for master to send event 
+线程已经连接上主服务器，正等待二进制日志事件到达。
+如果主服务器正空闲，会持续较长的时间。
+如果等待持续slave_read_timeout秒，则发生超时。
+此时，线程认为连接被中断并企图重新连接
+
+Queueing master event to the relay log 
+线程已经读取一个事件，正将它复制到中继日志供SQL线程来处理
+
+Waiting to reconnect after a failed master event read 
+读取时(由于没有连接)出现错误。线程企图重新连接前将睡眠master-connect-retry秒
+
+Reconnecting after a failed master event read  
+线程正尝试重新连接主服务器。当连接重新建立后，状态变为Waiting for master to send event
+
+Waiting for the slave SQL thread to free enough relay log space 
+正使用一个非零relay_log_space_limit值，中继日志已经增长到其组合大小超过该值。
+I/O线程正等待直到SQL线程处理中继日志内容并删除部分中继日志文件来释放足够的空间
+
 Waiting for slave mutex on exit 线程停止时发生的一个很简单的状态
 ```
 
@@ -1324,9 +1374,15 @@ Waiting for slave mutex on exit 线程停止时发生的一个很简单的状态
 
 ```
 sql thread (show processlist中command: connect)
-Reading event from the relay log  线程已经从中继日志读取一个事件，可以对事件进行处理了
-Has read all relay log; waiting for the slave I/O thread to update it 线程已经处理了中继日志文件中的所有事件，现在正等待I/O线程将新事件写入中继日志
-Waiting for slave mutex on exit 线程停止时发生的一个很简单的状态
+
+Reading event from the relay log  
+线程已经从中继日志读取一个事件，可以对事件进行处理了
+
+Has read all relay log; waiting for the slave I/O thread to update it 
+线程已经处理了中继日志文件中的所有事件，现在正等待I/O线程将新事件写入中继日志
+
+Waiting for slave mutex on exit 
+线程停止时发生的一个很简单的状态
 ```
 
 
@@ -1760,5 +1816,80 @@ mysql_options(&mysql, MYSQL_OPT_RECONNECT, (char *)&value);  #show variables lik
 ```
 mysqlslap mysql自带的
 sysbench
+```
+
+# 常混淆点
+
+```
+基于binlog的复制，在配置文件中binlog_format[=row|mixed|statement]
+innodb_default_row_format=dynamic
+innodb_file_format=Barracuda
+
+MS
+	传统
+	gtid 
+		#5.6的新功能,不能在线修改; 
+		#5.7.6可以在线修改,不停机切换gtid方法
+		#在线修改经历传统事务-匿名事务-gtid事务，其中匿名事务既接受传统事务，也接受gtid业务，2者可以共存，但复制效率比2者都低
+		gtid_mode=on
+		enforce_gtid_consistency=1
+		binlog_format=row  #最好是row格式
+		
+		
+gtid
+局限性
+	不支持非事务引擎
+	不允许一个sql同时更新一个事务引擎和非事务引擎
+	不支持create table ... select，在主库执行直接报错。 可以手动修改为create table && insert ... select ... 
+	不支持create temporary table 和 drop temporary table
+
+
+#开启GTID语法限制警报参数
+#观察err log是否有不满足要求的sql出现。如果有发现任何warning，需要通知应用进行调整相关sql，直到不出现warning为止。
+set global ENFORCE_GTID_CONSISTENCY = WARN;
+#确保没有警报了,也就是说当前这个实例没有语法上的冲突,那就可以完全开启语法限制了,这个时候如果有限制的语句进来,会有报错给对方
+set global ENFORCE_GTID_CONSISTENCY = ON;
+#开启匿名事务模式记录binlog,slave可以兼容GTID事务和普通pos事务,不过这个时候还没有GTID事务,需要确保所有主从都执行
+set global GTID_MODE = OFF_PERMISSIVE;
+#开启产生GTID事务,这时Slave即接受不带GTID的事务,也接受带GTID的事务,需要确保所有主从都执行
+set global GTID_MODE = ON_PERMISSIVE;
+###以下命令属于检测命令,按指示操作
+#查看匿名事务执行情况,必须所有主从都为零才能执行下一步,不然就会丢掉一部分事务
+SHOW STATUS LIKE 'ONGOING_ANONYMOUS_TRANSACTION_COUNT';
+#也可以在每一台slave上都执行下列命令,查看Executed_Gtid_Set是否有值,如果不为空了,说明已经开始使用GTID复制了.
+#也就是匿名事务全部执行完毕,一切复制都走向了GTID模式,一般来说你也能看到ONGOING_ANONYMOUS_TRANSACTION_COUNT值为零了
+show slave status\G
+#等待所有的从库都复制完成,延迟相差不太大,再做一次flush logs,将前面的日志purge掉这些日志包含带GTID和不带GTID的事务.
+flush logs
+
+#然后就是在所有主从实例上执行下面命令,完全开启GTID复制模式.
+set global GTID_MODE = ON;
+set global enforce_gtid_consistency = on;
+
+#最后在从库执行以下语句,把复制模式也切换成GTID模式,那就完成了
+stop slave;
+CHANGE MASTER TO MASTER_AUTO_POSITION = 1;
+START SLAVE;
+
+###在从库可以选择性开启，主库加不加都不影响使用
+#用来配置从服务器的更新是否写入二进制日志,如果有层级从库就必须开,没有的话建议关闭,能有效提高性能
+log_slave_updates
+#设置从库SQL线程并行重放events(事务)的worker线程数量,默认值为0，最大值为1024.在5.6.x版本中设置这个参数大于0时，
+#则SQL线程充当worker线程的协调者，在多个worker线程之间分发基于库级别的events,也就是库级别并行复制，
+#5.7.x版本的并行复制可以设置基于组提交事务的并行复制,更加好用.
+slave_parallel_workers = 8
+#5.7新参数，指定并行复制方式，为了兼容5.6的模式，默认的并行复制方式是基于库级别的，即默认值是：DATABASE，
+#我们要设置成5.7支持的基于组提交事务的并行复制方式，则需要设置成：LOGICAL_CLOCK，速度更快。
+#slave_parallel_type = LOGICAL_CLOCK
+
+#当然,别忘了在my.cnf配置文件里加上参数,不然重启就失效了
+gtid_mode = on
+enforce_gtid_consistency = on
+
+mysqldump
+	优点：官方自带，适用性强
+	缺点：由于是逻辑备份，如果数据量大的话，导出导入需要较长时间
+	
+
 ```
 

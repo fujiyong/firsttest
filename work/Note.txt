@@ -2934,3 +2934,32 @@ go build [-o output] [-i] [build flags] [pkgs]
         默认为当前目录，可以省略。  如果提供想对，则是相对于GOROOT GOPATH环境变量
         go build mydir      #只编译mydir这个包
         go build mydir/...  #...代表所有字符串 所以编译mydir下的所有pkg
+
+
+
+/*
+        ipfs--
+            bin
+                ipfs -> ipfs-Linux-x86_64-v2.3.5-20200418170759-51328808-2f200cec806226bd9f7625fdc5995e5c
+                ipfs-Linux-x86_64-v2.3.5-20200418170759-51328808-2f200cec806226bd9f7625fdc5995e5c
+                conf.ext-$size-$md5
+                swarm.key-$size-$md5
+            data
+                conf.done
+                conf
+                swarm.key
+    */
+   
+
+
+
+https://blog.51cto.com/arthur376/2114026
+https://blog.51cto.com/arthur376/1772177
+https://blog.51cto.com/arthur376/1792551
+
+http://blog.itpub.net/23718752/viewspace-2134001/
+https://blog.csdn.net/hzsunshine/article/details/69132225
+https://blog.csdn.net/d6619309/article/details/53691352
+https://www.cnblogs.com/maoyanqing/p/11724696.html
+https://www.cnblogs.com/monkeybron/p/9597818.html
+https://cloud.tencent.com/developer/article/1501860
