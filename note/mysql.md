@@ -402,8 +402,10 @@ mysql>ALTER USER "root"@"%" IDENTIFIED WITH auth_plugin BY "111111"; #可以使�
 			#mysql8.0需要修改为以前的加密方式，否则一般的gui client由于不支持新的默认加密方式而无法登录
 			#	default_authentication_plugin=mysql_native_password
 
+
 mysql>insert into mysql.user(host,user,authentication_string) values('%','root',password('111111'));
-mysql>UPDATE mysql.user SET authentication_string = PASSWORD('111111') where user='root';
+mysql>UPDATE mysql.user SET authentication_string = password('111111') where user='root';
+	  #5.6及以前是password字段, 5.7及以后是authentication_string字段
 	  #plugin是密码的加密方式 authentication_string是密码加密后的字符串
 
 #方式三 这种更方便
@@ -1825,9 +1827,77 @@ sysbench
 innodb_default_row_format=dynamic
 innodb_file_format=Barracuda
 
+
+mysql group replication(MGR2016.12)
+	参考mariaDB Galera Cluster和Percona XtraDB cluster，
+	是建立在paxos的xcom之上，每个数据库节点都维护一个状态机，事务的提交需经半数以上节点同意才可提交
+	保证节点间事务的一致性。
+	
+	优点
+		高一致性C 
+			基于原生复制和paxos协议的组复制
+		高容错性  
+			有自动检测机制， 当出现宕机时，会自动剔除问题节点，其他节点可以正常使用
+			当不同节点争用资源冲突时，会按照先到先得处理，并内置自动化脑裂防护机制
+		高扩展性 
+			可随时在线添加和移除节点，会自动同步所有节点上的状态，直到新节点和其他节点保持一致，自动维护新的组信息
+		高灵活性
+			直接以插件形式(.so)形式安装 
+			单主模式下，只有主库可以读写，其他从库会加上super_read_only状态，只能读取不可写入， 出现故障会自动选主
+			多主模式下
+	缺点
+		不稳定，性能略差于pxc  对网络要求很高，至少是同机房
+		
+		
+	安装插件
+		已经自带，只是没有安装上而已。 
+		和半同步插件一样安装
+		mysql>show plugins;#查看插件没有安装
+		mysql>show variables like '%group%'; #查看参数没有加载
+		mysql>show variables like 'plugin_dir';
+		mysql>system ll $plugin_dir | grep group_replication
+		mysql>install plugin group_replication soname 'group_replication.so';
+		mysql>show plugins;
+		mysql>show variables like 'group%';
+		
+	配置
+		必须
+		gtid_mode=on
+		enforce_gtid_consistency=on
+		
+		公共
+		server_id=$ip$version
+		binlog_format=row     #MGR强制要求row
+		binlog_checksum=NONE  #binlog校验规则5.6版本之前是NONE，5.6之后是CRC32， 但MGR要求NONE
+		log_slave_update=1    #集群在故障时会相互检查binlog，
+		                      #所以需要记录集群内其他服务器发过来已经执行的binlog，按gtid来区分是否执行过
+		transaction_isolation=read-commited #MGR使用乐观锁，GMR建议RC，减少锁粒度
+		master_info_reposity=table      #基于安全考虑，MGR强制要求
+		relay_log_info_repository=table #基于安全考虑，MGR强制要求
+		
+		独有
+		transaction_write_set_extraction=xxhash64 #记录事务的算法，MGR建议使用该参数
+		loose_group_replication_group_name=`uuidgen` #用来区分内网各个不同的group，而且也是这个group内的gtid值的uuid
+		loose_group_replication_ip_whitelist='127.0.0.1/8,192.168.1.0/24' #安全需要白名单，不许外部主机的连接
+		loose_group_replication_start_on_boot=off #是否随服务启动而启动组复制，不建议，以防故障恢复时扰乱数据的准确性
+		loose_group_replication_local_address='$ip:33061' #本地MGR的ip和端口
+		loose_group_replication_group_seeds='$myip:33061,$ip2:33061,$ip3:33061'#接受本MGR控制的MGR地址
+		loose_group_replication_bootstrap_group=off #开启引导模式，添加组成员。
+		
+		
+		
+		
+		
+		
+	
+
+
+
+
 MS
 	传统
 	gtid 
+	    #主开启了gtid模式,从也必须开启该模式
 		#5.6的新功能,不能在线修改; 
 		#5.7.6可以在线修改,不停机切换gtid方法
 		#在线修改经历传统事务-匿名事务-gtid事务，其中匿名事务既接受传统事务，也接受gtid业务，2者可以共存，但复制效率比2者都低
@@ -1886,10 +1956,129 @@ slave_parallel_workers = 8
 gtid_mode = on
 enforce_gtid_consistency = on
 
+
+主从异步0
+	一般模式下，是主从异步，即主不管从的任何状态，如果从有漏了主也不管，这就是我们所说的主从不一致的根本原因。
+主从半同步1 一开半同步插件
+	一个事务在主库执行完不行，还必须至少在一个从库执行成功，事务才算完成；而其他还没有执行的从库则执行异步操作。
+主从完全同步all 依靠集群软件，如pxc
+	一个事务不仅在主库执行成功，还必须在所有从库执行成功，事务才算完成。
+	
+	只有一台从库的主从半同步也是概念上的主从完全同步。
+	性能上说： 主从异步 > 主从半同步 > 主从完全同步
+	
+
+
+xbackup
+	导出主数据
+	innobackupex --defaults-file=mysql.cnf -uroot -p --stream=tar "/data/mysql" 2>/data/mysql/backup.log | gzip > /data/mysql/test.tgz
+	
+	从
+	清除数据
+	service mysqld stop
+	rm -rf /var/lib/mysql/data/*
+	导入数据
+	innobackupex --defaults-file=mysql.cnf --apply-log /data/mysql
+	innobackupex --defaults-file=mysql.cnf --copy-back /data/mysql
+	chown -R mysql.mysql /data/mysql
+	service mysqld start
+	mysql -uroot
+	
+	cat /data/mysql/xtrabackup_binlog_info 包含非innodb引擎的数据位置
+		mysql-bin.000020        8454162 16fdabc7-30f9-11e6-9234-0800273e5680:1-22037
+	cat /data/mysql/xtrabackup_binlog_pos_innodb 只包含innodb引擎的数据位置
+	
+	配置主从
+	
+	
+	
+
+
+
 mysqldump
 	优点：官方自带，适用性强
 	缺点：由于是逻辑备份，如果数据量大的话，导出导入需要较长时间
 	
+主
+	导出主新数据
+	mysqldump -uroot -p123123 --opt --default-character-set=utf8 --triggers -R --hex-blob --single-transaction --no-autocommit --master-data=2 -A >test.sql
+	
+从
+	清除从老数据
+    service mysqld stop
+    rm -rf /var/lib/mysql/data/*
+    service mysqld start
+
+    导入数据
+    mysql -uroot -p
+    mysql>reset master;
+    mysql>source test.sql
+    mysql>show variables like '%gtid%';
+    
+    配置主从
+    mysql>reset slave all;
+    	一般模式下
+        mysql>change master to 
+              master_host='',
+              master_user='',
+              master_password='',
+              master_port='',
+              master_log_file='',
+              master_log_pos=;
+        gtid模式下
+     	mysql>set @@global.gtid_purged='';
+     	mysql>change master to
+     		  master_host='',
+     		  master_port='',
+     		  master_user='',
+     		  master_password='',
+     		  master_auto_position=1;
+     mysql>start slave;
+     mysql>show slave status;  #auto_position retrieved_gtid_set executed_gtid_set
+     		  
+     		  
+reset master:
+	delete all existing binary log files
+	reset the bin log index file
+	create a new empty bin log file
+	reset its state before starting bin logging
+    
+	reset the gtid history execution history #reset slave has no effect on gtid history
+		set gloabl gtid_purged=''
+		set global gtid_executed=''
+		trucate mysql.gtid_executed
+		
+reset slave
+	
+		
+主从之破解主密码在slave上
+	service mysqld stop
+	#进入安全模式
+	mysqld_safe --skip-grant-tables --skip-networking & 
+	mysql -uroot
+	mysql>update mysql.user set authentication_password='' where user='root'
+	mysql>flush privileges;
+	#如果有必要，升级版本以便主从版本一致
+	mysql_upgrade -uroot -p--defaults-file=mysql.cnf
+	service mysqld restart
+	#检查是否正常
+	mysql -uroot -p
+	mysql>show databases;
+	
+主从之版本不一致导致 由于主库表的更改导致从库报错，所以从库最好忽略这些库或表的语句
+	#5.6及之前只能通过配置文件
+	replicate_wild_do_table=test.%,mysql.user
+	replicate_wild_ignore_table=mysql.%,test.fucking
+	#5.7及以后
+	change replication filter replicate_wild_do_table=(''test.%',''mysql.user');
+	change replication filter replicate_wild_ignore_table=(''test.%',''mysql.user');
+	
+	
+	
+     		  
+
+
+
 
 ```
 

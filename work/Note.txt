@@ -19,6 +19,19 @@ ipfs3	192.168.1.127	22	root	13622228504
 以太坊3	39.108.104.133	22	root	Svdsdev2019*$()
 测试机  192.168.1.128  root/orangepi  orangepi  
 
+
+
+goland 
+    改变背景颜色   Editor -> Color Schema -> General -> Text -> Default text -> Backgroud
+    代码模板快捷   Editor -> Live Templates
+    文件头自动注释 Editor -> File and Code Templates -> include 
+    注释对其代码
+    注释空格       Editor -> Code Style -> Go -> Other
+    =对其代码
+    import group  Editor -> Code Style -> Go -> import
+
+
+
 git clone http://fu_ji_yong:fujy6789@git.isecsp.com/frank/ocelot-api-gateway.git
 
 zsh操作指南
@@ -2963,3 +2976,11 @@ https://blog.csdn.net/d6619309/article/details/53691352
 https://www.cnblogs.com/maoyanqing/p/11724696.html
 https://www.cnblogs.com/monkeybron/p/9597818.html
 https://cloud.tencent.com/developer/article/1501860
+
+
+
+
+<div style="background-color:#C7EDCC">
+document.querySelector('body').style = 'background: #C7EDCC;'
+
+
