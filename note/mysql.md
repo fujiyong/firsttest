@@ -1154,14 +1154,130 @@ index
 
 # 复制MS
 
+## 各种框架
+
+```
+优点
+	高可用   故障检测及迁移 多节点备份
+	可伸缩性 新增节点方便扩容
+	负载均衡
+缺点
+	网络分裂 由于网络故障分成多个部分，每部分节点之内可以互联，部分之间不能
+	脑裂
+	
+单主
+多主
+	虽然是先到先得，但事务冲突的几率也高。
+```
+
+#### 原厂出品
+
+```
+mysql replication
+		特点
+			一主多从
+		优点
+		缺点
+			主从时间滞后，数据滞后，可能造成数据不一致
+			主节点crash，不能对外提供服务
+mysql fabric
+		特点
+			一主多从
+			增加了故障检测及转移，自动数据分片
+		优点
+			由于有转移，可以选择一个从节点来做主节点，不影响对外提供服务
+		缺点
+			事务及查询只支持在同一个分片内，事务中更新的数据不能跨分片，查询语句返回的数据也不能跨分片
+			节点故障恢复30秒或更长（采用InnoDB存储引擎的都这样）
+mysql cluster
+		特点
+			多主多从
+			多主 没有单点故障，故障恢复小于1秒
+			可伸缩性优秀 能自动切分数据，方便数据库的水平拓展
+			负载均衡优秀 看同时用于切分读写密集型应用，也可以使用sql或非sql接口访问数据
+			高可用 数据自动切分，即使是同一张表，数据都存储在多个物理节点datanode
+		缺点
+			只能是用ndb引擎，与innodb有许多明显的差距。比如事务只支持RC 外键的支持
+			节点间需要大量的通讯，对带宽要求高 所有的访问都需要经过一个节点(至少一个sql节点和ndb节点)才能完成
+			datanode数据会被尽量存放于内存中 对内存要求大 而且重启的时候 将数据load到内存需要很长时间
+```
+
+#### 第三方优化
+
+```
+MMM(master-master management google出品)双主多从
+    优点
+        双主failover3秒以内切换
+        多个读从节点负载均衡
+    缺点
+        无法保证数据一致性 如M1crash M2由于还没有完全同步M1的数据而被切换成主对外提供服务
+        使用VIP浮动技术，类似于keepalived，
+        所以虚ip(vip)需要和真实ip(rip)在同一网段内，
+        	如果不在同一网段内，需要用到虚拟路由技术。
+        	但绝对要在一个IDC机房，不可跨IDC机房
+MHA(master high availability 日本DeNA公司youshimaton开发)
+    特点
+        多主节点，但缺少vip(虚拟ip)，需要配合keepalived等一起使用
+        类似于多套mysql replication
+    优点
+        可进行故障的自动检测和转移
+        具备自动数据补偿能力，在主库异常crash时能最大程度的保证数据的一致性
+Galera cluster(由codeship开发)
+	特点
+			都是主节点，也都是从节点
+			主节点互为其他节点的从节点
+			不同于mysql原生的主从异步复制，gelera采用多主同步复制，并针对同步复制过程中，
+				会大概率出现的事务冲突和死锁进行优化，而是基于gelera复制插件，重写了wsrep api
+	优点
+		多主多活下 对任何一个节点进行读写操作，就算某个节点挂了，也不需要其他节点的读写，也不需要故障转移切换
+			      也不会中断整个集群对外提供服务
+		拓展性    新增节点会自动拉取在线节点的数据（当有新节点加入时，集群会选择衣蛾donor node为新数据提供数据
+			     最终急群众所有数据一致，而不需要手动备份
+	劣势
+		为了数据的强一致性，也是以牺牲性能为代价的
+```
+
+#### 借助硬件
+
+```
+不同主机的数据同步不再依赖mysql的原生复制功能，而是通过同步磁盘数据来保证数据的一致性
+故障处理是借助headbeat来监控和管理各个节点之间的网络连接，当节点出现故障或不可用时，自动在其他节点启动集群服务
+
+heartbeat + SAN
+    SAN storage area network
+    优点
+        SAN 共享存储，保证数据的一致性
+    缺点
+        SAN价格较贵
+heartbeat + drdb
+    drdb distributed replicated block device
+         这是linux内核实现块级别的同步复制技术。通过各主机之间的网络，复制对方磁盘的内容。
+    优点
+        相比于san，价格低廉
+        保证数据的强一致性
+        与mysql解耦，不会由于mysql的逻辑错误发生数据不一致的情况
+    缺点
+        对io性能影响较大
+        从库不提供读
+```
+
+#### 其他
+
+```
+zk+proxy
+paxos
+```
+
 ```
 不复制table的存储引擎类别 以便在不同的存储引擎间复制; 为提高速度,salve一般使用myisam来代替innodb和bdb
 双主复制  只是减少了锁竞争  
 ```
 
-## 基本
+## 传统
 
-### 1配置
+### 搭建
+
+#### 1配置
 
 #### Master
 
@@ -1216,13 +1332,13 @@ replicate-ignore-table=mydb1.mytabl1
 max-relay-logs-size=size
 ```
 
-### 2设置账号并授权
+#### 2设置账号并授权
 
 ```
 mysql> GRANT REPLICATION SLAVE ON *.* TO 'repl'@'192.168.0.%' IDENTIFIED BY 'repl';
 ```
 
-### 3主全量备份
+#### 3主全量备份
 
 ```
 方式一：
@@ -1235,7 +1351,7 @@ mysql>unlock tables;
 mysqldump -S /tmp/mysql3306.sock -p --master-data=2 --single-transaction -A |gzip >3306-`date +%F`.tar.gz
 ```
 
-### 4从复制
+#### 4从复制
 
 ```
 mysqld                                                                             
@@ -1259,7 +1375,7 @@ mysql>show slave status;  #!!!!!Slave_IO_Running: Yes   Slave_SQL_Running: Yes
                           #seconds_behind_master
 ```
 
-## 强制同步
+### 强制同步
 
 ```
 Master				             Slave
@@ -1271,7 +1387,7 @@ mysql>show master status;
 mysql>unlock tables;	                     
 ```
 
-## 出现问题
+### 出现问题
 
 ```
  slave
@@ -1290,7 +1406,7 @@ mysql>unlock tables;
  	mysql>start slave;
 ```
 
-## 主从切换
+### 主从切换
 
 ```
 在每个slave上,先
@@ -1303,6 +1419,405 @@ mysql>unlock tables;
     mysql>stop slave;
     mysql>change master to master_host="" master_port= master_user= master_password=;               #file使用默认值(第一个bin'log), pos使用默认值(4)
     msyql>start slave;
+```
+
+## MGR
+
+```
+mysql group replication(MGR2016.12)
+	参考mariaDB Galera Cluster和Percona XtraDB cluster，
+	是建立在paxos的xcom之上，每个数据库节点都维护一个状态机，事务的提交需经半数以上节点同意才可提交
+	保证节点间事务的一致性。
+	
+	同一个group最多为9个节点。
+	服务器配置最好一致，因为和pxc一样，会有木桶短板效应
+	
+
+优点
+    高一致性C 
+        基于原生复制和paxos协议的组复制
+    高容错性  
+        有自动检测机制， 当出现宕机时，会自动剔除问题节点，其他节点可以正常使用
+        当不同节点争用资源冲突时，会按照先到先得处理，并内置自动化脑裂防护机制
+    高扩展性 
+        可随时在线添加和移除节点，会自动同步所有节点上的状态，直到新节点和其他节点保持一致，自动维护新的组信息
+    高灵活性
+        直接以插件形式(.so)形式安装 
+        单主模式下，只有主库可以读写，其他从库会加上super_read_only状态，只能读取不可写入， 出现故障会自动选主
+        多主模式下
+
+理论局限性
+	不支持非事务引擎
+	不允许一个sql同时更新一个事务引擎和非事务引擎
+	不支持create table ... select，在主库执行直接报错。 可以手动修改为create table && insert ... select ... 
+	不支持create temporary table 和 drop temporary table
+	
+实际缺点
+	不稳定，性能略差于pxc  对网络要求很高，至少是同机房
+	
+	
+主从异步0  默认
+	一般模式下，是主从异步，即主不管从的任何状态，如果从有漏了主也不管，这就是我们所说的主从不一致的根本原因。
+主从半同步1 mysql5.5 一开半同步插件
+	一个事务在主库执行完不行，还必须至少在一个从库执行成功，事务才算完成；而其他还没有执行的从库则执行异步操作。
+	客户端提交sql给master
+	master自身执行sql
+	master提交sql给所有slave并等待其中任何一个返回成功
+	master返回给client
+主从完全同步all 依靠集群软件，如pxc
+	一个事务不仅在主库执行成功，还必须在所有从库执行成功，事务才算完成。
+	
+	只有一台从库的主从半同步也是概念上的主从完全同步。
+	性能上说： 主从异步 > 主从半同步 > 主从完全同步
+	
+基本参数
+    #主开启了gtid模式,从也必须开启该模式
+    #5.6的新功能,不能在线修改; 
+    #5.7.6可以在线修改,不停机切换gtid方法
+    #在线修改经历传统事务-匿名事务-gtid事务，其中匿名事务既接受传统事务，也接受gtid业务，2者可以共存，但复制效率比2者都低
+    gtid_mode=on
+    enforce_gtid_consistency=1
+    binlog_format=row  #最好是row格式
+```
+
+### 安装插件
+
+#### 安装半同步插件
+
+```
+一般mysql并没有预装该插件，但自带了。所以只需手动加载
+	mysql>show plugins;                     #查看插件没有安装
+	mysql>show variables like 'plugin_dir'; #查看插件位置
+	mysql>system ll $plugin_dir | grep 'semisync_(master|slave).so' 
+主库
+    安装
+    mysql>install plugin rpl_semi_sync_master soname 'semisync_master.so'
+    mysql>show plugins like 'semisync_master'; #确定安装成功
+    启动
+    mysql>set global rpl_semi_sync_master_enabled = on;
+
+从库
+    安装
+    mysql>install plugin rpl_semi_sync_slave  soname 'semisync_slave.so'
+    mysql>show plugins like 'semisync_slave'; #确定安装成功
+    启动
+    mysql>set global rpl_semi_sync_slave_enabled = on;
+    msyql>stop slave io_thread; #重启iothread，否则还是异步复制数据
+    mysql>start slave io_thread;
+```
+
+#### 安装group replication
+
+```
+mysql>show plugins;
+mysql>show variables like 'group%'; #查看参数没有加载
+mysql>show variables like 'plugin_dir';
+mysql>system ll $plugin_dir | grep group_replication
+mysql>install plugin group_replication soname 'group_replication.so';
+mysql>show variables like 'group%';
+```
+
+### 全新
+
+#### 配置
+
+```
+#必须
+gtid_mode=on
+enforce_gtid_consistency=on
+
+#公共
+server_id=$ip$version
+binlog_format=row     #MGR强制要求row
+binlog_checksum=NONE  #binlog校验规则5.6版本之前是NONE，5.6之后是CRC32， 但MGR要求NONE
+log_slave_update=1    #集群在故障时会相互检查binlog，
+                      #所以需要记录集群内其他服务器发过来已经执行的binlog，按gtid来区分是否执行过
+transaction_isolation=read-commited #MGR使用乐观锁，GMR建议RC，减少锁粒度
+master_info_reposity=table          #基于安全考虑，MGR强制要求
+relay_log_info_repository=table     #基于安全考虑，MGR强制要求
+
+#独有
+transaction_write_set_extraction=xxhash64 #记录事务的算法，MGR建议使用该参数
+loose_group_replication_group_name=`uuidgen` #用来区分内网各个不同的group，而且也是这个group内的gtid值的uuid
+loose_group_replication_ip_whitelist='127.0.0.1/8,192.168.1.0/24' #安全需要白名单，不许外部主机的连接
+loose_group_replication_start_on_boot=off #是否随服务启动而启动组复制，不建议，
+                #1.以防故障恢复时扰乱数据的准确性
+                #2.以防影响一些添加或删除节点的操作
+loose_group_replication_local_address='$ip:33061' #本地MGR的ip和端口
+loose_group_replication_group_seeds='$myip:33061,$ip2:33061,$ip3:33061'#接受本MGR控制的MGR地址
+loose_group_replication_bootstrap_group=off #开启引导模式，添加组成员。一个group内只需一台引导服务器
+                                            #默认off。如果有需要，再set global来开启
+loose-group_replication_single_primary_mode=off #是否启动单主模式
+                 #如果启动，则本实例是主库，提供读写;其他实例仅提供读
+                 #如果off，则是多主模式
+loose-group_replication_enforce_update_everywhere_checks=on
+    #多主模式下，强制检查每一个实例是否允许该操作；如果不是，不存在多主操作的可能，可以关闭
+```
+
+#### 启动
+
+```
+主库必须先启动,随时观察err日志
+mysql>set global group_replication_bootstrap_group=on; #一个group只能有一个引导库，且这个引导库必须是主库
+                                                       #主库必须要有这步操作，从库不能有
+mysql>create user 'sroot'@'%' identified by '111111'
+mysql>grant replication slaveon *.* to 'sroot'@'%' with grant option;
+mysql>reset master; #删除所以gtid
+mysql>change master to #创建同步认证规则信息，与一般的主从规则写法不一样
+      master_user='sroot' master_password='111111' for channel 'group_replication_recovery';
+mysql>start group_replication; #启动MGR
+mysql>select * from performance_schema.replication_group_members;
+      channel_name:group_replication_applier
+         member_id: a29a1b91-4908-11e8-848b-08002778eea7
+       member_host: ubuntu
+       member_port: 3308
+      member_state: online   #表示成功连接；如果错误，会被踢出集群且显示error
+       member_role: primary  #单主只有一个primary，其余为secondary；多主可以多个primary
+    member_version: 8.0.11
+mysql>set global group_replication_bootstrap_group=off; #这是可以关闭引导
+
+
+
+从库
+mysql>create user 'sroot'@'%' identified by '111111';
+mysql>grant replication slaveon *.* to 'sroot'@'%' with grant option;
+mysql>reset master; #删除所以gtid
+mysql>change master to #创建同步认证规则信息，与一般的主从规则写法不一样
+      master_user='sroot' master_password='111111' for channel 'group_replication_recovery';
+mysql>start group_replication; #启动MGR
+mysql>select * from performance_schema.replication_group_members;
+```
+
+#### 管理
+
+```
+主
+mysql>show master status;
+      File:mysql-bin.000003
+      Position:4801
+      Binlog_Do_DB:
+      Binlog_Ignore_DB:
+      Executed_Gtid_Set:`uuidgen`:1-23:000003
+mysql>select * from performance_schema.replication_group_status;
+			*************************** 1. row ***************************
+                              CHANNEL_NAME: group_replication_applier
+                                   VIEW_ID: 15258529121778212:5
+                                 MEMBER_ID: a29a1b91-4908-11e8-848b-08002778eea7
+               COUNT_TRANSACTIONS_IN_QUEUE: 0
+                COUNT_TRANSACTIONS_CHECKED: 9
+                  COUNT_CONFLICTS_DETECTED: 0
+        COUNT_TRANSACTIONS_ROWS_VALIDATING: 0
+        TRANSACTIONS_COMMITTED_ALL_MEMBERS: cc5e2627-2285-451f-86e6-0be21581539f:1-23:1000003
+            LAST_CONFLICT_FREE_TRANSACTION: cc5e2627-2285-451f-86e6-0be21581539f:23
+COUNT_TRANSACTIONS_REMOTE_IN_APPLIER_QUEUE: 0
+         COUNT_TRANSACTIONS_REMOTE_APPLIED: 3
+         COUNT_TRANSACTIONS_LOCAL_PROPOSED: 9
+         COUNT_TRANSACTIONS_LOCAL_ROLLBACK: 0
+*************************** 2. row ***************************
+                              CHANNEL_NAME: group_replication_applier
+                                   VIEW_ID: 15258529121778212:5
+                                 MEMBER_ID: af892b6e-49ca-11e8-9c9e-080027b04376
+               COUNT_TRANSACTIONS_IN_QUEUE: 0
+                COUNT_TRANSACTIONS_CHECKED: 9
+                  COUNT_CONFLICTS_DETECTED: 0
+        COUNT_TRANSACTIONS_ROWS_VALIDATING: 0
+        TRANSACTIONS_COMMITTED_ALL_MEMBERS: cc5e2627-2285-451f-86e6-0be21581539f:1-23:1000003
+            LAST_CONFLICT_FREE_TRANSACTION: cc5e2627-2285-451f-86e6-0be21581539f:23
+COUNT_TRANSACTIONS_REMOTE_IN_APPLIER_QUEUE: 0
+         COUNT_TRANSACTIONS_REMOTE_APPLIED: 10
+         COUNT_TRANSACTIONS_LOCAL_PROPOSED: 0
+         COUNT_TRANSACTIONS_LOCAL_ROLLBACK: 0
+         
+mysql>select * from performance_schema.replication_connection_status; #查看server中各个通道channel的使用情况
+    *************************** 1. row ***************************
+                                      CHANNEL_NAME: group_replication_applier
+                                        GROUP_NAME: cc5e2627-2285-451f-86e6-0be21581539f
+                                       SOURCE_UUID: cc5e2627-2285-451f-86e6-0be21581539f
+                                         THREAD_ID: NULL
+                                     SERVICE_STATE: ON
+                         COUNT_RECEIVED_HEARTBEATS: 0
+                          LAST_HEARTBEAT_TIMESTAMP: 0000-00-00 00:00:00.000000
+                          RECEIVED_TRANSACTION_SET: cc5e2627-2285-451f-86e6-0be21581539f:1-23:1000003
+                                 LAST_ERROR_NUMBER: 0
+                                LAST_ERROR_MESSAGE: 
+                              LAST_ERROR_TIMESTAMP: 0000-00-00 00:00:00.000000
+                           LAST_QUEUED_TRANSACTION: cc5e2627-2285-451f-86e6-0be21581539f:23
+ LAST_QUEUED_TRANSACTION_ORIGINAL_COMMIT_TIMESTAMP: 2018-05-09 16:38:08.035692
+LAST_QUEUED_TRANSACTION_IMMEDIATE_COMMIT_TIMESTAMP: 0000-00-00 00:00:00.000000
+     LAST_QUEUED_TRANSACTION_START_QUEUE_TIMESTAMP: 2018-05-09 16:38:08.031639
+       LAST_QUEUED_TRANSACTION_END_QUEUE_TIMESTAMP: 2018-05-09 16:38:08.031753
+                              QUEUEING_TRANSACTION: 
+    QUEUEING_TRANSACTION_ORIGINAL_COMMIT_TIMESTAMP: 0000-00-00 00:00:00.000000
+   QUEUEING_TRANSACTION_IMMEDIATE_COMMIT_TIMESTAMP: 0000-00-00 00:00:00.000000
+        QUEUEING_TRANSACTION_START_QUEUE_TIMESTAMP: 0000-00-00 00:00:00.000000
+	mysql>select * from performance_schema.replication_applier_status; #检查通道channel是否启用
+		              channel_name: group_replication_applier
+		            service_status: on
+		           remaining_delay: null
+		count_transactions_retries: 0
+mysql>select * from performance_schema.global_status where variabl_name='group_replication_primary_member'
+mysql>show global variables like 'server_uuid';
+mysql>show global variables like 'super_read_only'; #查看是否是从库
+```
+
+### 在线
+
+```
+#开启GTID语法限制警报参数
+#观察err log是否有不满足要求的sql出现。如果有发现任何warning，需要通知应用进行调整相关sql，直到不出现warning为止。
+set global ENFORCE_GTID_CONSISTENCY = WARN;
+#确保没有警报了,也就是说当前这个实例没有语法上的冲突,那就可以完全开启语法限制了,这个时候如果有限制的语句进来,会有报错给对方
+set global ENFORCE_GTID_CONSISTENCY = ON;
+#开启匿名事务模式记录binlog,slave可以兼容GTID事务和普通pos事务,不过这个时候还没有GTID事务,需要确保所有主从都执行
+set global GTID_MODE = OFF_PERMISSIVE;
+#开启产生GTID事务,这时Slave即接受不带GTID的事务,也接受带GTID的事务,需要确保所有主从都执行
+set global GTID_MODE = ON_PERMISSIVE;
+###以下命令属于检测命令,按指示操作
+#查看匿名事务执行情况,必须所有主从都为零才能执行下一步,不然就会丢掉一部分事务
+SHOW STATUS LIKE 'ONGOING_ANONYMOUS_TRANSACTION_COUNT';
+#也可以在每一台slave上都执行下列命令,查看Executed_Gtid_Set是否有值,如果不为空了,说明已经开始使用GTID复制了.
+#也就是匿名事务全部执行完毕,一切复制都走向了GTID模式,一般来说你也能看到ONGOING_ANONYMOUS_TRANSACTION_COUNT值为零了
+show slave status\G
+#等待所有的从库都复制完成,延迟相差不太大,再做一次flush logs,将前面的日志purge掉这些日志包含带GTID和不带GTID的事务.
+flush logs
+
+#然后就是在所有主从实例上执行下面命令,完全开启GTID复制模式.
+set global GTID_MODE = ON;
+set global enforce_gtid_consistency = on;
+
+#最后在从库执行以下语句,把复制模式也切换成GTID模式,那就完成了
+stop slave;
+CHANGE MASTER TO MASTER_AUTO_POSITION = 1;
+START SLAVE;
+
+###在从库可以选择性开启，主库加不加都不影响使用
+#用来配置从服务器的更新是否写入二进制日志,如果有层级从库就必须开,没有的话建议关闭,能有效提高性能
+log_slave_updates
+#设置从库SQL线程并行重放events(事务)的worker线程数量,默认值为0，最大值为1024.在5.6.x版本中设置这个参数大于0时，
+#则SQL线程充当worker线程的协调者，在多个worker线程之间分发基于库级别的events,也就是库级别并行复制，
+#5.7.x版本的并行复制可以设置基于组提交事务的并行复制,更加好用.
+slave_parallel_workers = 8
+#5.7新参数，指定并行复制方式，为了兼容5.6的模式，默认的并行复制方式是基于库级别的，即默认值是：DATABASE，
+#我们要设置成5.7支持的基于组提交事务的并行复制方式，则需要设置成：LOGICAL_CLOCK，速度更快。
+#slave_parallel_type = LOGICAL_CLOCK
+
+#当然,别忘了在my.cnf配置文件里加上参数,不然重启就失效了
+gtid_mode = on
+enforce_gtid_consistency = on
+
+
+5.7新增功能
+ 	rpl_semi_sync_master_wait_point = AFTER_SYNC
+    	控制主库在返回给回话事务成功之前提交事务的方式。
+    	旧模式是AFTER_COMMIT，新模式是AFTER_SYNC，默认值是AFTER_SYNC(这种更好).
+    	在AFTER_SYNC模式下，所有的客户端在同一时刻查看已经提交的数据。假如主库crash，所有主库上的已经提交的事务会同步到slave
+    	并记录到relay log。此时切换从库，可以保证最小的数据损失。
+    rpl_semi_sync_master_wait_for_slave_count=${slaveNumbers}
+        半同步参数，默认是1。 若这个参数为从库数量，则效果等价于全同步
+    rpl_semi_sync_master_wait_no_slave=[0|1]
+    	如果rpl_semi_sync_master_wait_for_slave_count为${slaveNumbers},但实际上少于该值，则取决于该值
+    	如果为0，立即变成异步复制
+    	如果为1，等待直至超时
+    rpl_semi_sync_master_timeout=
+    	该值应该小于连接池的连接时间，否则一直抛出异常
+    	
+主从之版本不一致导致 由于主库表的更改导致从库报错，所以从库最好忽略这些库或表的语句
+	#5.6及之前只能通过配置文件
+	replicate_wild_do_table=test.%,mysql.user
+	replicate_wild_ignore_table=mysql.%,test.fucking
+	#5.7及以后
+	change replication filter replicate_wild_do_table=(''test.%',''mysql.user');
+	change replication filter replicate_wild_ignore_table=(''test.%',''mysql.user');
+```
+
+### 查看
+
+#### 半同步
+
+```
+主库
+mysql>show variabels like '%rpl';
+    +------------------------------------+----------+
+    | Variable_name                      | Value    |
+    +------------------------------------+----------+
+    | rpl_semi_sync_master_enabled       | ON       |  #是否开启
+    | rpl_semi_sync_master_timeout       | 10000    |
+    | rpl_semi_sync_master_trace_level   | 32       |
+    | rpl_semi_sync_master_wait_no_slave | ON       |
+    | rpl_semi_sync_slave_enabled        | OFF      |
+    | rpl_semi_sync_slave_trace_level    | 32       |
+    | rpl_stop_slave_timeout             | 31536000 |
+    +------------------------------------+----------+
+        rpl_semi_sync_master_timeout       超时
+            master等待slave的响应时间，单位是毫秒，默认值是10秒。
+            超过这个时间，slave无响应，将自动转换成异步；如果探测slave恢复，又转成semi
+        rpl_semi_sync_master_trace_level   监控登记
+            1  genneral  记录时间函数失效
+            16 detail    
+            32 new wait  包含网络等待
+            64 function  包含函数进入退出
+        rpl_semi_sync_master_wait_no_slave
+            是否允许master在每个事物提交后都等待slave的receipt信号
+            默认是on 如果slave down之后，当slave重新追上master的lig日志时，可以自动的切换为semi
+            如果是off 如果slavedown之后，当slave追上之后也不会切换为semi
+mysql>show status like'%rpl_semi_sysnc%';
+    +--------------------------------------------+---------+
+    | Variable_name                              | Value   |
+    +--------------------------------------------+---------+
+    | Rpl_semi_sync_master_clients               | 1       | #slave的数量
+    | Rpl_semi_sync_master_net_avg_wait_time     | 746     |
+    | Rpl_semi_sync_master_net_wait_time         | 3788497 |
+    | Rpl_semi_sync_master_net_waits             | 5077    |
+    | Rpl_semi_sync_master_no_times              | 0       |
+    | Rpl_semi_sync_master_no_tx                 | 0       |  #发送给slave失败数量，最好为0
+    | Rpl_semi_sync_master_status                | ON      |  #是否启动semi(可能网络超时导致切换成异步)
+    | Rpl_semi_sync_master_timefunc_failures     | 0       |
+    | Rpl_semi_sync_master_tx_avg_wait_time      | 614     |
+    | Rpl_semi_sync_master_tx_wait_time          | 2797020 |
+    | Rpl_semi_sync_master_tx_waits              | 4552    |
+    | Rpl_semi_sync_master_wait_pos_backtraverse | 0       |
+    | Rpl_semi_sync_master_wait_sessions         | 0       |
+    | Rpl_semi_sync_master_yes_tx                | 5077    |  #发送给slave成功数量
+    | Rpl_semi_sync_slave_status                 | OFF     |
+    +--------------------------------------------+---------+
+    
+
+从库
+mysql>show variables like '%rpl%';
+    +------------------------------------+----------+
+    | Variable_name                      | Value    |
+    +------------------------------------+----------+
+    | rpl_semi_sync_master_enabled       | OFF      |
+    | rpl_semi_sync_master_timeout       | 10000    |
+    | rpl_semi_sync_master_trace_level   | 32       |  #默认32
+    | rpl_semi_sync_master_wait_no_slave | ON       |
+    | rpl_semi_sync_slave_enabled        | ON       |  #是否开启
+    | rpl_semi_sync_slave_trace_level    | 32       |
+    | rpl_stop_slave_timeout             | 31536000 |
+    +------------------------------------+----------+
+        rpl_stop_slave_timeout 控制stop slave的时间
+            在重放一个大的事务时，如果突然执行stop slave命令会执行很久，这个时候可能产生死锁或阻塞
+            这个参数可以控制stop slave的时间
+mysql>show status like'%rpl_semi_sysnc%';
+    +--------------------------------------------+-------+
+    | Variable_name                              | Value |
+    +--------------------------------------------+-------+
+    | Rpl_semi_sync_master_clients               | 0     |
+    | Rpl_semi_sync_master_net_avg_wait_time     | 0     |
+    | Rpl_semi_sync_master_net_wait_time         | 0     |
+    | Rpl_semi_sync_master_net_waits             | 0     |
+    | Rpl_semi_sync_master_no_times              | 0     |
+    | Rpl_semi_sync_master_no_tx                 | 0     |
+    | Rpl_semi_sync_master_status                | OFF   |
+    | Rpl_semi_sync_master_timefunc_failures     | 0     |
+    | Rpl_semi_sync_master_tx_avg_wait_time      | 0     |
+    | Rpl_semi_sync_master_tx_wait_time          | 0     |
+    | Rpl_semi_sync_master_tx_waits              | 0     |
+    | Rpl_semi_sync_master_wait_pos_backtraverse | 0     |
+    | Rpl_semi_sync_master_wait_sessions         | 0     |
+    | Rpl_semi_sync_master_yes_tx                | 0     |
+    | Rpl_semi_sync_slave_status                 | ON    | #证明连接上
+    +--------------------------------------------+-------+
 ```
 
 ## 状态详解
@@ -1387,8 +1902,6 @@ Waiting for slave mutex on exit
 线程停止时发生的一个很简单的状态
 ```
 
-
-
 # 命令
 
 ```
@@ -1403,8 +1916,6 @@ mysql --print-defaults
 
 mysqld和mysql使用同一个配置文件my.cnf
 ```
-
-
 
 ## mysql
 
@@ -1455,8 +1966,6 @@ mysqladmin -uroot -p111111
     
 mysqladmin processlist status
 ```
-
-
 
 ## mysqlbinlog
 
@@ -1547,7 +2056,6 @@ mysqlimport   #Load data infile 命令行版
 ## explain
 
 ```
-字段
 id                  查询序号
 
 select_type
@@ -1781,17 +2289,6 @@ performance_schema  inspect the internal execution of the server at runtime
 sys                 提供一系列对象更好地查看performance schema
 ```
 
-```
-mysql_options(..., MYSQL_OPT_WRITE_TIMEOUT,...)
-mysql_options(..., MYSQL_OPT_READ_TIMEOUT,...)
-int value = 1;
-mysql_options(&mysql, MYSQL_OPT_RECONNECT, (char *)&value);  #show variables like '%timeout%'; wait_timeout和interactive_timeout默认值是28800也就是8小时，最大值只允许2147483（24天左右）
-
-保护数据最简单的方法是使用''
- ';drop database test'                  #
- select * from t where id='12 or 1=1';  #没''则检出所有所有数据  mysql在数字列会自动将字符串转换为数字，非数字的自动舍弃。
-```
-
 # 查看死锁
 
 ```
@@ -1820,154 +2317,44 @@ mysqlslap mysql自带的
 sysbench
 ```
 
+# 小技巧
+
+## api
+
+```
+mysql_options(..., MYSQL_OPT_WRITE_TIMEOUT,...)
+mysql_options(..., MYSQL_OPT_READ_TIMEOUT,...)
+int value = 1;
+mysql_options(&mysql, MYSQL_OPT_RECONNECT, (char *)&value);  #show variables like '%timeout%'; wait_timeout和interactive_timeout默认值是28800也就是8小时，最大值只允许2147483（24天左右）
+
+保护数据最简单的方法是使用''
+ ';drop database test'                  #
+ select * from t where id='12 or 1=1';  #没''则检出所有所有数据  mysql在数字列会自动将字符串转换为数字，非数字的自动舍弃。
+```
+
+## 丢失密码
+
+```
+service mysqld stop
+#进入安全模式
+mysqld_safe --skip-grant-tables --skip-networking & 
+mysql -uroot
+mysql>update mysql.user set authentication_password='' where user='root'
+mysql>flush privileges;
+#如果有必要，升级版本以便主从版本一致
+mysql_upgrade -uroot -p--defaults-file=mysql.cnf
+service mysqld restart
+#检查是否正常
+mysql -uroot -p
+mysql>show databases;
+```
+
 # 常混淆点
 
 ```
 基于binlog的复制，在配置文件中binlog_format[=row|mixed|statement]
 innodb_default_row_format=dynamic
 innodb_file_format=Barracuda
-
-
-mysql group replication(MGR2016.12)
-	参考mariaDB Galera Cluster和Percona XtraDB cluster，
-	是建立在paxos的xcom之上，每个数据库节点都维护一个状态机，事务的提交需经半数以上节点同意才可提交
-	保证节点间事务的一致性。
-	
-	优点
-		高一致性C 
-			基于原生复制和paxos协议的组复制
-		高容错性  
-			有自动检测机制， 当出现宕机时，会自动剔除问题节点，其他节点可以正常使用
-			当不同节点争用资源冲突时，会按照先到先得处理，并内置自动化脑裂防护机制
-		高扩展性 
-			可随时在线添加和移除节点，会自动同步所有节点上的状态，直到新节点和其他节点保持一致，自动维护新的组信息
-		高灵活性
-			直接以插件形式(.so)形式安装 
-			单主模式下，只有主库可以读写，其他从库会加上super_read_only状态，只能读取不可写入， 出现故障会自动选主
-			多主模式下
-	缺点
-		不稳定，性能略差于pxc  对网络要求很高，至少是同机房
-		
-		
-	安装插件
-		已经自带，只是没有安装上而已。 
-		和半同步插件一样安装
-		mysql>show plugins;#查看插件没有安装
-		mysql>show variables like '%group%'; #查看参数没有加载
-		mysql>show variables like 'plugin_dir';
-		mysql>system ll $plugin_dir | grep group_replication
-		mysql>install plugin group_replication soname 'group_replication.so';
-		mysql>show plugins;
-		mysql>show variables like 'group%';
-		
-	配置
-		必须
-		gtid_mode=on
-		enforce_gtid_consistency=on
-		
-		公共
-		server_id=$ip$version
-		binlog_format=row     #MGR强制要求row
-		binlog_checksum=NONE  #binlog校验规则5.6版本之前是NONE，5.6之后是CRC32， 但MGR要求NONE
-		log_slave_update=1    #集群在故障时会相互检查binlog，
-		                      #所以需要记录集群内其他服务器发过来已经执行的binlog，按gtid来区分是否执行过
-		transaction_isolation=read-commited #MGR使用乐观锁，GMR建议RC，减少锁粒度
-		master_info_reposity=table      #基于安全考虑，MGR强制要求
-		relay_log_info_repository=table #基于安全考虑，MGR强制要求
-		
-		独有
-		transaction_write_set_extraction=xxhash64 #记录事务的算法，MGR建议使用该参数
-		loose_group_replication_group_name=`uuidgen` #用来区分内网各个不同的group，而且也是这个group内的gtid值的uuid
-		loose_group_replication_ip_whitelist='127.0.0.1/8,192.168.1.0/24' #安全需要白名单，不许外部主机的连接
-		loose_group_replication_start_on_boot=off #是否随服务启动而启动组复制，不建议，以防故障恢复时扰乱数据的准确性
-		loose_group_replication_local_address='$ip:33061' #本地MGR的ip和端口
-		loose_group_replication_group_seeds='$myip:33061,$ip2:33061,$ip3:33061'#接受本MGR控制的MGR地址
-		loose_group_replication_bootstrap_group=off #开启引导模式，添加组成员。
-		
-		
-		
-		
-		
-		
-	
-
-
-
-
-MS
-	传统
-	gtid 
-	    #主开启了gtid模式,从也必须开启该模式
-		#5.6的新功能,不能在线修改; 
-		#5.7.6可以在线修改,不停机切换gtid方法
-		#在线修改经历传统事务-匿名事务-gtid事务，其中匿名事务既接受传统事务，也接受gtid业务，2者可以共存，但复制效率比2者都低
-		gtid_mode=on
-		enforce_gtid_consistency=1
-		binlog_format=row  #最好是row格式
-		
-		
-gtid
-局限性
-	不支持非事务引擎
-	不允许一个sql同时更新一个事务引擎和非事务引擎
-	不支持create table ... select，在主库执行直接报错。 可以手动修改为create table && insert ... select ... 
-	不支持create temporary table 和 drop temporary table
-
-
-#开启GTID语法限制警报参数
-#观察err log是否有不满足要求的sql出现。如果有发现任何warning，需要通知应用进行调整相关sql，直到不出现warning为止。
-set global ENFORCE_GTID_CONSISTENCY = WARN;
-#确保没有警报了,也就是说当前这个实例没有语法上的冲突,那就可以完全开启语法限制了,这个时候如果有限制的语句进来,会有报错给对方
-set global ENFORCE_GTID_CONSISTENCY = ON;
-#开启匿名事务模式记录binlog,slave可以兼容GTID事务和普通pos事务,不过这个时候还没有GTID事务,需要确保所有主从都执行
-set global GTID_MODE = OFF_PERMISSIVE;
-#开启产生GTID事务,这时Slave即接受不带GTID的事务,也接受带GTID的事务,需要确保所有主从都执行
-set global GTID_MODE = ON_PERMISSIVE;
-###以下命令属于检测命令,按指示操作
-#查看匿名事务执行情况,必须所有主从都为零才能执行下一步,不然就会丢掉一部分事务
-SHOW STATUS LIKE 'ONGOING_ANONYMOUS_TRANSACTION_COUNT';
-#也可以在每一台slave上都执行下列命令,查看Executed_Gtid_Set是否有值,如果不为空了,说明已经开始使用GTID复制了.
-#也就是匿名事务全部执行完毕,一切复制都走向了GTID模式,一般来说你也能看到ONGOING_ANONYMOUS_TRANSACTION_COUNT值为零了
-show slave status\G
-#等待所有的从库都复制完成,延迟相差不太大,再做一次flush logs,将前面的日志purge掉这些日志包含带GTID和不带GTID的事务.
-flush logs
-
-#然后就是在所有主从实例上执行下面命令,完全开启GTID复制模式.
-set global GTID_MODE = ON;
-set global enforce_gtid_consistency = on;
-
-#最后在从库执行以下语句,把复制模式也切换成GTID模式,那就完成了
-stop slave;
-CHANGE MASTER TO MASTER_AUTO_POSITION = 1;
-START SLAVE;
-
-###在从库可以选择性开启，主库加不加都不影响使用
-#用来配置从服务器的更新是否写入二进制日志,如果有层级从库就必须开,没有的话建议关闭,能有效提高性能
-log_slave_updates
-#设置从库SQL线程并行重放events(事务)的worker线程数量,默认值为0，最大值为1024.在5.6.x版本中设置这个参数大于0时，
-#则SQL线程充当worker线程的协调者，在多个worker线程之间分发基于库级别的events,也就是库级别并行复制，
-#5.7.x版本的并行复制可以设置基于组提交事务的并行复制,更加好用.
-slave_parallel_workers = 8
-#5.7新参数，指定并行复制方式，为了兼容5.6的模式，默认的并行复制方式是基于库级别的，即默认值是：DATABASE，
-#我们要设置成5.7支持的基于组提交事务的并行复制方式，则需要设置成：LOGICAL_CLOCK，速度更快。
-#slave_parallel_type = LOGICAL_CLOCK
-
-#当然,别忘了在my.cnf配置文件里加上参数,不然重启就失效了
-gtid_mode = on
-enforce_gtid_consistency = on
-
-
-主从异步0
-	一般模式下，是主从异步，即主不管从的任何状态，如果从有漏了主也不管，这就是我们所说的主从不一致的根本原因。
-主从半同步1 一开半同步插件
-	一个事务在主库执行完不行，还必须至少在一个从库执行成功，事务才算完成；而其他还没有执行的从库则执行异步操作。
-主从完全同步all 依靠集群软件，如pxc
-	一个事务不仅在主库执行成功，还必须在所有从库执行成功，事务才算完成。
-	
-	只有一台从库的主从半同步也是概念上的主从完全同步。
-	性能上说： 主从异步 > 主从半同步 > 主从完全同步
-	
-
 
 xbackup
 	导出主数据
@@ -1991,10 +2378,6 @@ xbackup
 	配置主从
 	
 	
-	
-
-
-
 mysqldump
 	优点：官方自带，适用性强
 	缺点：由于是逻辑备份，如果数据量大的话，导出导入需要较长时间
@@ -2049,36 +2432,5 @@ reset master:
 		trucate mysql.gtid_executed
 		
 reset slave
-	
-		
-主从之破解主密码在slave上
-	service mysqld stop
-	#进入安全模式
-	mysqld_safe --skip-grant-tables --skip-networking & 
-	mysql -uroot
-	mysql>update mysql.user set authentication_password='' where user='root'
-	mysql>flush privileges;
-	#如果有必要，升级版本以便主从版本一致
-	mysql_upgrade -uroot -p--defaults-file=mysql.cnf
-	service mysqld restart
-	#检查是否正常
-	mysql -uroot -p
-	mysql>show databases;
-	
-主从之版本不一致导致 由于主库表的更改导致从库报错，所以从库最好忽略这些库或表的语句
-	#5.6及之前只能通过配置文件
-	replicate_wild_do_table=test.%,mysql.user
-	replicate_wild_ignore_table=mysql.%,test.fucking
-	#5.7及以后
-	change replication filter replicate_wild_do_table=(''test.%',''mysql.user');
-	change replication filter replicate_wild_ignore_table=(''test.%',''mysql.user');
-	
-	
-	
-     		  
-
-
-
-
 ```
 
