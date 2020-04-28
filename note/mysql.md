@@ -1150,13 +1150,13 @@ index
                     row(txid fields rollbackPointer)
 ```
 
-
-
 # 复制MS
 
 ## 各种框架
 
 ```
+https://blog.51cto.com/14089205/2477055
+
 优点
 	高可用   故障检测及迁移 多节点备份
 	可伸缩性 新增节点方便扩容
@@ -1165,9 +1165,33 @@ index
 	网络分裂 由于网络故障分成多个部分，每部分节点之内可以互联，部分之间不能
 	脑裂
 	
-单主
-多主
+	
+主从异步0  默认
+	一般模式下，是主从异步，即主不管从的任何状态，如果从有漏了主也不管，这就是我们所说的主从不一致的根本原因。
+主从半同步1 mysql5.5 一开半同步插件
+	一个事务在主库执行完不行，还必须至少在一个从库执行成功，事务才算完成；而其他还没有执行的从库则执行异步操作。
+	客户端提交sql给master
+	master自身执行sql
+	master提交sql给所有slave并等待其中任何一个返回成功
+	master返回给client
+主从完全同步all 依靠集群软件，如pxc
+	一个事务不仅在主库执行成功，还必须在所有从库执行成功，事务才算完成。
+	
+	只有一台从库的主从半同步也是概念上的主从完全同步。
+	性能上说： 主从异步 > 主从半同步 > 主从完全同步
+	
+	
+引导库
+	一个group内只能有一个引导库，且这个引导库必须是主库
+	
+单主模式single primary
+	主库，提供读写;其他实例仅提供读超级只读模式(super read mode)
+	group_replication_single_primary_mode=on
+	group_replication_enforce_update_everywhere_checks=FALSE
+多主模式
 	虽然是先到先得，但事务冲突的几率也高。
+	group_replication_single_primary_mode=OFF    #必须，表示关闭单主模型，即使用多主
+	group_replication_enforce_update_everywhere_checks=ON    #非必需，但强烈建议
 ```
 
 #### 原厂出品
@@ -1235,6 +1259,7 @@ Galera cluster(由codeship开发)
 			     最终急群众所有数据一致，而不需要手动备份
 	劣势
 		为了数据的强一致性，也是以牺牲性能为代价的
+PXC(Percona Extra Cluster)
 ```
 
 #### 借助硬件
@@ -1421,6 +1446,124 @@ mysql>unlock tables;
     msyql>start slave;
 ```
 
+## MSR
+
+```
+mysql semisync replication
+```
+
+### 安装插件
+
+```
+一般mysql并没有预装该插件，但自带了。所以只需手动加载
+	mysql>show plugins;                     #查看插件没有安装
+	mysql>show variables like 'plugin_dir'; #查看插件位置
+	mysql>system ll $plugin_dir | grep 'semisync_(master|slave).so' 
+主库
+    安装
+    mysql>install plugin rpl_semi_sync_master soname 'semisync_master.so'
+    mysql>show plugins like 'semisync_master'; #确定安装成功
+    启动
+    mysql>set global rpl_semi_sync_master_enabled = on;
+
+从库
+    安装
+    mysql>install plugin rpl_semi_sync_slave  soname 'semisync_slave.so'
+    mysql>show plugins like 'semisync_slave'; #确定安装成功
+    启动
+    mysql>set global rpl_semi_sync_slave_enabled = on;
+    msyql>stop slave io_thread; #重启iothread，否则还是异步复制数据
+    mysql>start slave io_thread;
+```
+
+### 查看
+
+```
+主库
+mysql>show variabels like '%rpl';
+    +------------------------------------+----------+
+    | Variable_name                      | Value    |
+    +------------------------------------+----------+
+    | rpl_semi_sync_master_enabled       | ON       |  #是否开启
+    | rpl_semi_sync_master_timeout       | 10000    |
+    | rpl_semi_sync_master_trace_level   | 32       |
+    | rpl_semi_sync_master_wait_no_slave | ON       |
+    | rpl_semi_sync_slave_enabled        | OFF      |
+    | rpl_semi_sync_slave_trace_level    | 32       |
+    | rpl_stop_slave_timeout             | 31536000 |
+    +------------------------------------+----------+
+        rpl_semi_sync_master_timeout       超时
+            master等待slave的响应时间，单位是毫秒，默认值是10秒。
+            超过这个时间，slave无响应，将自动转换成异步；如果探测slave恢复，又转成semi
+        rpl_semi_sync_master_trace_level   监控登记
+            1  genneral  记录时间函数失效
+            16 detail    
+            32 new wait  包含网络等待
+            64 function  包含函数进入退出
+        rpl_semi_sync_master_wait_no_slave
+            是否允许master在每个事物提交后都等待slave的receipt信号
+            默认是on 如果slave down之后，当slave重新追上master的lig日志时，可以自动的切换为semi
+            如果是off 如果slavedown之后，当slave追上之后也不会切换为semi
+mysql>show status like'%rpl_semi_sysnc%';
+    +--------------------------------------------+---------+
+    | Variable_name                              | Value   |
+    +--------------------------------------------+---------+
+    | Rpl_semi_sync_master_clients               | 1       | #slave的数量
+    | Rpl_semi_sync_master_net_avg_wait_time     | 746     |
+    | Rpl_semi_sync_master_net_wait_time         | 3788497 |
+    | Rpl_semi_sync_master_net_waits             | 5077    |
+    | Rpl_semi_sync_master_no_times              | 0       |
+    | Rpl_semi_sync_master_no_tx                 | 0       |  #发送给slave失败数量，最好为0
+    | Rpl_semi_sync_master_status                | ON      |  #是否启动semi(可能网络超时导致切换成异步)
+    | Rpl_semi_sync_master_timefunc_failures     | 0       |
+    | Rpl_semi_sync_master_tx_avg_wait_time      | 614     |
+    | Rpl_semi_sync_master_tx_wait_time          | 2797020 |
+    | Rpl_semi_sync_master_tx_waits              | 4552    |
+    | Rpl_semi_sync_master_wait_pos_backtraverse | 0       |
+    | Rpl_semi_sync_master_wait_sessions         | 0       |
+    | Rpl_semi_sync_master_yes_tx                | 5077    |  #发送给slave成功数量
+    | Rpl_semi_sync_slave_status                 | OFF     |
+    +--------------------------------------------+---------+
+    
+
+从库
+mysql>show variables like '%rpl%';
+    +------------------------------------+----------+
+    | Variable_name                      | Value    |
+    +------------------------------------+----------+
+    | rpl_semi_sync_master_enabled       | OFF      |
+    | rpl_semi_sync_master_timeout       | 10000    |
+    | rpl_semi_sync_master_trace_level   | 32       |  #默认32
+    | rpl_semi_sync_master_wait_no_slave | ON       |
+    | rpl_semi_sync_slave_enabled        | ON       |  #是否开启
+    | rpl_semi_sync_slave_trace_level    | 32       |
+    | rpl_stop_slave_timeout             | 31536000 |
+    +------------------------------------+----------+
+        rpl_stop_slave_timeout 控制stop slave的时间
+            在重放一个大的事务时，如果突然执行stop slave命令会执行很久，这个时候可能产生死锁或阻塞
+            这个参数可以控制stop slave的时间
+mysql>show status like'%rpl_semi_sysnc%';
+    +--------------------------------------------+-------+
+    | Variable_name                              | Value |
+    +--------------------------------------------+-------+
+    | Rpl_semi_sync_master_clients               | 0     |
+    | Rpl_semi_sync_master_net_avg_wait_time     | 0     |
+    | Rpl_semi_sync_master_net_wait_time         | 0     |
+    | Rpl_semi_sync_master_net_waits             | 0     |
+    | Rpl_semi_sync_master_no_times              | 0     |
+    | Rpl_semi_sync_master_no_tx                 | 0     |
+    | Rpl_semi_sync_master_status                | OFF   |
+    | Rpl_semi_sync_master_timefunc_failures     | 0     |
+    | Rpl_semi_sync_master_tx_avg_wait_time      | 0     |
+    | Rpl_semi_sync_master_tx_wait_time          | 0     |
+    | Rpl_semi_sync_master_tx_waits              | 0     |
+    | Rpl_semi_sync_master_wait_pos_backtraverse | 0     |
+    | Rpl_semi_sync_master_wait_sessions         | 0     |
+    | Rpl_semi_sync_master_yes_tx                | 0     |
+    | Rpl_semi_sync_slave_status                 | ON    | #证明连接上
+    +--------------------------------------------+-------+
+```
+
 ## MGR
 
 ```
@@ -1455,20 +1598,9 @@ mysql group replication(MGR2016.12)
 实际缺点
 	不稳定，性能略差于pxc  对网络要求很高，至少是同机房
 	
+
+
 	
-主从异步0  默认
-	一般模式下，是主从异步，即主不管从的任何状态，如果从有漏了主也不管，这就是我们所说的主从不一致的根本原因。
-主从半同步1 mysql5.5 一开半同步插件
-	一个事务在主库执行完不行，还必须至少在一个从库执行成功，事务才算完成；而其他还没有执行的从库则执行异步操作。
-	客户端提交sql给master
-	master自身执行sql
-	master提交sql给所有slave并等待其中任何一个返回成功
-	master返回给client
-主从完全同步all 依靠集群软件，如pxc
-	一个事务不仅在主库执行成功，还必须在所有从库执行成功，事务才算完成。
-	
-	只有一台从库的主从半同步也是概念上的主从完全同步。
-	性能上说： 主从异步 > 主从半同步 > 主从完全同步
 	
 基本参数
     #主开启了gtid模式,从也必须开启该模式
@@ -1478,35 +1610,18 @@ mysql group replication(MGR2016.12)
     gtid_mode=on
     enforce_gtid_consistency=1
     binlog_format=row  #最好是row格式
+    
+节点状态
+ONLINE 节点状态正常，可以正常执行事务
+RECOVERING 正在接收种子节点的日志
+OFFLINE 节点之前注册了，但并不属于当前集群（可能节点已经失败）
+ERROR 恢复阶段，阶段1或者阶段2失败
+UNREACHABLE 节点不可达，一般出现在通讯超时的情况
 ```
 
 ### 安装插件
 
-#### 安装半同步插件
-
-```
-一般mysql并没有预装该插件，但自带了。所以只需手动加载
-	mysql>show plugins;                     #查看插件没有安装
-	mysql>show variables like 'plugin_dir'; #查看插件位置
-	mysql>system ll $plugin_dir | grep 'semisync_(master|slave).so' 
-主库
-    安装
-    mysql>install plugin rpl_semi_sync_master soname 'semisync_master.so'
-    mysql>show plugins like 'semisync_master'; #确定安装成功
-    启动
-    mysql>set global rpl_semi_sync_master_enabled = on;
-
-从库
-    安装
-    mysql>install plugin rpl_semi_sync_slave  soname 'semisync_slave.so'
-    mysql>show plugins like 'semisync_slave'; #确定安装成功
-    启动
-    mysql>set global rpl_semi_sync_slave_enabled = on;
-    msyql>stop slave io_thread; #重启iothread，否则还是异步复制数据
-    mysql>start slave io_thread;
-```
-
-#### 安装group replication
+#### 主从都安装group replication
 
 ```
 mysql>show plugins;
@@ -1522,12 +1637,42 @@ mysql>show variables like 'group%';
 #### 配置
 
 ```
-#必须
+port=3306
+basedir=/home/mysql
+datadir=/home/mysql/data3
+socket = /home/mysql/data3/mysql3.sock
+
+log_error=/home/mysql/data3/mysql3.error
+
+slow_query_log=on
+slow_query_log_file=/home/mysql/data3/slow3.log
+long_query_time=3
+log-slow-admin-statements=1
+log-queries-not-using-indexes=1
+
+expire-logs-days = 15
+
+character_set_server=utf8
+lower_case_table_names=1
+max_connections=1000
+max_connect_errors=1000
+explicit_defaults_for_timestamp=1
+
+open_files_limit=65535
+innodb_log_file_size = 100m
+innodb_log_files_in_group = 3
+innodb_file_per_table = 1
+innodb_buffer_pool_size=10240M
+
+
+
+##必须
+server_id=$ip$version
 gtid_mode=on
 enforce_gtid_consistency=on
 
-#公共
-server_id=$ip$version
+##公共
+log-bin=/home/mysql/data3/mysql-bin
 binlog_format=row     #MGR强制要求row
 binlog_checksum=NONE  #binlog校验规则5.6版本之前是NONE，5.6之后是CRC32， 但MGR要求NONE
 log_slave_update=1    #集群在故障时会相互检查binlog，
@@ -1536,35 +1681,49 @@ transaction_isolation=read-commited #MGR使用乐观锁，GMR建议RC，减少�
 master_info_reposity=table          #基于安全考虑，MGR强制要求
 relay_log_info_repository=table     #基于安全考虑，MGR强制要求
 
-#独有
-transaction_write_set_extraction=xxhash64 #记录事务的算法，MGR建议使用该参数
-loose_group_replication_group_name=`uuidgen` #用来区分内网各个不同的group，而且也是这个group内的gtid值的uuid
-loose_group_replication_ip_whitelist='127.0.0.1/8,192.168.1.0/24' #安全需要白名单，不许外部主机的连接
+##独有
+transaction_write_set_extraction=xxhash64    #记录事务的算法，MGR建议使用该参数
+loose_group_replication_group_name=`uuidgen` #用来区分内网中各个不同的group，而且也是这个group内的gtid值的uuid
+loose_group_replication_local_address='$myip:33061' #本地MGR的ip和端口
+#接受本MGR控制的MGR地址 这些成员称为seed成员 可以查询 performance_schema.replication_group_members
+loose_group_replication_group_seeds='$myip:33061,$ip2:33061,$ip3:33061'
 loose_group_replication_start_on_boot=off #是否随服务启动而启动组复制，不建议，
                 #1.以防故障恢复时扰乱数据的准确性
                 #2.以防影响一些添加或删除节点的操作
-loose_group_replication_local_address='$ip:33061' #本地MGR的ip和端口
-loose_group_replication_group_seeds='$myip:33061,$ip2:33061,$ip3:33061'#接受本MGR控制的MGR地址
-loose_group_replication_bootstrap_group=off #开启引导模式，添加组成员。一个group内只需一台引导服务器
-                                            #默认off。如果有需要，再set global来开启
-loose-group_replication_single_primary_mode=off #是否启动单主模式
-                 #如果启动，则本实例是主库，提供读写;其他实例仅提供读
-                 #如果off，则是多主模式
+loose_group_replication_bootstrap_group=off #默认off；如果有需要，再set global来开启。开启引导模式，添加组成员。
+                          
+loose-group_replication_single_primary_mode=off #on单主且本实例为主 off多主
 loose-group_replication_enforce_update_everywhere_checks=on
     #多主模式下，强制检查每一个实例是否允许该操作；如果不是，不存在多主操作的可能，可以关闭
+
+loose_group_replication_ip_whitelist='127.0.0.1/8,192.168.1.0/24' #安全需要白名单，不许外部主机的连接
+
+#当有成员发生故障，需要重新选举为master时的自身投票的权重
+#若有相同的投票权重，则根据服务器的优先级排序，server_uuid按字典顺序和选择第一个
+group_replication_member_weight=80
+#少数组成员由于网络中断且无法连接到多数成员的成员在离开组之前等待多长时间参数
+#少数组将永远等待网络重新连接。在使用停止组复制之前，将阻止少数组处理的任何事务
+loose-group_replication_unreachable_majority_timeout=5
+#默认情况下启用压缩，阈值为1000000字节（1MB),美团为128K。压缩阈值以字节为单位。
+group_replication_compression_theeshold=131072
+#配置组接受的最大事务大小（以字节为单位）
+#设置为0时，组接受的事务大小没有限制，并且可能存在导致组失败的大型事务的风险
+group_replication_transaction_size_limit=20971520
 ```
 
 #### 启动
 
 ```
 主库必须先启动,随时观察err日志
-mysql>set global group_replication_bootstrap_group=on; #一个group只能有一个引导库，且这个引导库必须是主库
-                                                       #主库必须要有这步操作，从库不能有
 mysql>create user 'sroot'@'%' identified by '111111'
 mysql>grant replication slaveon *.* to 'sroot'@'%' with grant option;
-mysql>reset master; #删除所以gtid
-mysql>change master to #创建同步认证规则信息，与一般的主从规则写法不一样
+
+mysql>reset master;      #删除所以gtid
+mysql>change master to   #创建同步认证规则信息，与一般的主从规则写法不一样
       master_user='sroot' master_password='111111' for channel 'group_replication_recovery';
+mysql>select * from mysql.slave_relay_log_info\G
+      
+mysql>set global group_replication_bootstrap_group=on; #引导库必须要有这步操作，从库不能有                  
 mysql>start group_replication; #启动MGR
 mysql>select * from performance_schema.replication_group_members;
       channel_name:group_replication_applier
@@ -1574,23 +1733,63 @@ mysql>select * from performance_schema.replication_group_members;
       member_state: online   #表示成功连接；如果错误，会被踢出集群且显示error
        member_role: primary  #单主只有一个primary，其余为secondary；多主可以多个primary
     member_version: 8.0.11
-mysql>set global group_replication_bootstrap_group=off; #这是可以关闭引导
-
+mysql>set global group_replication_bootstrap_group=off; #这时可以关闭引导
 
 
 从库
 mysql>create user 'sroot'@'%' identified by '111111';
 mysql>grant replication slaveon *.* to 'sroot'@'%' with grant option;
-mysql>reset master; #删除所以gtid
-mysql>change master to #创建同步认证规则信息，与一般的主从规则写法不一样
+
+mysql>reset master;      #删除所以gtid
+mysql>change master to   #创建同步认证规则信息，与一般的主从规则写法不一样
       master_user='sroot' master_password='111111' for channel 'group_replication_recovery';
+      
+#一个节点加入组复制会有本地的事物产生，比如更改密码，加入测试数据等.使用下面这条语句可以规避这些事务，强制加入
+#当然也可以sql_log_bin=0; $sql sql_log_bin=1;采用这种方式临时规避
+mysql>set global group_replication_allow_local_disjoint_gtids_join=1;
 mysql>start group_replication; #启动MGR
+
+mysql>sql_log_bin=0;
+mysql>start group_replication; #启动MGR
+mysql>sql_log_bin=1;
+
 mysql>select * from performance_schema.replication_group_members;
 ```
 
 #### 管理
 
 ```
+任一节点启动、停止组复制
+	start group_replication;
+	stop  group_replication;
+查看
+	select * from performance_schema.replication_group_members;       #查看组成员
+	select * from performance_schema.replication_group_member_stats;  #查看组成员状态
+	select * from performance_schema.replication_connection_status;
+	select * from performance_schema.replication_applier_status;
+
+单主模式下查看主节点， 多主模式下不能查看
+select b.member_host the_master,a.variable_value master_uuid
+    from performance_schema.global_status a
+    join performance_schema.replication_group_members b
+    on a.variable_value = b.member_id
+    where variable_name='group_replication_primary_member';
++------------+--------------------------------------+
+| the_master | master_uuid |
++------------+--------------------------------------+
+| calldb3 | cc4958ae-a1cc-11e8-9334-00155d322c00 |
++------------+--------------------------------------+
+
+mysql> select * from performance_schema.replication_group_members;
++---------------------------+--------------------------------------+-------------+-------------+--------------+
+| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE |
++---------------------------+--------------------------------------+-------------+-------------+--------------+
+| group_replication_applier | 75af6fe1-6a92-11e9-8bf8-005056a1d54e | sanborn1    |        3306 | ONLINE       |
+| group_replication_applier | 8e091df0-6b4c-11e9-896b-005056a175f4 | sanborn2    |        3306 | RECOVERING   |
+| group_replication_applier | ae657017-6b4c-11e9-8548-005056a1c149 | sanborn3    |        3306 | RECOVERING   |
++---------------------------+--------------------------------------+-------------+-------------+--------------+
+
+
 主
 mysql>show master status;
       File:mysql-bin.000003
@@ -1728,96 +1927,6 @@ enforce_gtid_consistency = on
 	#5.7及以后
 	change replication filter replicate_wild_do_table=(''test.%',''mysql.user');
 	change replication filter replicate_wild_ignore_table=(''test.%',''mysql.user');
-```
-
-### 查看
-
-#### 半同步
-
-```
-主库
-mysql>show variabels like '%rpl';
-    +------------------------------------+----------+
-    | Variable_name                      | Value    |
-    +------------------------------------+----------+
-    | rpl_semi_sync_master_enabled       | ON       |  #是否开启
-    | rpl_semi_sync_master_timeout       | 10000    |
-    | rpl_semi_sync_master_trace_level   | 32       |
-    | rpl_semi_sync_master_wait_no_slave | ON       |
-    | rpl_semi_sync_slave_enabled        | OFF      |
-    | rpl_semi_sync_slave_trace_level    | 32       |
-    | rpl_stop_slave_timeout             | 31536000 |
-    +------------------------------------+----------+
-        rpl_semi_sync_master_timeout       超时
-            master等待slave的响应时间，单位是毫秒，默认值是10秒。
-            超过这个时间，slave无响应，将自动转换成异步；如果探测slave恢复，又转成semi
-        rpl_semi_sync_master_trace_level   监控登记
-            1  genneral  记录时间函数失效
-            16 detail    
-            32 new wait  包含网络等待
-            64 function  包含函数进入退出
-        rpl_semi_sync_master_wait_no_slave
-            是否允许master在每个事物提交后都等待slave的receipt信号
-            默认是on 如果slave down之后，当slave重新追上master的lig日志时，可以自动的切换为semi
-            如果是off 如果slavedown之后，当slave追上之后也不会切换为semi
-mysql>show status like'%rpl_semi_sysnc%';
-    +--------------------------------------------+---------+
-    | Variable_name                              | Value   |
-    +--------------------------------------------+---------+
-    | Rpl_semi_sync_master_clients               | 1       | #slave的数量
-    | Rpl_semi_sync_master_net_avg_wait_time     | 746     |
-    | Rpl_semi_sync_master_net_wait_time         | 3788497 |
-    | Rpl_semi_sync_master_net_waits             | 5077    |
-    | Rpl_semi_sync_master_no_times              | 0       |
-    | Rpl_semi_sync_master_no_tx                 | 0       |  #发送给slave失败数量，最好为0
-    | Rpl_semi_sync_master_status                | ON      |  #是否启动semi(可能网络超时导致切换成异步)
-    | Rpl_semi_sync_master_timefunc_failures     | 0       |
-    | Rpl_semi_sync_master_tx_avg_wait_time      | 614     |
-    | Rpl_semi_sync_master_tx_wait_time          | 2797020 |
-    | Rpl_semi_sync_master_tx_waits              | 4552    |
-    | Rpl_semi_sync_master_wait_pos_backtraverse | 0       |
-    | Rpl_semi_sync_master_wait_sessions         | 0       |
-    | Rpl_semi_sync_master_yes_tx                | 5077    |  #发送给slave成功数量
-    | Rpl_semi_sync_slave_status                 | OFF     |
-    +--------------------------------------------+---------+
-    
-
-从库
-mysql>show variables like '%rpl%';
-    +------------------------------------+----------+
-    | Variable_name                      | Value    |
-    +------------------------------------+----------+
-    | rpl_semi_sync_master_enabled       | OFF      |
-    | rpl_semi_sync_master_timeout       | 10000    |
-    | rpl_semi_sync_master_trace_level   | 32       |  #默认32
-    | rpl_semi_sync_master_wait_no_slave | ON       |
-    | rpl_semi_sync_slave_enabled        | ON       |  #是否开启
-    | rpl_semi_sync_slave_trace_level    | 32       |
-    | rpl_stop_slave_timeout             | 31536000 |
-    +------------------------------------+----------+
-        rpl_stop_slave_timeout 控制stop slave的时间
-            在重放一个大的事务时，如果突然执行stop slave命令会执行很久，这个时候可能产生死锁或阻塞
-            这个参数可以控制stop slave的时间
-mysql>show status like'%rpl_semi_sysnc%';
-    +--------------------------------------------+-------+
-    | Variable_name                              | Value |
-    +--------------------------------------------+-------+
-    | Rpl_semi_sync_master_clients               | 0     |
-    | Rpl_semi_sync_master_net_avg_wait_time     | 0     |
-    | Rpl_semi_sync_master_net_wait_time         | 0     |
-    | Rpl_semi_sync_master_net_waits             | 0     |
-    | Rpl_semi_sync_master_no_times              | 0     |
-    | Rpl_semi_sync_master_no_tx                 | 0     |
-    | Rpl_semi_sync_master_status                | OFF   |
-    | Rpl_semi_sync_master_timefunc_failures     | 0     |
-    | Rpl_semi_sync_master_tx_avg_wait_time      | 0     |
-    | Rpl_semi_sync_master_tx_wait_time          | 0     |
-    | Rpl_semi_sync_master_tx_waits              | 0     |
-    | Rpl_semi_sync_master_wait_pos_backtraverse | 0     |
-    | Rpl_semi_sync_master_wait_sessions         | 0     |
-    | Rpl_semi_sync_master_yes_tx                | 0     |
-    | Rpl_semi_sync_slave_status                 | ON    | #证明连接上
-    +--------------------------------------------+-------+
 ```
 
 ## 状态详解
