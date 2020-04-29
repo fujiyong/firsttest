@@ -2419,6 +2419,41 @@ sys                 提供一系列对象更好地查看performance schema
     show open tables where in_use > 0;            #查看哪些表可能被锁住了
 ```
 
+# 搭建
+
+## mysqlproxy
+
+```
+先配置好主从，再安装mysqlproxy
+vim /usr/local/mysql-proxy/share/doc/mysql-proxy/rw-splitting.lua
+	min_idle_connections=1   -- 默认超过4个连接才读写分离，否则所有读写都发生在masters上，修改为1
+	max_idle_connections=1   -- 默认最大值为8，修改为1
+
+启动
+/usr/local/mysql-proxy/bin/mysql-proxy
+--daemon
+--log-level=debug 
+--log-file=/var/log/mysql-proxy.log
+--user=mysql-proxy 
+--keepalive             #在mysql-proxy crash后尝试重启
+--plugins="proxy"
+--proxy-address=:4040    #代理服务监听地址默认为4040
+--proxy-backend-addresses="192.168.8.5:3306"            
+--proxy-read-only-backend-addresses="192.168.8.6:3306"  #后端只读
+--proxy-lua-script="/usr/local/mysql-proxy/share/doc/mysql-proxy/rw-splitting.lua" 
+--plugins="admin"
+--admin-address=:4041      #管理模块监听地址，默认为4041
+--admin-username="admin" 
+--admin-password="admin" 
+--admin-lua-script="/usr/local/mysql-proxy/lib/mysql-proxy/lua/admin.lua"
+
+mysql -uadmin -padmin -P4041 -e "select * from backends;" #state字段一定要为up type字段为rw|ro
+测试读写分离
+	直接在从库上写看是否在主库上可以查询到 create table t(id int); insert t select 1; select * from t;
+```
+
+
+
 # 压力测试
 
 ```
@@ -2542,4 +2577,3 @@ reset master:
 		
 reset slave
 ```
-

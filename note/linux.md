@@ -3184,12 +3184,13 @@ wget -c -q -O - http://www.baidu.com
 	-b 下载大文件时后台下载 输出信息会保存到同目录的wget-log文件中,可以使用tail -f wget-log查看
 	-c continue 表示继续下载以前退出的 否则文件名在原来的文件名上再加1
 	-q 不打印header
-	-O 指定输出目的地 - 表示stdout
+	-O 指定输出目的地 - 表示stdout  大写的O
 ```
 
 ##  scp/rsync
 
 ```
+scp -P $dstHostPort $localfile $user@$host:/file
 rsync -avzh   --verbose  -h进度条
 ```
 

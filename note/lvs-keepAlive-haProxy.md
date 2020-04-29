@@ -1,6 +1,13 @@
+# lvs
+
+```
+
+```
+
 # keepAlived
 
 ```
+https://www.keepalived.org/manpage.html
 高可用
 	早期 heartbeat
 	目前 
@@ -13,6 +20,69 @@
 	
 Layer3 定期向服务器群中的服务器发送icmp包，如果发现某台服务器无法ping通，ka则报告该服务器失效并将它剔除。
 Layer4 定期向服务器群中的服务器某端口发起连接，如果发送某台服务器无法telnet通，ka则报告该服务器失效并将它剔除。
+Layer7 根据用户的设定检查服务器是否运行正常，如果与用户的设定不相符，ka则报告该服务器失效并将它剔除。
+
+vrrp(virtual router redundancy protocol)
+现实中，2台需要通讯的物理机一般不会直接直接的物理连接。对于这种情况，他们之间的路由怎么选择？主机如何选择到达目的主机的下一跳路由？一般有2种解决方案
+	使用动态路由协议rip、ospf。但非常不切实际，因为管理维护成本以及是否支持等诸多问题
+	使用静态路由。但路由器(或默认网关default gateway)经常成为单点故障。vrrp就是为了解决单点故障的。
+
+安装
+	tar -zxvf && cd
+	./configure --prefix=/usr/local/keepalived
+	make && make install
+	ln -s /usr/local/keepalived/sbin/keepalived /usr/sbin
+	cp    /usr/local/keepalived/etc/sysconfig/keepalived   /etc/sysconfig
+	cp    /usr/local/keepalived/etc/rc.d/init.d/keepalived /etc/init.d
+	chkconfig --add keepalived
+	chkconfig keepalived on
+	mkdir /etc/keepalived
+	cp    /usr/local/keepalived/etc/keepalived/keepalived.conf /etc/keepalived
+	
+配置
+global_defs {
+    notification_email {
+        675583110@qq.com
+    }
+
+    notification_email_from 675583110@qq.com
+    smtp_server 127.0.0.1
+    smtp_connect_timeout 30
+    router_id LVS_DEVEL
+}
+
+vrrp_script chk_nginx {
+    script "/data/shell/check_nginx.sh"
+    interval 2
+    weight 2
+}
+
+vrrp_instance VI_1 {
+    state MASTER                #角色 master or backup       
+    interface eth0
+    virtual_router_id 51
+    mcast_src_ip 192.168.60.93  #实际地址
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass xiaoqi
+    }
+    virtual_ipaddress {
+        192.168.60.88           #virtual ip
+    }
+    track_script {
+        chk_nginx
+    }
+}
+
+#cat check_nginx.sh
+Time=$(date +%Y%m%d:%H:%M)
+Code=$(ps -ef | grep -v grep | grep -c "nginx: master process")
+if [ ${Code} -eq 0 ];then
+    /etc/init.d/keepalived stop
+    echo "${Time} Keepalived is stop Success..." >> /tmp/nginx_keepalived.log
+fi
 ```
 
 # HAProxy
@@ -21,22 +91,40 @@ Layer4 定期向服务器群中的服务器某端口发起连接，如果发送�
 事件驱动 单一进程模型
 工作于4 7层
 功能
+	后端检测
 	支持虚拟主机，
 	支持连接拒绝 防范蠕虫(attack bots)、DDOs攻击
 	支持全透明代理，可以使用客户端ip或其他任何地址连接后端服务器
 	对mysql，支持url的后端检测和负载均衡
 	对nginx，保持session Cookie的代理
-	
-	
 ```
 
 配置
 
 ```
-#yum list | grep haproxy
-#yum install -y haproxy
+#安装
+yum list | grep haproxy
+yum install -y haproxy
+apt install haproxy
+dpkg -L haproxy
 
-#cat /etc/haproxy/haproxy.cnf
+#验证
+haproxy -f /etc/haproxy/haproxy.cfg -c
+#启动
+systemctl start haproxy
+#负载均衡算法
+source     基于请求源的ip,使来自于同一ip的请求始终发送给某一服务器 hash(ip)%sum(weight)
+uri        对整个uri或部分uri进行hash  hash(uri)%sum(weight)
+uri_param  hash(uri_param)%sum(weight)
+hdr        根据http header进行转发 如果http header不存在，则使用roundrobin
+
+roundrobin 基于权重的轮巡
+static-rr  基于权重的轮巡 不过为静态算法，在运行时调整其服务器权重不会生效
+leastconn  将新的连接请求发送给最少连接数的后端服务器  在会话较长的场景中推荐使用此算法，如数据库负载均衡
+
+
+
+#cat /etc/haproxy/haproxy.cfg
 ##global 全局配置 属于进程级的配置
 global
 log 127.0.0.1 local2 info #使用127.0.0.1的rsyslog中的local2日志设备，日志等级info [debug info warning err]
@@ -94,18 +182,16 @@ balance roundrobin
 server web1 192.168.31.66:80 cookie server1 weight 6 check inter 2000 rise 2 fall 3
 server web2 192.168.31.55:80 cookie server2 weight 6 check inter 2000 rise 2 fall 3
 
-##设置监控界面
-listen
-
-#验证
-haproxy -f /etc/haproxy/haproxy.cfg -c
-#启动
-systemctl start haproxy
-
-
-安装apach
-yum install -y httpd httpd-devel
-echo "$ip" > /var/www/html/index.html
-systemctl start httpd
+##设置监控页面
+listen admin_status
+bind 0.0.0.0:9188
+mode http
+log 127.0.0.1 local0 err
+stats refresh 30s             #设置统计自动刷新间隔
+stats uri     /haproxy-status #设置haproxy监控页面的访问地址
+stats realm welcom login      #设置登录监控页面时，密码框上的提示信息
+stats auth admin:admin        #设置登录页面的用户名和密码 可以设置多个，每行一个
+stats auth guest:guest
+stats hide-version            #设置在监控页面隐藏版本
+stats admin if TRUE           #在版本1.4.9版本后，设置此选项，可在监控页面上启用禁用服务器
 ```
-
