@@ -3012,3 +3012,18 @@ gops
 go-ps
 
 https://www.cnblogs.com/zhoujinyi/p/6477133.html
+
+
+https://blog.csdn.net/chen_kkw/article/details/82724330 redis引用链接不错
+
+http://www.dataguru.cn/article-14564-1.html   redis大数据经验
+http://distributedsystem.dataguru.cn/article-15499-1.html  kafka
+
+
+
+yum search yumdownload
+yum install yum-utils
+yum info yum-utils
+yumdownloader --source sysbench.x86_64
+rpm2cpio sysbench-1.0.17-2.el7.src.rpm | cpio -iv
+tar -zxvf sysbench-1.0.17.tar.gz
